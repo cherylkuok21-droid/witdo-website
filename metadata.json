@@ -1,0 +1,7 @@
+{
+  "name": "Witdo - Baby Hand & Foot Casting Studio",
+  "description": "A sophisticated and minimalist landing page for a premium baby casting studio, featuring AI-powered FAQ and personalized care tips.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

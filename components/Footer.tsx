@@ -1,0 +1,113 @@
+
+import React, { useState } from 'react';
+import { Language, Page } from '../App';
+
+interface FooterProps {
+  lang: Language;
+  setCurrentPage: (p: Page) => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
+  const [showToast, setShowToast] = useState(false);
+
+  const labels = {
+    en: {
+      desc: "Artisanal preservation of life's first forms. Designed and crafted with architectural intent in Macau.",
+      explore: "Curation",
+      studio: "The Studio",
+      rights: "© Witdo Macau. Est. 2016",
+      collections: "Collections",
+      copied: "ID Copied: witdomacau2",
+      faq: "FAQ",
+      philosophy: "Philosophy",
+      care: "Care"
+    },
+    zh: {
+      desc: "生命最初形態的匠心留存。於澳門以建築美學精神設計與製作。",
+      explore: "作品策劃",
+      studio: "工作室",
+      rights: "© Witdo Macau. 創立於二零一六",
+      collections: "系列方案",
+      copied: "ID 已複製: witdomacau2",
+      faq: "常見問題",
+      philosophy: "理念",
+      care: "保養"
+    }
+  };
+
+  const handleBookNow = () => {
+    const wechatId = 'witdomacau2';
+    navigator.clipboard.writeText(wechatId).then(() => {
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    });
+  };
+
+  return (
+    <footer className="bg-linen-100 border-t border-linen-200 pt-32 pb-16 px-8 relative">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-24">
+        <div className="space-y-10">
+          <button 
+            onClick={() => setCurrentPage('home')}
+            className="text-4xl serif tracking-[0.4em] uppercase text-left text-linen-900 font-light"
+          >
+            Witdo
+          </button>
+          <p className="text-linen-800 max-w-xs text-sm leading-relaxed font-light opacity-70 italic serif">
+            {labels[lang].desc}
+          </p>
+          <div className="flex space-x-10">
+             <a 
+               href="https://www.instagram.com/witdo.macau/" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300 hover:text-linen-900 transition-all border-b border-transparent hover:border-linen-900 pb-2"
+             >
+               Instagram
+             </a>
+             <button 
+               onClick={handleBookNow}
+               className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300 hover:text-linen-900 transition-all border-b border-transparent hover:border-linen-900 pb-2"
+             >
+               WeChat
+             </button>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-16 lg:gap-32">
+          <div className="space-y-8">
+            <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].explore}</h4>
+            <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-300 font-medium">
+              <li><button onClick={() => setCurrentPage('pricing')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
+              <li><button onClick={() => setCurrentPage('why')} className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</button></li>
+              <li><button onClick={() => setCurrentPage('care')} className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</button></li>
+              <li><button onClick={() => setCurrentPage('faq')} className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</button></li>
+            </ul>
+          </div>
+          <div className="space-y-8">
+            <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].studio}</h4>
+            <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-300 font-medium">
+              <li><button onClick={() => setCurrentPage('studio')} className="hover:text-linen-900 transition-all text-left">Location</button></li>
+              <li><button onClick={handleBookNow} className="hover:text-linen-900 transition-all text-left">Bookings</button></li>
+              <li><a href="#" className="hover:text-linen-900 transition-all block">Gift Cards</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-linen-200 flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-300 font-bold">
+        <div>{labels[lang].rights}</div>
+      </div>
+
+      {/* Toast Notification */}
+      <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] transition-all duration-500 ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+        <div className="bg-linen-900 text-linen-50 px-8 py-4 shadow-2xl flex flex-col items-center gap-2 border border-linen-800 w-[90vw] max-w-sm text-center">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em]">{labels[lang].copied}</span>
+          <span className="text-[9px] opacity-60 uppercase tracking-widest">{lang === 'en' ? 'Please add us on WeChat' : '請在微信中添加我們'}</span>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
