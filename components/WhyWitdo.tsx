@@ -18,8 +18,8 @@ const PAPER_IMAGE = "https://lh3.googleusercontent.com/d/1agkoQuMttlvnzno94jAD3p
 const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
   const content = {
     en: {
-      sub: "Our Philosophy",
-      title: "Bespoke Excellence",
+      sub: "The Standard",
+      title: "The Standard",
       intro: "Nearly a decade of expertise in hand and foot casting. We offer lifetime maintenance and are Macau's exclusive provider of high-precision bronze casting services.",
       commitment: "We firmly believe that high-quality work begins with superior materials. From the initial molding to the final finishing, we spare no expense in selecting premium resources to ensure your artwork remains a permanent legacy.",
       evolution: "Witdo is dedicated to continuous evolution. We regularly upgrade our materials and equipment while participating in sculpture and professional art courses. This commitment to mastering new techniques ensures our work maintains the highest industry standards, honoring the trust every client places in us.",
@@ -35,8 +35,8 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
       ]
     },
     zh: {
-      sub: "品牌理念",
-      title: "Bespoke Excellence",
+      sub: "極致標準",
+      title: "The Standard",
       intro: "近10年製作手腳模經驗，終生保養服務，澳門唯一高精緻度青銅手腳製作服務",
       commitment: "我們堅信作品要有好品質，先要有好材料。因此無論由取模材料，到後製材料，我們只選用優質的物料，不惜成本。",
       evolution: "Witdo 依然繼續努力，不斷將物料、設備等進行調整升級，定期參加雕塑、藝術課程，提升並學習新技術。",
@@ -56,54 +56,74 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
   const t = content[lang];
 
   return (
-    <div className="space-y-24 md:space-y-40">
-      <div className="max-w-4xl space-y-8 md:space-y-12">
-        <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.4em] md:tracking-[0.5em] text-linen-300 block">{t.sub}</span>
-        <h2 
-          className="text-5xl md:text-8xl italic leading-tight text-linen-900 tracking-tighter" 
-          style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
-        >
-          {t.title}
-        </h2>
-        <div className="space-y-8 md:space-y-12 max-w-3xl border-l border-linen-200 pl-6 md:pl-12 py-4">
-          <p className="text-xl md:text-2xl text-linen-900 font-medium leading-relaxed italic serif">
-            {t.intro}
-          </p>
-          <div className="space-y-6 md:space-y-8">
-            <p className="text-base md:text-lg text-linen-800 font-light leading-relaxed italic serif opacity-80">
-              {t.commitment}
+    <div className="space-y-32 md:space-y-64">
+      {/* Header Spread */}
+      <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 items-start">
+        <div className="lg:w-7/12 space-y-12">
+          <div className="space-y-6">
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">{t.sub}</span>
+            <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
+              {t.title}
+            </h2>
+          </div>
+          <div className="max-w-xl space-y-8">
+            <p className="text-xl md:text-2xl text-linen-900 font-light leading-relaxed italic serif">
+              {t.intro}
             </p>
-            <p className="text-base md:text-lg text-linen-800 font-light leading-relaxed italic serif opacity-80">
-              {t.evolution}
-            </p>
+          </div>
+        </div>
+        <div className="lg:w-5/12 pt-4 lg:pt-24">
+          <div className="space-y-8 text-linen-800 font-light leading-relaxed text-sm md:text-base italic serif opacity-70 border-l border-linen-200 pl-8">
+            <p>{t.commitment}</p>
+            <p>{t.evolution}</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-24 md:gap-48">
-        {t.pillars.map((pillar, i) => (
-          <div key={i} className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 md:gap-24 items-center`}>
-            <div className="w-full md:w-1/2 aspect-[3/4] overflow-hidden bg-linen-200 shadow-sm">
-              <img 
-                src={pillar.img} 
-                alt={pillar.title} 
-                className="w-full h-full object-cover brightness-95 hover:brightness-100 transition-all duration-1000"
-              />
+      {/* Elements Grid */}
+      <div className="space-y-32 md:space-y-48">
+        <div className="flex items-center gap-6 opacity-20 mb-16">
+          <div className="w-12 h-px bg-linen-900"></div>
+          <span className="text-[10px] uppercase tracking-[0.5em] font-bold text-linen-900">The Elements of Craft</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-32 md:gap-y-48">
+          {t.pillars.map((pillar, i) => (
+            <div key={i} className={`space-y-10 ${i % 2 !== 0 ? 'md:pt-32' : ''}`}>
+              <div className="relative aspect-[4/3] overflow-hidden bg-linen-200 group">
+                <img 
+                  src={pillar.img} 
+                  alt={pillar.title} 
+                  className="w-full h-full object-cover opacity-90 transition-all duration-[2s] group-hover:scale-110 group-hover:opacity-100"
+                />
+                <div className="absolute top-6 left-6 text-[9px] font-bold tracking-[0.3em] text-linen-50 mix-blend-difference uppercase">
+                  Element 0{i + 1}
+                </div>
+              </div>
+              <div className="space-y-4 max-w-sm">
+                <h3 className="text-2xl md:text-3xl serif italic text-linen-900 tracking-tight">
+                  {pillar.title}
+                </h3>
+                <p className="text-xs md:text-sm text-linen-800 font-light leading-relaxed serif italic opacity-70">
+                  {pillar.desc}
+                </p>
+              </div>
             </div>
-            <div className="w-full md:w-1/2 space-y-6 md:space-y-10">
-              <div className="text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.4em] text-linen-300 font-medium">Element 0{i + 1}</div>
-              <h3 
-                className="text-4xl md:text-6xl italic text-linen-900 tracking-tighter" 
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
-              >
-                {pillar.title}
-              </h3>
-              <p className="text-linen-800 font-light leading-relaxed md:leading-loose text-lg md:text-xl max-w-md serif italic opacity-80 whitespace-pre-line">
-                {pillar.desc}
-              </p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      </div>
+
+      {/* Final Note */}
+      <div className="pt-32 border-t border-linen-200/60 flex flex-col md:flex-row justify-between items-start gap-12">
+        <div className="max-w-md space-y-6">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-900">Our Promise</h4>
+          <p className="text-sm text-linen-800 italic serif opacity-60 leading-relaxed">
+            Every material is selected not just for its aesthetic quality, but for its archival permanence. We build for generations.
+          </p>
+        </div>
+        <div className="text-[9px] font-medium uppercase tracking-[0.6em] text-linen-300 vertical-text hidden md:block">
+          Witdo Macau • Est. 2016
+        </div>
       </div>
     </div>
   );
