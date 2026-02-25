@@ -28,46 +28,46 @@ const About: React.FC<AboutProps> = ({ lang, isPreview = false }) => {
   const t = content[lang];
 
   return (
-    <div className={isPreview ? "" : "py-12 md:py-24"}>
-      <div className={`flex flex-col ${isPreview ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-16 md:gap-24 lg:gap-32`}>
-        <div className="lg:w-1/2 relative group">
-          <div className="absolute -inset-6 bg-linen-200/50 -z-10 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-700"></div>
-          <div className={`overflow-hidden relative z-10 ${isPreview ? 'aspect-[4/5]' : 'aspect-[3/4]'} bg-linen-200`}>
+    <div className={isPreview ? "" : "py-12 md:py-32"}>
+      <div className={`flex flex-col ${isPreview ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-start gap-16 lg:gap-32`}>
+        {/* Image Column */}
+        <div className="w-full lg:w-5/12">
+          <div className="relative aspect-[3/4] overflow-hidden bg-linen-200">
             <img 
               src={STUDIO_PHOTO_1} 
               alt="Witdo Studio Craftsmanship" 
-              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-[3s]"
+              className="w-full h-full object-cover opacity-90 transition-all duration-[3s] hover:scale-105"
             />
           </div>
+          {!isPreview && (
+            <div className="mt-8 flex items-center gap-4 opacity-30">
+              <div className="w-8 h-px bg-linen-900"></div>
+              <span className="text-[9px] uppercase tracking-[0.4em] font-medium text-linen-900">Studio Detail</span>
+            </div>
+          )}
         </div>
         
-        <div className="lg:w-1/2 space-y-8 md:space-y-16 text-left">
-          <div className="space-y-4 md:space-y-6">
-            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.4em] md:tracking-[0.5em] text-linen-300">{t.sub}</span>
-            <h2 className={`${isPreview ? 'text-5xl md:text-8xl' : 'text-6xl md:text-9xl'} leading-[0.9] md:leading-[0.85] serif italic text-linen-900 tracking-tighter whitespace-pre-line`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+        {/* Content Column */}
+        <div className="w-full lg:w-7/12 space-y-12 md:space-y-20">
+          <div className="space-y-6">
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+              {t.sub}
+            </span>
+            <h2 className="text-5xl md:text-7xl lg:text-8xl leading-[1] md:leading-[0.9] serif italic text-linen-900 tracking-tight whitespace-pre-line">
               {t.title}
             </h2>
           </div>
           
-          <div className={`space-y-6 md:space-y-10 text-linen-900 font-light leading-relaxed ${isPreview ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'} max-w-xl italic serif`}>
-            <p className="opacity-80">
-              {t.p1}
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+            <div className="space-y-6 text-linen-900 font-light leading-relaxed text-sm md:text-base italic serif opacity-80">
+              <p>{t.p1}</p>
+            </div>
+            
             {!isPreview && (
-              <p className="pt-8 border-t border-linen-200/50">
-                {t.p2}
-              </p>
+              <div className="space-y-6 text-linen-900 font-light leading-relaxed text-sm md:text-base italic serif opacity-80">
+                <p>{t.p2}</p>
+              </div>
             )}
           </div>
 
-          <div className="pt-8">
-             <div className="w-16 h-px bg-linen-900/10 mb-8"></div>
-             <p className="text-[11px] font-medium uppercase tracking-[0.5em] text-linen-300">Est. 2016 Macau</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default About;
+          <div className="pt-12 border-t border-linen-200/60 flex justify-between items-end">
