@@ -50,43 +50,44 @@ const FAQ: React.FC<FAQProps> = ({ lang }) => {
     en: { 
       title: "Common Enquiries", 
       subtitle: "Frequently Asked Questions",
-      contact: "For specific requests, please contact the studio directly."
     },
     zh: { 
       title: "常見問題", 
       subtitle: "解答您的疑問",
-      contact: "如有特殊需求，請直接與工作室聯繫。"
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-24 py-12">
-      <div className="text-center space-y-6">
-        <span className="text-[11px] uppercase tracking-[0.8em] text-linen-300 font-bold block">{t[lang].subtitle}</span>
-        <h2 className="text-6xl md:text-8xl text-linen-50 serif italic tracking-tighter">{t[lang].title}</h2>
-        <div className="w-12 h-px bg-linen-50/20 mx-auto mt-8"></div>
+    <div className="space-y-24 md:space-y-32">
+      {/* Header Section */}
+      <div className="space-y-8">
+        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+          {t[lang].subtitle}
+        </span>
+        <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
+          {t[lang].title}
+        </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-20">
+      {/* FAQ Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-20 md:gap-y-28 pt-16 border-t border-linen-200/60">
         {faqsData[lang].map((f, i) => (
-          <div key={i} className="group space-y-6 text-left">
-            <div className="flex gap-6 items-start">
-               <span className="text-linen-300 serif italic text-3xl opacity-40">0{i+1}</span>
-               <div className="space-y-4">
-                 <h4 className="text-2xl font-medium text-linen-50 serif italic leading-tight">{f.q}</h4>
-                 <p className="text-linen-100/60 font-light leading-relaxed text-lg italic serif group-hover:text-linen-50 transition-colors duration-500">
-                   {f.a}
-                 </p>
-               </div>
+          <div key={i} className="group space-y-6">
+            <div className="flex gap-8 items-start">
+              <span className="text-[10px] font-bold tracking-[0.3em] text-linen-300 uppercase pt-2">
+                Q.0{i + 1}
+              </span>
+              <div className="space-y-6">
+                <h4 className="text-2xl md:text-3xl serif italic text-linen-900 tracking-tight leading-tight">
+                  {f.q}
+                </h4>
+                <p className="text-sm md:text-base text-linen-800 font-light leading-relaxed serif italic opacity-70 group-hover:opacity-100 transition-opacity duration-700">
+                  {f.a}
+                </p>
+              </div>
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="pt-24 text-center">
-        <p className="text-[11px] uppercase tracking-[0.4em] text-linen-300 italic opacity-60">
-          {t[lang].contact}
-        </p>
       </div>
     </div>
   );
