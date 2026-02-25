@@ -13,7 +13,7 @@ const HERO_IMAGE = "https://lh3.googleusercontent.com/d/1v9V0tNryf00lC9H7z5ql6IJ
 const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
   const content = {
     en: {
-      sub: "Artisanal Preservation Studio",
+      sub: "Professional Hand & Foot Casting",
       title: "The tactile \n essence of memory",
       desc: "Capturing the delicate form of infancy through museum-grade materials and architectural precision.",
       btn1: "Our Philosophy",
@@ -21,7 +21,7 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
     },
     zh: {
       // Per user request: Do not translate the main slogans for the Chinese version
-      sub: "Artisanal Preservation Studio",
+      sub: "Professional Hand & Foot Casting",
       title: "The tactile \n essence of memory",
       desc: "Capturing the delicate form of infancy through museum-grade materials and architectural precision.",
       btn1: "了解理念",
