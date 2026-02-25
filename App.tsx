@@ -70,10 +70,8 @@ const App: React.FC = () => {
         );
       case 'studio':
         return (
-          <section className="py-32 bg-linen-50 px-6 fade-in min-h-[80vh] flex items-center">
-            <div className="max-w-7xl mx-auto w-full">
-              <Location lang={lang} />
-            </div>
+          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+            <Location lang={lang} />
           </section>
         );
       case 'care':
