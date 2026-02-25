@@ -21,7 +21,7 @@ const tipsData = {
     ]
   },
   zh: {
-    title: "藝術品保養指南",
+    title: "Preserving Your Artwork",
     subtitle: "專業維護建議，確保您的珍貴回憶長久如新。",
     guarantee: "品質終身承諾",
     items: [
@@ -38,34 +38,66 @@ const tipsData = {
 const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
   const current = tipsData[lang];
   return (
-    <div className="space-y-16">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-linen-200 pb-12">
-        <div className="max-w-xl space-y-4">
-          <span className="text-[11px] font-bold uppercase tracking-[0.5em] text-linen-300 block">Care & Maintenance</span>
-          <h2 className="text-5xl md:text-7xl serif italic text-linen-900">{current.title}</h2>
-          <p className="text-linen-800 font-light italic serif opacity-60">{current.subtitle}</p>
+    <div className="space-y-32 md:space-y-48">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 items-start">
+        <div className="lg:w-7/12 space-y-8">
+          <div className="space-y-6">
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+              Care & Maintenance
+            </span>
+            <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
+              {current.title}
+            </h2>
+          </div>
+          <div className="max-w-xl">
+            <p className="text-lg md:text-xl text-linen-900 font-light leading-relaxed italic serif opacity-80">
+              {current.subtitle}
+            </p>
+          </div>
         </div>
-        <div className="bg-linen-200/50 px-8 py-4 border-l-2 border-linen-900 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-900">{current.guarantee}</span>
+        <div className="lg:w-5/12 pt-4 lg:pt-24">
+          <div className="space-y-8 text-linen-800 font-light leading-relaxed text-sm md:text-base italic serif opacity-70 border-l border-linen-200 pl-8">
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-900 block">
+                The Witdo Promise
+              </span>
+              <p>{current.guarantee}</p>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md: Batesville-cols-2 lg:grid-cols-3 gap-12">
+
+      {/* Tips Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-24 md:gap-y-32 pt-16 border-t border-linen-200/60">
         {current.items.map((tip, i) => (
-          <div key={i} className="group space-y-6 p-2 transition-all">
-            <div className="flex items-center gap-6">
-              <span className="text-2xl serif italic text-linen-300 opacity-50 group-hover:opacity-100 transition-opacity">0{i+1}</span>
-              <h3 className="text-xl text-linen-900 serif italic font-medium">{tip.title}</h3>
+          <div key={i} className="group space-y-8">
+            <div className="flex gap-6 items-start">
+              <span className="text-[10px] font-bold tracking-[0.3em] text-linen-300 uppercase pt-2">
+                0{i + 1}
+              </span>
+              <div className="space-y-6">
+                <h3 className="text-2xl serif italic text-linen-900 tracking-tight leading-tight">
+                  {tip.title}
+                </h3>
+                <p className="text-sm text-linen-800 font-light leading-relaxed serif italic opacity-70 group-hover:opacity-100 transition-opacity duration-700">
+                  {tip.desc}
+                </p>
+              </div>
             </div>
-            <p className="text-linen-800 text-sm leading-relaxed font-light italic serif opacity-70 pl-12 border-l border-linen-200 group-hover:border-linen-900 transition-all duration-700">
-              {tip.desc}
-            </p>
           </div>
         ))}
       </div>
 
-      <div className="pt-12 text-center">
-        <p className="text-[10px] uppercase tracking-[0.5em] text-linen-300">Est. 2016 Macau</p>
+      {/* Final Note */}
+      <div className="pt-32 border-t border-linen-200/60 flex justify-between items-end">
+        <div className="space-y-2">
+          <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-linen-900">Witdo Macau</p>
+          <p className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300">Est. 2016</p>
+        </div>
+        <div className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300 italic serif">
+          Preservation Standards
+        </div>
       </div>
     </div>
   );
