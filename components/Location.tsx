@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { motion } from 'motion/react';
 import { Language } from '../App';
 
 interface LocationProps {
@@ -35,60 +36,74 @@ const Location: React.FC<LocationProps> = ({ lang }) => {
   const t = content[lang];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-      <div className="space-y-12 order-2 lg:order-1">
-        <div className="space-y-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-stone-400">{t.sub}</span>
-          <h2 
-            className="text-5xl md:text-7xl italic leading-none tracking-tighter" 
-            style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
-          >
-            {t.title}
-          </h2>
-        </div>
-        
-        <div className="space-y-10 pt-4">
-          <div className="flex gap-8 border-b border-stone-200 pb-8">
-            <div className="w-1/2 space-y-2">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{t.addrLabel}</h4>
-              <p className="text-lg text-stone-800 whitespace-pre-line leading-relaxed serif italic">{t.address}</p>
+    <div className="space-y-24 md:space-y-32">
+      {/* Header Section */}
+      <div className="space-y-8">
+        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+          {t.sub}
+        </span>
+        <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
+          {t.title}
+        </h2>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start pt-16 border-t border-linen-200/60">
+        {/* Info Column */}
+        <div className="lg:col-span-5 space-y-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-12">
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300">{t.addrLabel}</h4>
+              <p className="text-xl text-linen-900 serif italic leading-relaxed whitespace-pre-line">
+                {t.address}
+              </p>
             </div>
-            <div className="w-1/2 space-y-2">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{t.hoursLabel}</h4>
-              <p className="text-lg text-stone-800 whitespace-pre-line leading-relaxed serif italic">{t.hours}</p>
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300">{t.hoursLabel}</h4>
+              <p className="text-xl text-linen-900 serif italic leading-relaxed whitespace-pre-line">
+                {t.hours}
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300">{t.contactLabel}</h4>
+              <p className="text-xl text-linen-900 serif italic leading-relaxed">
+                mo.witdo@gmail.com
+              </p>
             </div>
           </div>
-          <div className="space-y-2">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{t.contactLabel}</h4>
-            <p className="text-xl text-stone-900 font-light tracking-widest">mo.witdo@gmail.com</p>
+
+          <div className="pt-8">
+            <a 
+              href="https://maps.app.goo.gl/KtUuz2c68sSbU43M7" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-linen-900"
+            >
+              <span className="border-b border-linen-900 pb-1 group-hover:border-linen-300 transition-colors">
+                {t.btn}
+              </span>
+              <span className="text-lg">→</span>
+            </a>
           </div>
         </div>
 
-        <div className="pt-4">
-          <a 
-            href="https://maps.app.goo.gl/9M9D5WfG6r7Z3vBv8" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-block bg-stone-900 text-white px-12 py-5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-stone-700 transition-all"
+        {/* Image Column */}
+        <div className="lg:col-span-7">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="relative aspect-[4/5] lg:aspect-[16/10] overflow-hidden bg-linen-200"
           >
-            {t.btn}
-          </a>
-        </div>
-      </div>
-      
-      <div className="order-1 lg:order-2">
-        <div className="relative group overflow-hidden shadow-2xl bg-stone-200 aspect-[4/5]">
-          <div className="absolute inset-0 bg-stone-900/10 z-10"></div>
-          <img 
-            src={STUDIO_EXTERIOR}
-            alt="Witdo Studio Facade" 
-            className="w-full h-full object-cover transition-all duration-[2.5s]"
-          />
-          <div className="absolute top-8 right-8 z-20">
-             <div className="bg-white text-stone-900 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.3em] shadow-lg">
-                Rua do Alm. Sergio 285
-             </div>
-          </div>
+            <img 
+              src={STUDIO_EXTERIOR}
+              alt="Witdo Studio Facade" 
+              className="w-full h-full object-cover grayscale-[0.2] hover:scale-105 transition-transform duration-[3s] ease-out"
+            />
+            <div className="absolute bottom-8 right-8 text-white text-[9px] font-bold uppercase tracking-[0.4em] mix-blend-difference">
+              Exterior View
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
