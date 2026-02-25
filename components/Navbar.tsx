@@ -73,10 +73,10 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
           <div className="absolute inset-0 bg-gradient-to-b from-linen-900/10 to-transparent -z-10 pointer-events-none"></div>
         )}
         
-        <div className="max-w-7xl mx-auto px-6 md:px-8 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-8 md:px-12 flex justify-between items-center">
           <button 
             onClick={() => navigateTo('home')}
-            className={`text-xl md:text-2xl font-light tracking-[0.4em] serif uppercase transition-all duration-500 ${isTransparentHome ? 'text-linen-900 drop-shadow-sm' : 'text-linen-900'}`}
+            className={`text-lg md:text-xl font-light tracking-[0.5em] serif uppercase transition-all duration-500 ${isTransparentHome ? 'text-linen-900' : 'text-linen-900'}`}
           >
             Witdo
           </button>
@@ -112,7 +112,10 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
 
             <button 
               onClick={handleBookNow}
-              className="hidden sm:flex bg-linen-900 text-linen-50 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800 hover:scale-[1.02] active:scale-95 transition-all shadow-sm items-center gap-2"
+              className={`hidden sm:flex px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] transition-all items-center gap-2
+                ${isTransparentHome 
+                  ? 'text-linen-900 border border-linen-900/20 hover:bg-linen-900 hover:text-linen-50' 
+                  : 'bg-linen-900 text-linen-50 hover:bg-linen-800 shadow-sm'}`}
             >
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8.228 9c.493 0 .892.412.892.921s-.399.92-.892.92a.907.907 0 0 1-.892-.92c0-.509.4-.921.892-.921zm4.76 0c.493 0 .891.412.891.921s-.398.92-.891.92a.907.907 0 0 1-.892-.92c0-.509.4-.921.892-.921zM24 10.158c0-4.633-4.545-8.389-10.152-8.389C8.24 1.769 3.696 5.525 3.696 10.158c0 2.503 1.328 4.75 3.425 6.257L6.11 19.33l3.292-1.745c.477.133.974.218 1.48.243-.372-.614-.582-1.323-.582-2.079 0-3.13 3.197-5.666 7.142-5.666 1.458 0 2.808.347 3.903.94-.038-.288-.063-.58-.063-.875-.037-.013-.037-.013-.037-.013L24 10.158zm-7.143 4.45c-3.151 0-5.706 2.029-5.706 4.532 0 2.503 2.555 4.532 5.706 4.532.404 0 .8-.035 1.183-.1l2.632 1.395-.808-2.316c1.677-1.205 2.739-3.003 2.739-5.004 0-2.503-2.555-4.532-5.706-4.532zm-2.031 4.532c-.394 0-.713-.33-.713-.736s.319-.737.713-.737.713.33.713.737-.319.736-.713.736zm4.062 0c-.394 0-.714-.33-.714-.736s.32-.737.714-.737c.393 0 .713.33.713.737s-.32.736-.713.736z"/></svg>
               {labels[lang].book}
