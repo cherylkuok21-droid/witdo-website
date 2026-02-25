@@ -47,22 +47,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
     <footer className="bg-linen-100 border-t border-linen-200 pt-32 pb-16 px-8 relative">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-24">
         <div className="space-y-10">
-          <div className="flex space-x-10">
-             <a 
-               href="https://www.instagram.com/witdo.macau/" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300 hover:text-linen-900 transition-all border-b border-transparent hover:border-linen-900 pb-2"
-             >
-               Instagram
-             </a>
-             <button 
-               onClick={handleBookNow}
-               className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300 hover:text-linen-900 transition-all border-b border-transparent hover:border-linen-900 pb-2"
-             >
-               WeChat
-             </button>
-          </div>
+          {/* Social links relocated to bottom bar */}
         </div>
         
         <div className="grid grid-cols-2 gap-16 lg:gap-32">
@@ -86,9 +71,25 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-linen-200 flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-300 font-bold">
-        <div>{labels[lang].rights}</div>
-      </div>
+        <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-linen-200 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-300 font-bold">
+          <div>{labels[lang].rights}</div>
+          <div className="flex space-x-12">
+             <a 
+               href="https://www.instagram.com/witdo.macau/" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               className="hover:text-linen-900 transition-all"
+             >
+               Instagram
+             </a>
+             <button 
+               onClick={handleBookNow}
+               className="hover:text-linen-900 transition-all"
+             >
+               WeChat
+             </button>
+          </div>
+        </div>
 
       {/* Toast Notification */}
       <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] transition-all duration-500 ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
