@@ -37,22 +37,22 @@ const Pricing: React.FC<PricingProps> = ({ lang, setCurrentPage, navigateToDesig
   const current = content[lang];
 
   return (
-    <div className="space-y-24 bg-linen-100">
-      <div className="text-center space-y-6">
+    <div className="space-y-16 md:space-y-24 bg-linen-100">
+      <div className="text-center space-y-4 md:space-y-6">
         <h2 
-          className="text-6xl md:text-9xl italic text-linen-900 tracking-tighter" 
+          className="text-5xl md:text-9xl italic text-linen-900 tracking-tighter" 
           style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
         >
           {current.title}
         </h2>
-        <p className="text-xl text-linen-800 font-light italic serif opacity-70">{current.subtitle}</p>
+        <p className="text-lg md:text-xl text-linen-800 font-light italic serif opacity-70">{current.subtitle}</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
         {current.tiers.map((tier, i) => (
-          <div key={i} className="bg-linen-50 p-12 py-16 border border-linen-200/50 flex flex-col items-center text-center shadow-sm hover:shadow-xl transition-all duration-700 group min-h-[620px]">
+          <div key={i} className="bg-linen-50 p-8 md:p-12 py-12 md:py-16 border border-linen-200/50 flex flex-col items-center text-center shadow-sm hover:shadow-xl transition-all duration-700 group min-h-[500px] md:min-h-[620px]">
             <h3 
-              className="text-4xl mb-8 italic text-linen-900 tracking-tighter" 
+              className="text-3xl md:text-4xl mb-6 md:mb-8 italic text-linen-900 tracking-tighter" 
               style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
             >
               {tier.name}
