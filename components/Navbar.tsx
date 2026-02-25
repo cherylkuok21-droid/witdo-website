@@ -139,7 +139,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
             <button
               key={`${item.id}-mob-${index}`}
               onClick={() => navigateTo(item.id)}
-              className={`text-2xl md:text-3xl serif italic tracking-wide transition-all ${currentPage === item.id ? 'text-linen-900 underline underline-offset-8' : 'text-linen-300'}`}
+              className={`text-xl md:text-2xl serif italic tracking-wide transition-all ${currentPage === item.id ? 'text-linen-900 underline underline-offset-8' : 'text-linen-300'}`}
             >
               {item.label}
             </button>
