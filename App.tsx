@@ -42,10 +42,8 @@ const App: React.FC = () => {
     switch (currentPage) {
       case 'why':
         return (
-          <section className="py-32 bg-linen-50 px-6 fade-in">
-            <div className="max-w-7xl mx-auto">
-              <WhyWitdo lang={lang} />
-            </div>
+          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+            <WhyWitdo lang={lang} />
           </section>
         );
       case 'pricing':
@@ -86,10 +84,8 @@ const App: React.FC = () => {
         );
       case 'faq':
         return (
-          <section className="py-32 bg-linen-900 text-linen-50 px-6 fade-in min-h-screen flex items-center">
-            <div className="max-w-4xl mx-auto w-full">
-              <FAQ lang={lang} />
-            </div>
+          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+            <FAQ lang={lang} />
           </section>
         );
       default:
