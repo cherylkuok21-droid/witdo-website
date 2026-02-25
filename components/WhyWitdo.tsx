@@ -42,9 +42,9 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
       evolution: "Witdo 依然繼續努力，不斷將物料、設備等進行調整升級，定期參加雕塑、藝術課程，提升並學習新技術。",
       pillars: [
         { title: "英國天然海藻膠", desc: "99% 天然海藻成份，英國進口。通過安全認證，環保低敏。", img: ALGINATE_IMAGE },
-        { title: "手塗工藝與 10 款色彩", desc: "拒絕廉價噴漆。我們堅持費時但效果細緻的手塗上漆工藝，採用進口顏料提供 10 種精選成色。", img: FINISHES_IMAGE },
-        { title: "天然實木框", desc: "與市面上一般的塑膠框架對比，Witdo 使用的是實木框。天然樹木紋理俱獨特的觸感。", img: WOOD_IMAGE },
-        { title: "Acid Etching 工藝名牌", desc: "Witdo 的金屬名牌採用 Acid Etching（酸蝕）工藝製作，字體效果極其細緻且具備層次感。", img: METAL_PLATE_IMAGE },
+        { title: "手塗工藝與 10 款色彩", desc: "拒絕廉價噴漆。我們堅持使用進口顏料，只用費時但效果細緻的手塗上漆工藝。", img: FINISHES_IMAGE },
+        { title: "天然實木框", desc: "與市面上一般的塑膠框架對比，Witdo 使用的是實木框。\n天然樹木紋理俱獨特的觸感, 質地細膩、色澤柔和。", img: WOOD_IMAGE },
+        { title: "Acid Etching 工藝名牌", desc: "好品質需要好材質。Witdo 的金屬名牌和市面上的膠片仿製金屬名牌最大分別是，膠片輕易被折彎及塗層易被刮掉。\n\n另外，Witdo 採用Acid Etching 工藝製作名牌，雖然工序繁瑣，但有別於一般直接在上面鐳射雕刻 / 打印的字體，Acid Etching 工藝製作出來的字體效果十分細緻。", img: METAL_PLATE_IMAGE },
         { title: "優質石膏與特殊處理", desc: "Witdo 的石膏在倒模前也會經過特別處理。這道工序能有效防止作品表面出現大量小氣孔。", img: PLASTER_IMAGE },
         { title: "2mm 厚專業有機玻璃", desc: "Witdo 採用 2mm 有機玻璃而非普通薄膠片，主要是考慮到居家安全性。", img: ACRYLIC_IMAGE },
         { title: "鑲嵌 + 粘貼 雙重技術", desc: "我們同時採用「鑲嵌」與「黏貼」雙重固定技術，確保每一件石膏作品都能極度牢固地裝裱。", img: MOUNTING_IMAGE },
