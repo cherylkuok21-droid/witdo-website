@@ -27,9 +27,9 @@ const Pricing: React.FC<PricingProps> = ({ lang, setCurrentPage, navigateToDesig
       footer: "另提供多樣化相框選擇與客製化鑄模組合，歡迎諮詢。",
       viewDesigns: "查看設計",
       tiers: [
-        { id: 'duo' as Category, name: '一手一腳', price: '999', prefix: 'MOP ', suffix: ' 起', features: ['精選 2 件作品組合', '專業生命翻模課程', '天然原木工藝相框', '手工酸蝕金屬名牌'] },
-        { id: 'full' as Category, name: '經典全套', price: '1,899', prefix: 'MOP ', suffix: ' 起', features: ['完整 4 件作品組合', '深度取模製作時長', '天然原木工藝相框', '手工酸蝕金屬名牌', '136 色檔案級無酸襯紙'] },
-        { id: 'legacy' as Category, name: '親情系列', price: '1,499', prefix: 'MOP ', suffix: ' 起', features: ['客製化團體動態造型', '大尺寸藝術展示型裝裱', '一對一私人設計諮詢', '天然原木工藝相框', '手工酸蝕金屬名牌', '136 色檔案級無酸襯紙'] }
+        { id: 'duo' as Category, name: '一手一腳', price: '999', prefix: 'MOP ', suffix: ' 起', features: [] },
+        { id: 'full' as Category, name: '經典全套', price: '1,899', prefix: 'MOP ', suffix: ' 起', features: [] },
+        { id: 'legacy' as Category, name: '親情系列', price: '1,499', prefix: 'MOP ', suffix: ' 起', features: [] }
       ]
     }
   };
