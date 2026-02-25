@@ -121,7 +121,7 @@ const App: React.FC = () => {
         currentPage={currentPage} 
         setCurrentPage={setCurrentPage} 
       />
-      <main className="flex-grow pt-16">
+      <main className={`flex-grow ${currentPage === 'home' ? '' : 'pt-16'}`}>
         {renderPage()}
       </main>
       <Footer lang={lang} setCurrentPage={setCurrentPage} />
