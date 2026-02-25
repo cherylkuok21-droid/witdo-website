@@ -20,9 +20,10 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
       btn2: "Contact Studio"
     },
     zh: {
-      sub: "匠心手工翻模工作室",
-      title: "回憶與 \n 觸感的交織",
-      desc: "透過博物館級材料與建築美學的精準度，捕捉嬰兒時期的細膩形態。",
+      // Per user request: Do not translate the main slogans for the Chinese version
+      sub: "Artisanal Preservation Studio",
+      title: "The tactile \n essence of memory",
+      desc: "Capturing the delicate form of infancy through museum-grade materials and architectural precision.",
       btn1: "了解理念",
       btn2: "聯繫工作室"
     }

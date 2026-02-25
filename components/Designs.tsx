@@ -106,54 +106,66 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
     : DESIGNS_DATA.filter(d => d.category === activeCategory);
 
   return (
-    <div className="space-y-16 bg-linen-100 min-h-screen">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-12 border-b border-linen-200 pb-16">
+    <div className="space-y-12 md:space-y-24 bg-linen-100 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 border-b border-linen-200 pb-12 md:pb-16">
         <div className="max-w-2xl space-y-6">
-          <span className="text-[11px] font-bold uppercase tracking-[0.5em] text-linen-300 block">{t.sub}</span>
-          <h2 className="text-6xl md:text-8xl serif italic text-linen-900 tracking-tighter">{t.title}</h2>
-          <p className="text-xl text-linen-800 font-light italic serif opacity-60 leading-relaxed">
+          <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.4em] md:tracking-[0.5em] text-linen-300 block">
+            {t.sub}
+          </span>
+          <h2 className="text-5xl md:text-8xl serif italic text-linen-900 tracking-tighter leading-tight">
+            {t.title}
+          </h2>
+          <p className="text-lg md:text-xl text-linen-800 font-light italic serif opacity-60 leading-relaxed">
             {t.desc}
           </p>
         </div>
         <button 
           onClick={() => setCurrentPage('pricing')}
-          className="bg-transparent border border-linen-900 text-linen-900 px-12 py-5 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-linen-900 hover:text-linen-50 transition-all shadow-sm"
+          className="w-full md:w-auto bg-transparent border border-linen-900 text-linen-900 px-10 py-4 md:px-12 md:py-5 text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] hover:bg-linen-900 hover:text-linen-50 transition-all shadow-sm"
         >
           {t.back}
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-8 md:gap-12 text-[10px] font-bold uppercase tracking-[0.4em] border-b border-linen-200 pb-8">
-        {(Object.keys(t.categories) as Category[]).map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat as Category)}
-            className={`transition-all relative py-2 ${activeCategory === cat ? 'text-linen-900' : 'text-linen-300 hover:text-linen-900'}`}
-          >
-            {t.categories[cat as keyof typeof t.categories]}
-            {activeCategory === cat && (
-              <span className="absolute bottom-0 left-0 w-full h-px bg-linen-900"></span>
-            )}
-          </button>
-        ))}
+      {/* Optimized Category Bar for Mobile */}
+      <div className="relative border-b border-linen-200">
+        <div className="flex overflow-x-auto no-scrollbar gap-8 md:gap-12 text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] pb-6 -mx-6 px-6 md:mx-0 md:px-0">
+          {(Object.keys(t.categories) as Category[]).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat as Category)}
+              className={`transition-all relative py-2 whitespace-nowrap ${activeCategory === cat ? 'text-linen-900' : 'text-linen-300 hover:text-linen-900'}`}
+            >
+              {t.categories[cat as keyof typeof t.categories]}
+              {activeCategory === cat && (
+                <span className="absolute bottom-0 left-0 w-full h-px bg-linen-900"></span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 md:gap-12 space-y-8 md:space-y-12">
+      {/* Optimized Masonry Grid */}
+      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 md:gap-12 space-y-8 md:space-y-12">
         {filteredDesigns.map((design, i) => {
           const price = lang === 'en' ? design.priceEn : design.priceZh;
           return (
             <div 
               key={i}
-              className="break-inside-avoid relative group bg-linen-50"
+              className="break-inside-avoid relative group bg-linen-50 rounded-sm overflow-hidden"
             >
               <div className="overflow-hidden border border-linen-200/50 shadow-sm transition-shadow duration-500 group-hover:shadow-xl relative">
                 <img 
                   src={design.url} 
                   alt={`Witdo Design ${design.id}`} 
-                  className="w-full h-auto block brightness-95 group-hover:scale-[1.02] transition-all duration-1000"
+                  className="w-full h-auto block brightness-95 group-hover:scale-[1.02] transition-all duration-[1.5s] ease-out"
                   loading="lazy"
                 />
+                
+                {/* Overlay only visible on hover (Desktop) or for context */}
                 <div className="absolute inset-0 bg-gradient-to-t from-linen-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none flex justify-between items-end">
                   <div className="flex flex-col gap-1">
                     <span className="text-[9px] font-bold uppercase tracking-[0.5em] text-linen-50/80">Edition {design.id}</span>
@@ -163,10 +175,12 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex justify-between items-baseline px-1 transition-opacity">
-                 <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-linen-300">#{design.id}</span>
+              
+              {/* Detailed Mobile Meta */}
+              <div className="mt-4 flex justify-between items-baseline px-2 pb-2">
+                 <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.3em] text-linen-300">#{design.id}</span>
                  { price && (
-                   <span className="text-xs font-medium tracking-widest text-linen-900">{price}</span>
+                   <span className="text-xs md:text-sm font-medium tracking-widest text-linen-900">{price}</span>
                  )}
               </div>
             </div>
@@ -174,17 +188,20 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
         })}
       </div>
 
-      <div className="pt-24 mt-12 border-t border-linen-200">
+      {/* Footer Info Section */}
+      <div className="pt-20 md:pt-32 mt-12 border-t border-linen-200">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center">
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.6em] text-linen-900 mb-8">{t.termsTitle}</h3>
+            <h3 className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.5em] md:tracking-[0.6em] text-linen-900 mb-6">
+              {t.termsTitle}
+            </h3>
             <div className="w-8 h-px bg-linen-900/20 mx-auto"></div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6 px-4 md:px-0">
             {t.terms.map((term, idx) => (
               <div key={idx} className="flex items-start gap-4">
-                <span className="w-px h-4 bg-linen-300 mt-0.5 shrink-0"></span>
-                <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-linen-800/70 leading-relaxed">
+                <span className="w-px h-4 bg-linen-300 mt-1 shrink-0"></span>
+                <p className="text-[9px] md:text-[10px] font-medium uppercase tracking-[0.15em] md:tracking-[0.2em] text-linen-800/70 leading-relaxed">
                   {term}
                 </p>
               </div>
@@ -192,14 +209,26 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
           </div>
         </div>
       </div>
-      <div className="text-center py-24 border-t border-linen-200/50">
+
+      <div className="text-center py-20 md:py-32 border-t border-linen-200/50 px-6">
          <button 
             onClick={() => setCurrentPage('studio')}
-            className="text-[11px] font-bold uppercase tracking-[0.6em] text-linen-900 hover:text-linen-300 transition-all underline underline-offset-[12px]"
+            className="inline-block text-[10px] md:text-[11px] font-bold uppercase tracking-[0.5em] md:tracking-[0.6em] text-linen-900 hover:text-linen-300 transition-all underline underline-offset-[12px] md:underline-offset-[16px]"
          >
            {lang === 'en' ? 'Book Your Session' : '預約製作時間'}
          </button>
       </div>
+      
+      {/* Hide scrollbar utility for the category bar */}
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };
