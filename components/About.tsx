@@ -71,3 +71,18 @@ const About: React.FC<AboutProps> = ({ lang, isPreview = false }) => {
           </div>
 
           <div className="pt-12 border-t border-linen-200/60 flex justify-between items-end">
+             <div className="space-y-2">
+               <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-linen-900">Witdo Macau</p>
+               <p className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300">Est. 2016</p>
+             </div>
+             <div className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300 italic serif">
+               Architectural Precision
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default About;
