@@ -47,15 +47,6 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
     <footer className="bg-linen-100 border-t border-linen-200 pt-32 pb-16 px-8 relative">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-24">
         <div className="space-y-10">
-          <button 
-            onClick={() => setCurrentPage('home')}
-            className="text-4xl serif tracking-[0.4em] uppercase text-left text-linen-900 font-light"
-          >
-            Witdo
-          </button>
-          <p className="text-linen-800 max-w-xs text-sm leading-relaxed font-light opacity-70 italic serif">
-            {labels[lang].desc}
-          </p>
           <div className="flex space-x-10">
              <a 
                href="https://www.instagram.com/witdo.macau/" 
