@@ -30,7 +30,7 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
   };
 
   return (
-    <div className="relative min-h-[120vh] w-full flex items-start justify-center overflow-hidden bg-linen-100">
+    <div className="relative min-h-screen md:min-h-[120vh] w-full flex items-start justify-center overflow-hidden bg-linen-100">
       <div className="absolute inset-0 z-0">
         <img 
           src={HERO_IMAGE} 
@@ -42,21 +42,21 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
         <div className="absolute inset-0 bg-linen-900/5"></div>
       </div>
       
-      <div className="relative z-10 text-center px-6 max-w-6xl mt-32 pt-[220px] pb-32">
-        <span className="block text-[11px] uppercase tracking-[0.8em] text-linen-900 mb-12 font-bold opacity-90 drop-shadow-sm">
+      <div className="relative z-10 text-center px-6 max-w-6xl mt-20 md:mt-32 pt-[120px] md:pt-[220px] pb-20 md:pb-32">
+        <span className="block text-[10px] md:text-[11px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-linen-900 mb-8 md:mb-12 font-bold opacity-90 drop-shadow-sm">
           {content[lang].sub}
         </span>
         
         {/* Large high-contrast serif headers */}
-        <h1 className="text-7xl md:text-[11rem] font-extralight leading-[0.85] text-linen-900 mb-14 serif italic whitespace-pre-line tracking-tighter drop-shadow-md">
+        <h1 className="text-5xl md:text-[11rem] font-extralight leading-[0.9] md:leading-[0.85] text-linen-900 mb-10 md:mb-14 serif italic whitespace-pre-line tracking-tighter drop-shadow-md">
           {content[lang].title}
         </h1>
         
-        <p className="text-xl md:text-2xl text-linen-900 font-light mb-20 tracking-tight max-w-2xl mx-auto leading-relaxed italic serif">
+        <p className="text-lg md:text-2xl text-linen-900 font-light mb-12 md:mb-20 tracking-tight max-w-2xl mx-auto leading-relaxed italic serif">
           {content[lang].desc}
         </p>
         
-        <div className="flex flex-col md:flex-row items-center justify-center gap-10">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
           <button 
             onClick={() => setCurrentPage('why')}
             className="bg-linen-900 text-linen-50 px-14 py-6 text-[11px] font-bold uppercase tracking-[0.4em] hover:bg-linen-800 transition-all w-full md:w-auto min-w-[260px] shadow-xl"
