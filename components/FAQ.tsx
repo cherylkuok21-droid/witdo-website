@@ -52,7 +52,7 @@ const FAQ: React.FC<FAQProps> = ({ lang }) => {
       subtitle: "Frequently Asked Questions",
     },
     zh: { 
-      title: "常見問題", 
+      title: "Common Enquiries", 
       subtitle: "解答您的疑問",
     }
   };
