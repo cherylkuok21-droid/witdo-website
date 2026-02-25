@@ -96,9 +96,9 @@ const App: React.FC = () => {
         return (
           <>
             <Hero lang={lang} setCurrentPage={setCurrentPage} />
-            <section className="py-32 px-6 max-w-7xl mx-auto">
+            <section className="py-16 md:py-32 px-6 max-w-7xl mx-auto">
               <About lang={lang} isPreview />
-              <div className="mt-20 text-center">
+              <div className="mt-12 md:mt-20 text-center">
                 <button 
                   onClick={() => setCurrentPage('about')}
                   className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 hover:text-linen-900 transition-all border-b border-linen-200 pb-3"
