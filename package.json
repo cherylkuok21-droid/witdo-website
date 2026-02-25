@@ -1,11 +1,12 @@
 {
-  "name": "witdo---baby-hand-&-foot-casting-studio",
+  "name": "witdo-macau---baby-hand-&-foot-casting-studio",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "lint": "tsc --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {
