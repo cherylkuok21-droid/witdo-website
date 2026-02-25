@@ -38,11 +38,11 @@ const tipsData = {
 const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
   const current = tipsData[lang];
   return (
-    <div className="space-y-32 md:space-y-48">
+    <div className="space-y-20 md:space-y-28">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 items-start">
-        <div className="lg:w-7/12 space-y-8">
-          <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
+        <div className="lg:w-7/12 space-y-6">
+          <div className="space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
               Care & Maintenance
             </span>
@@ -56,8 +56,8 @@ const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
             </p>
           </div>
         </div>
-        <div className="lg:w-5/12 pt-4 lg:pt-24">
-          <div className="space-y-8 text-linen-800 font-light leading-relaxed text-sm md:text-base italic serif opacity-70 border-l border-linen-200 pl-8">
+        <div className="lg:w-5/12 pt-4 lg:pt-16">
+          <div className="space-y-6 text-linen-800 font-light leading-relaxed text-sm md:text-base italic serif opacity-70 border-l border-linen-200 pl-8">
             <div className="space-y-2">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-900 block">
                 The Witdo Promise
@@ -69,14 +69,14 @@ const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
       </div>
 
       {/* Tips Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-24 md:gap-y-32 pt-16 border-t border-linen-200/60">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16 md:gap-y-20 pt-12 border-t border-linen-200/60">
         {current.items.map((tip, i) => (
-          <div key={i} className="group space-y-8">
+          <div key={i} className="group space-y-6">
             <div className="flex gap-6 items-start">
               <span className="text-[10px] font-bold tracking-[0.3em] text-linen-300 uppercase pt-2">
                 0{i + 1}
               </span>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <h3 className="text-2xl serif italic text-linen-900 tracking-tight leading-tight">
                   {tip.title}
                 </h3>
@@ -87,17 +87,6 @@ const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Final Note */}
-      <div className="pt-32 border-t border-linen-200/60 flex justify-between items-end">
-        <div className="space-y-2">
-          <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-linen-900">Witdo Macau</p>
-          <p className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300">Est. 2016</p>
-        </div>
-        <div className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300 italic serif">
-          Preservation Standards
-        </div>
       </div>
     </div>
   );
