@@ -28,8 +28,8 @@ const About: React.FC<AboutProps> = ({ lang, isPreview = false }) => {
   const t = content[lang];
 
   return (
-    <div className={isPreview ? "" : "py-24"}>
-      <div className={`flex flex-col ${isPreview ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-24 lg:gap-32`}>
+    <div className={isPreview ? "" : "py-12 md:py-24"}>
+      <div className={`flex flex-col ${isPreview ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-16 md:gap-24 lg:gap-32`}>
         <div className="lg:w-1/2 relative group">
           <div className="absolute -inset-6 bg-linen-200/50 -z-10 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-700"></div>
           <div className={`overflow-hidden relative z-10 ${isPreview ? 'aspect-[4/5]' : 'aspect-[3/4]'} bg-linen-200`}>
@@ -41,15 +41,15 @@ const About: React.FC<AboutProps> = ({ lang, isPreview = false }) => {
           </div>
         </div>
         
-        <div className="lg:w-1/2 space-y-16 text-left">
-          <div className="space-y-6">
-            <span className="text-[11px] font-bold uppercase tracking-[0.5em] text-linen-300">{t.sub}</span>
-            <h2 className={`${isPreview ? 'text-6xl md:text-8xl' : 'text-7xl md:text-9xl'} leading-[0.85] serif italic text-linen-900 tracking-tighter whitespace-pre-line`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+        <div className="lg:w-1/2 space-y-8 md:space-y-16 text-left">
+          <div className="space-y-4 md:space-y-6">
+            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.4em] md:tracking-[0.5em] text-linen-300">{t.sub}</span>
+            <h2 className={`${isPreview ? 'text-5xl md:text-8xl' : 'text-6xl md:text-9xl'} leading-[0.9] md:leading-[0.85] serif italic text-linen-900 tracking-tighter whitespace-pre-line`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {t.title}
             </h2>
           </div>
           
-          <div className={`space-y-10 text-linen-900 font-light leading-relaxed ${isPreview ? 'text-xl' : 'text-2xl'} max-w-xl italic serif`}>
+          <div className={`space-y-6 md:space-y-10 text-linen-900 font-light leading-relaxed ${isPreview ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'} max-w-xl italic serif`}>
             <p className="opacity-80">
               {t.p1}
             </p>
