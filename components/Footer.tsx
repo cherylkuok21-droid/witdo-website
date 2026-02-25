@@ -19,7 +19,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       collections: "Collections",
       copied: "ID Copied: witdomacau2",
       faq: "FAQ",
-      philosophy: "Philosophy",
+      philosophy: "The Standard",
       care: "Care",
       follow: "Follow"
     },
@@ -31,7 +31,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       collections: "系列方案",
       copied: "ID 已複製: witdomacau2",
       faq: "常見問題",
-      philosophy: "理念",
+      philosophy: "極致標準",
       care: "保養",
       follow: "關注我們"
     }
