@@ -16,7 +16,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
 
   const labels = {
     en: { 
-      why: 'Philosophy', 
+      why: 'The Standard', 
       pricing: 'Prices', 
       about: 'About', 
       location: 'Studio', 
@@ -28,7 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
       close: 'Close'
     },
     zh: { 
-      why: '理念', 
+      why: '極致標準', 
       pricing: '價格', 
       about: '關於', 
       location: '工作室', 
