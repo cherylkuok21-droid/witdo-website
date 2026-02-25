@@ -17,7 +17,7 @@ export type Category = 'all' | 'duo' | 'full' | 'legacy';
 
 const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [lang, setLang] = useState<Language>('en');
+  const [lang, setLang] = useState<Language>('zh');
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [initialCategory, setInitialCategory] = useState<Category>('all');
 
@@ -96,17 +96,6 @@ const App: React.FC = () => {
         return (
           <>
             <Hero lang={lang} setCurrentPage={setCurrentPage} />
-            <section className="py-16 md:py-32 px-6 max-w-7xl mx-auto">
-              <About lang={lang} isPreview />
-              <div className="mt-12 md:mt-20 text-center">
-                <button 
-                  onClick={() => setCurrentPage('about')}
-                  className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 hover:text-linen-900 transition-all border-b border-linen-200 pb-3"
-                >
-                  {lang === 'en' ? 'Read Our Story' : '閱讀品牌故事'}
-                </button>
-              </div>
-            </section>
           </>
         );
     }
