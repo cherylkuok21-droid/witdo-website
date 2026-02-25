@@ -56,33 +56,33 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
   const t = content[lang];
 
   return (
-    <div className="space-y-40">
-      <div className="max-w-4xl space-y-12">
-        <span className="text-[11px] font-bold uppercase tracking-[0.5em] text-linen-300 block">{t.sub}</span>
+    <div className="space-y-24 md:space-y-40">
+      <div className="max-w-4xl space-y-8 md:space-y-12">
+        <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.4em] md:tracking-[0.5em] text-linen-300 block">{t.sub}</span>
         <h2 
-          className="text-6xl md:text-8xl italic leading-tight text-linen-900 tracking-tighter" 
+          className="text-5xl md:text-8xl italic leading-tight text-linen-900 tracking-tighter" 
           style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
         >
           {t.title}
         </h2>
-        <div className="space-y-12 max-w-3xl border-l border-linen-200 pl-12 py-4">
-          <p className="text-2xl text-linen-900 font-medium leading-relaxed italic serif">
+        <div className="space-y-8 md:space-y-12 max-w-3xl border-l border-linen-200 pl-6 md:pl-12 py-4">
+          <p className="text-xl md:text-2xl text-linen-900 font-medium leading-relaxed italic serif">
             {t.intro}
           </p>
-          <div className="space-y-8">
-            <p className="text-lg text-linen-800 font-light leading-relaxed italic serif opacity-80">
+          <div className="space-y-6 md:space-y-8">
+            <p className="text-base md:text-lg text-linen-800 font-light leading-relaxed italic serif opacity-80">
               {t.commitment}
             </p>
-            <p className="text-lg text-linen-800 font-light leading-relaxed italic serif opacity-80">
+            <p className="text-base md:text-lg text-linen-800 font-light leading-relaxed italic serif opacity-80">
               {t.evolution}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-48">
+      <div className="grid grid-cols-1 gap-24 md:gap-48">
         {t.pillars.map((pillar, i) => (
-          <div key={i} className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-24 items-center`}>
+          <div key={i} className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 md:gap-24 items-center`}>
             <div className="w-full md:w-1/2 aspect-[3/4] overflow-hidden bg-linen-200 shadow-sm">
               <img 
                 src={pillar.img} 
@@ -90,15 +90,15 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
                 className="w-full h-full object-cover brightness-95 hover:brightness-100 transition-all duration-1000"
               />
             </div>
-            <div className="w-full md:w-1/2 space-y-10">
-              <div className="text-[12px] uppercase tracking-[0.4em] text-linen-300 font-medium">Element 0{i + 1}</div>
+            <div className="w-full md:w-1/2 space-y-6 md:space-y-10">
+              <div className="text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.4em] text-linen-300 font-medium">Element 0{i + 1}</div>
               <h3 
-                className="text-5xl md:text-6xl italic text-linen-900 tracking-tighter" 
+                className="text-4xl md:text-6xl italic text-linen-900 tracking-tighter" 
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
               >
                 {pillar.title}
               </h3>
-              <p className="text-linen-800 font-light leading-loose text-xl max-w-md serif italic opacity-80 whitespace-pre-line">
+              <p className="text-linen-800 font-light leading-relaxed md:leading-loose text-lg md:text-xl max-w-md serif italic opacity-80 whitespace-pre-line">
                 {pillar.desc}
               </p>
             </div>
