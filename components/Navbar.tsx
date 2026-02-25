@@ -155,17 +155,24 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
           </button>
         </div>
         
-        <div className="p-12 border-t border-linen-200 flex justify-between items-center bg-linen-50">
-          <div className="flex gap-6 text-[11px] font-bold tracking-[0.3em]">
-            <button onClick={() => setLang('en')} className={lang === 'en' ? 'text-linen-900' : 'text-linen-300'}>ENGLISH</button>
-            <button onClick={() => setLang('zh')} className={lang === 'zh' ? 'text-linen-900' : 'text-linen-300'}>中文</button>
+        <div className="p-12 border-t border-linen-200 flex flex-col gap-8 bg-linen-50">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-6 text-[11px] font-bold tracking-[0.3em]">
+              <button onClick={() => setLang('en')} className={lang === 'en' ? 'text-linen-900' : 'text-linen-300'}>ENGLISH</button>
+              <button onClick={() => setLang('zh')} className={lang === 'zh' ? 'text-linen-900' : 'text-linen-300'}>中文</button>
+            </div>
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300"
+            >
+              {labels[lang].close}
+            </button>
           </div>
-          <button 
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300"
-          >
-            {labels[lang].close}
-          </button>
+          
+          <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.4em] text-linen-300">
+            <a href="https://www.instagram.com/witdo.macau/" target="_blank" rel="noopener noreferrer" className="hover:text-linen-900">Instagram</a>
+            <button onClick={handleBookNow} className="hover:text-linen-900">WeChat</button>
+          </div>
         </div>
       </div>
 
