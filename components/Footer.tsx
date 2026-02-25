@@ -20,7 +20,8 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       copied: "ID Copied: witdomacau2",
       faq: "FAQ",
       philosophy: "Philosophy",
-      care: "Care"
+      care: "Care",
+      follow: "Follow"
     },
     zh: {
       desc: "生命最初形態的匠心留存。於澳門以建築美學精神設計與製作。",
@@ -31,7 +32,8 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       copied: "ID 已複製: witdomacau2",
       faq: "常見問題",
       philosophy: "理念",
-      care: "保養"
+      care: "保養",
+      follow: "關注我們"
     }
   };
 
@@ -46,11 +48,9 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
   return (
     <footer className="bg-linen-100 border-t border-linen-200 pt-32 pb-16 px-8 relative">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-24">
-        <div className="space-y-10">
-          {/* Social links relocated to bottom bar */}
-        </div>
+
         
-        <div className="grid grid-cols-2 gap-16 lg:gap-32">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-16 lg:gap-32">
           <div className="space-y-8">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].explore}</h4>
             <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-300 font-medium">
@@ -68,28 +68,35 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
               <li><a href="#" className="hover:text-linen-900 transition-all block">Gift Cards</a></li>
             </ul>
           </div>
+          <div className="space-y-8">
+            <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].follow}</h4>
+            <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-300 font-medium">
+              <li>
+                <a 
+                  href="https://www.instagram.com/witdo.macau/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-linen-900 transition-all block"
+                >
+                  Instagram
+                </a>
+              </li>
+              <li>
+                <button 
+                  onClick={handleBookNow} 
+                  className="hover:text-linen-900 transition-all text-left"
+                >
+                  WeChat
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       
-        <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-linen-200 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-300 font-bold">
-          <div>{labels[lang].rights}</div>
-          <div className="flex space-x-12">
-             <a 
-               href="https://www.instagram.com/witdo.macau/" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               className="hover:text-linen-900 transition-all"
-             >
-               Instagram
-             </a>
-             <button 
-               onClick={handleBookNow}
-               className="hover:text-linen-900 transition-all"
-             >
-               WeChat
-             </button>
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-linen-200 flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-300 font-bold">
+        <div>{labels[lang].rights}</div>
+      </div>
 
       {/* Toast Notification */}
       <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] transition-all duration-500 ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
