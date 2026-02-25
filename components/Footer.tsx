@@ -26,7 +26,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       desc: "生命最初形態的匠心留存。於澳門以建築美學精神設計與製作。",
       explore: "作品策劃",
       studio: "工作室",
-      rights: "© Witdo Macau. 創立於二零一六",
+      rights: "© Witdo Macau. Est. 2016",
       collections: "系列方案",
       copied: "ID 已複製: witdomacau2",
       faq: "常見問題",
