@@ -66,7 +66,7 @@ const App: React.FC = () => {
         );
       case 'about':
         return (
-          <section className="py-32 px-6 max-w-7xl mx-auto fade-in">
+          <section className="px-8 md:px-12 max-w-7xl mx-auto fade-in">
             <About lang={lang} />
           </section>
         );
