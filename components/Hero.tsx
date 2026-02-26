@@ -45,7 +45,7 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
       {/* Top Section (Meta) */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-12 pt-16 md:pt-24">
         <div className="flex items-center">
-          <span className="text-[8px] md:text-[10px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-linen-900 font-medium opacity-50">
+          <span className="text-[8px] md:text-[10px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-linen-900 font-medium">
             {content[lang].sub}
           </span>
         </div>
