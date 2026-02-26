@@ -12,17 +12,11 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
       title: "Gift Cards",
       sub: "Share the memory",
       desc: "A Witdo gift card is more than a present; it's the promise of a preserved memory. Perfect for baby showers, full moons, or first birthdays.",
-      optionsTitle: "Available Options",
-      options: [
-        { name: "The Duo Gift", value: "MOP 999", desc: "Covers a standard Duo collection session." },
-        { name: "The Full Set Gift", value: "MOP 1,899", desc: "Covers a complete Full Set collection." },
-        { name: "Custom Amount", value: "Flexible", desc: "Choose any amount to contribute towards a collection." }
-      ],
       howTo: "How to Purchase",
       steps: [
         "Contact us via WeChat or Instagram",
         "Select your desired gift card value",
-        "Receive a digital or physical premium gift card",
+        "Receive a digital gift card",
         "The recipient can book their session at their convenience"
       ],
       cta: "Purchase via WeChat"
@@ -31,17 +25,11 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
       title: "禮品卡",
       sub: "分享珍貴回憶",
       desc: "Witdo 禮品卡不僅是一份禮物，更是一份永恆回憶的承諾。非常適合百日宴、滿月禮或週歲生日。",
-      optionsTitle: "可選方案",
-      options: [
-        { name: "一手一腳禮品卡", value: "MOP 999", desc: "涵蓋標準「一手一腳」系列製作。" },
-        { name: "經典全套禮品卡", value: "MOP 1,899", desc: "涵蓋完整的「經典全套」系列製作。" },
-        { name: "自定義金額", value: "彈性金額", desc: "自由選擇金額，用於抵扣任何系列作品。" }
-      ],
       howTo: "如何購買",
       steps: [
         "通過微信或 Instagram 與我們聯繫",
         "選擇您想要的禮品卡面額",
-        "獲取電子版或實體高級禮品卡",
+        "獲取電子版禮品卡",
         "收禮人可隨時預約製作時間"
       ],
       cta: "通過微信購買"
@@ -73,18 +61,6 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
             {t.desc}
           </p>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        {t.options.map((opt, i) => (
-          <div key={i} className="bg-linen-50 p-12 border border-linen-200/50 flex flex-col items-center text-center space-y-6">
-            <h3 className="text-2xl serif italic text-linen-900">{opt.name}</h3>
-            <div className="text-3xl font-light text-linen-900">{opt.value}</div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-linen-300 leading-relaxed">
-              {opt.desc}
-            </p>
-          </div>
-        ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-24 pt-16 border-t border-linen-200">
