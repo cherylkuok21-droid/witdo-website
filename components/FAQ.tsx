@@ -61,7 +61,7 @@ const FAQ: React.FC<FAQProps> = ({ lang }) => {
     <div className="space-y-24 md:space-y-32">
       {/* Header Section */}
       <div className="space-y-8">
-        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-800 block">
           {t[lang].subtitle}
         </span>
         <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
@@ -74,7 +74,7 @@ const FAQ: React.FC<FAQProps> = ({ lang }) => {
         {faqsData[lang].map((f, i) => (
           <div key={i} className="group space-y-6">
             <div className="flex gap-8 items-start">
-              <span className="text-[10px] font-bold tracking-[0.3em] text-linen-300 uppercase pt-2">
+              <span className="text-[10px] font-bold tracking-[0.3em] text-linen-800 uppercase pt-2">
                 Q.0{i + 1}
               </span>
               <div className="space-y-6">
