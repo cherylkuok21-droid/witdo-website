@@ -61,11 +61,6 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang }) => {
     });
   };
 
-  const navigateTo = (path: string) => {
-    navigate(path);
-    setIsMobileMenuOpen(false);
-  };
-
   const isHome = location.pathname === '/';
   const isTransparentHome = isHome && !scrolled;
 
