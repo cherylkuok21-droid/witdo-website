@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import WhyWitdo from './components/WhyWitdo';
-import Pricing from './components/Pricing';
 import About from './components/About';
 import Location from './components/Location';
 import FAQ from './components/FAQ';
@@ -12,14 +11,14 @@ import Footer from './components/Footer';
 import Designs from './components/Designs';
 
 export type Language = 'en' | 'zh';
-export type Page = 'home' | 'why' | 'pricing' | 'about' | 'studio' | 'care' | 'designs' | 'faq';
-export type Category = 'all' | 'duo' | 'full' | 'legacy';
+export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq';
+export type Category = 'duo' | 'full' | 'legacy';
 
 const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [lang, setLang] = useState<Language>('zh');
   const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [initialCategory, setInitialCategory] = useState<Category>('all');
+  const [initialCategory, setInitialCategory] = useState<Category>('duo');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,14 +43,6 @@ const App: React.FC = () => {
         return (
           <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
             <WhyWitdo lang={lang} />
-          </section>
-        );
-      case 'pricing':
-        return (
-          <section className="py-32 bg-linen-100 px-6 fade-in min-h-[80vh] flex items-center border-t border-linen-200">
-            <div className="max-w-7xl mx-auto w-full">
-              <Pricing lang={lang} setCurrentPage={setCurrentPage} navigateToDesigns={navigateToDesigns} />
-            </div>
           </section>
         );
       case 'designs':
