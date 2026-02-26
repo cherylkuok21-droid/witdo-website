@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
   const navItems: { label: string; id: Page }[] = [
     { label: labels[lang].about, id: 'about' },
     { label: labels[lang].why, id: 'why' },
-    { label: labels[lang].pricing, id: 'pricing' },
+    { label: labels[lang].pricing, id: 'designs' },
     { label: labels[lang].location, id: 'studio' },
     { label: labels[lang].care, id: 'care' },
     { label: labels[lang].faq, id: 'faq' },
