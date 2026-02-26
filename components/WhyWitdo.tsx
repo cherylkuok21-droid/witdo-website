@@ -112,19 +112,6 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
           ))}
         </div>
       </div>
-
-      {/* Final Note */}
-      <div className="pt-32 border-t border-linen-200/60 flex flex-col md:flex-row justify-between items-start gap-12">
-        <div className="max-w-md space-y-6">
-          <h4 className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-900">Our Promise</h4>
-          <p className="text-sm text-linen-800 italic serif opacity-60 leading-relaxed">
-            Every material is selected not just for its aesthetic quality, but for its archival permanence. We build for generations.
-          </p>
-        </div>
-        <div className="text-[9px] font-medium uppercase tracking-[0.6em] text-linen-800 vertical-text hidden md:block">
-          Witdo Macau • Est. 2016
-        </div>
-      </div>
     </div>
   );
 };
