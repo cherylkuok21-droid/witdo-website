@@ -1,18 +1,19 @@
 
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Language, Page } from '../App';
 
 interface NavbarProps {
   scrolled: boolean;
   lang: Language;
   setLang: (l: Language) => void;
-  currentPage: Page;
-  setCurrentPage: (p: Page) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, setCurrentPage }) => {
+const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang }) => {
   const [showToast, setShowToast] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const labels = {
     en: { 
@@ -41,13 +42,13 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
     }
   };
 
-  const navItems: { label: string; id: Page }[] = [
-    { label: labels[lang].about, id: 'about' },
-    { label: labels[lang].why, id: 'why' },
-    { label: labels[lang].pricing, id: 'designs' },
-    { label: labels[lang].location, id: 'studio' },
-    { label: labels[lang].care, id: 'care' },
-    { label: labels[lang].faq, id: 'faq' },
+  const navItems: { label: string; path: string; id: Page }[] = [
+    { label: labels[lang].about, path: '/about', id: 'about' },
+    { label: labels[lang].why, path: '/why', id: 'why' },
+    { label: labels[lang].pricing, path: '/designs', id: 'designs' },
+    { label: labels[lang].location, path: '/studio', id: 'studio' },
+    { label: labels[lang].care, path: '/care', id: 'care' },
+    { label: labels[lang].faq, path: '/faq', id: 'faq' },
   ];
 
   const handleBookNow = () => {
@@ -59,23 +60,26 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
     });
   };
 
-  const navigateTo = (page: Page) => {
-    setCurrentPage(page);
+  const navigateTo = (path: string) => {
+    navigate(path);
     setIsMobileMenuOpen(false);
   };
 
-  const isTransparentHome = currentPage === 'home' && !scrolled;
+  const isHome = location.pathname === '/';
+  const isTransparentHome = isHome && !scrolled;
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${scrolled || currentPage !== 'home' ? 'bg-linen-100/95 backdrop-blur-md py-4 border-b border-linen-200' : 'bg-transparent py-8'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${scrolled || !isHome ? 'bg-linen-100/95 backdrop-blur-md py-4 border-b border-linen-200' : 'bg-transparent py-8'}`}>
         {isTransparentHome && !isMobileMenuOpen && (
           <div className="absolute inset-0 bg-gradient-to-b from-linen-900/10 to-transparent -z-10 pointer-events-none"></div>
         )}
         
         <div className="max-w-7xl mx-auto px-8 md:px-12 flex justify-between items-center">
           <button 
-            onClick={() => navigateTo('home')}
+            onClick={() => navigateTo('/')}
             className={`text-lg md:text-xl font-light tracking-[0.5em] serif uppercase transition-all duration-500 ${isTransparentHome ? 'text-linen-900' : 'text-linen-900'}`}
           >
             Witdo
@@ -86,12 +90,12 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
             {navItems.map((item, index) => (
               <button
                 key={`${item.id}-${index}`}
-                onClick={() => navigateTo(item.id)}
+                onClick={() => navigateTo(item.path)}
                 className={`transition-all relative group whitespace-nowrap py-1 
-                  ${currentPage === item.id ? 'text-linen-900' : isTransparentHome ? 'text-linen-800/80 hover:text-linen-900' : 'text-linen-800 hover:text-linen-900'}`}
+                  ${isActive(item.path) ? 'text-linen-900' : isTransparentHome ? 'text-linen-800/80 hover:text-linen-900' : 'text-linen-800 hover:text-linen-900'}`}
               >
                 {item.label}
-                <span className={`absolute bottom-0 left-0 h-px bg-linen-900 transition-all duration-500 ${currentPage === item.id ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                <span className={`absolute bottom-0 left-0 h-px bg-linen-900 transition-all duration-500 ${isActive(item.path) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
               </button>
             ))}
           </div>
@@ -141,8 +145,8 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
           {navItems.map((item, index) => (
             <button
               key={`${item.id}-mob-${index}`}
-              onClick={() => navigateTo(item.id)}
-              className={`text-xl md:text-2xl serif italic tracking-wide transition-all ${currentPage === item.id ? 'text-linen-900 underline underline-offset-8' : 'text-linen-800'}`}
+              onClick={() => navigateTo(item.path)}
+              className={`text-xl md:text-2xl serif italic tracking-wide transition-all ${isActive(item.path) ? 'text-linen-900 underline underline-offset-8' : 'text-linen-800'}`}
             >
               {item.label}
             </button>
