@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Language, Page, Category } from '../App';
+import { useNavigate } from 'react-router-dom';
+import { Language, Category } from '../App';
 
 interface DesignsProps {
   lang: Language;
-  setCurrentPage: (p: Page) => void;
   initialCategory: Category;
 }
 
@@ -46,8 +46,9 @@ const DESIGNS_DATA: DesignItem[] = [
   { url: 'https://lh3.googleusercontent.com/d/1ylxzIvTtb_TPtc9YYL5Td6NBLdMCn5z-', category: 'legacy', id: 'L08', priceEn: 'MOP 2,799', priceZh: 'MOP 2,799' },
 ];
 
-const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory }) => {
+const Designs: React.FC<DesignsProps> = ({ lang, initialCategory }) => {
   const [activeCategory, setActiveCategory] = useState<Category>(initialCategory);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -202,7 +203,7 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
 
       <div className="text-center py-20 md:py-32 border-t border-linen-200/50 px-6">
          <button 
-            onClick={() => setCurrentPage('studio')}
+            onClick={() => navigate('/studio')}
             className="inline-block text-[10px] md:text-[11px] font-bold uppercase tracking-[0.5em] md:tracking-[0.6em] text-linen-900 hover:text-linen-300 transition-all underline underline-offset-[12px] md:underline-offset-[16px]"
          >
            {lang === 'en' ? 'Book Your Session' : '預約製作時間'}
