@@ -54,7 +54,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
           <div className="space-y-8">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].explore}</h4>
             <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-300 font-medium">
-              <li><button onClick={() => setCurrentPage('pricing')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
+              <li><button onClick={() => setCurrentPage('designs')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
               <li><button onClick={() => setCurrentPage('why')} className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</button></li>
               <li><button onClick={() => setCurrentPage('care')} className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</button></li>
               <li><button onClick={() => setCurrentPage('faq')} className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</button></li>
