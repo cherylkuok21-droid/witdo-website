@@ -88,7 +88,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
                 key={`${item.id}-${index}`}
                 onClick={() => navigateTo(item.id)}
                 className={`transition-all relative group whitespace-nowrap py-1 
-                  ${currentPage === item.id ? 'text-linen-900' : isTransparentHome ? 'text-linen-800/80 hover:text-linen-900' : 'text-linen-300 hover:text-linen-900'}`}
+                  ${currentPage === item.id ? 'text-linen-900' : isTransparentHome ? 'text-linen-800/80 hover:text-linen-900' : 'text-linen-800 hover:text-linen-900'}`}
               >
                 {item.label}
                 <span className={`absolute bottom-0 left-0 h-px bg-linen-900 transition-all duration-500 ${currentPage === item.id ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
@@ -98,7 +98,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
 
           <div className="flex items-center gap-4 md:gap-8">
             {/* Desktop Language Switcher */}
-            <div className={`hidden md:flex items-center gap-4 text-[9px] font-bold tracking-[0.2em] transition-colors duration-500 ${isTransparentHome ? 'text-linen-800' : 'text-linen-300'}`}>
+            <div className={`hidden md:flex items-center gap-4 text-[9px] font-bold tracking-[0.2em] transition-colors duration-500 ${isTransparentHome ? 'text-linen-800' : 'text-linen-800'}`}>
               <button 
                 onClick={() => setLang('en')} 
                 className={`${lang === 'en' ? 'text-linen-900 underline underline-offset-4' : 'opacity-60 hover:opacity-100'}`}
@@ -142,7 +142,7 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
             <button
               key={`${item.id}-mob-${index}`}
               onClick={() => navigateTo(item.id)}
-              className={`text-xl md:text-2xl serif italic tracking-wide transition-all ${currentPage === item.id ? 'text-linen-900 underline underline-offset-8' : 'text-linen-300'}`}
+              className={`text-xl md:text-2xl serif italic tracking-wide transition-all ${currentPage === item.id ? 'text-linen-900 underline underline-offset-8' : 'text-linen-800'}`}
             >
               {item.label}
             </button>
@@ -158,18 +158,18 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang, currentPage, s
         <div className="p-12 border-t border-linen-200 flex flex-col gap-8 bg-linen-50">
           <div className="flex justify-between items-center">
             <div className="flex gap-6 text-[11px] font-bold tracking-[0.3em]">
-              <button onClick={() => setLang('en')} className={lang === 'en' ? 'text-linen-900' : 'text-linen-300'}>ENGLISH</button>
-              <button onClick={() => setLang('zh')} className={lang === 'zh' ? 'text-linen-900' : 'text-linen-300'}>中文</button>
+              <button onClick={() => setLang('en')} className={lang === 'en' ? 'text-linen-900' : 'text-linen-800'}>ENGLISH</button>
+              <button onClick={() => setLang('zh')} className={lang === 'zh' ? 'text-linen-900' : 'text-linen-800'}>中文</button>
             </div>
             <button 
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300"
+              className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-800"
             >
               {labels[lang].close}
             </button>
           </div>
           
-          <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.4em] text-linen-300">
+          <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.4em] text-linen-800">
             <a href="https://www.instagram.com/witdo.macau/" target="_blank" rel="noopener noreferrer" className="hover:text-linen-900">Instagram</a>
             <button onClick={handleBookNow} className="hover:text-linen-900">WeChat</button>
           </div>
