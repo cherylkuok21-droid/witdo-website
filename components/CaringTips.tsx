@@ -43,7 +43,7 @@ const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
         <div className="lg:w-7/12 space-y-6">
           <div className="space-y-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-800 block">
               Care & Maintenance
             </span>
             <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
@@ -73,7 +73,7 @@ const CaringTips: React.FC<CaringTipsProps> = ({ lang }) => {
         {current.items.map((tip, i) => (
           <div key={i} className="group space-y-6">
             <div className="flex gap-6 items-start">
-              <span className="text-[10px] font-bold tracking-[0.3em] text-linen-300 uppercase pt-2">
+              <span className="text-[10px] font-bold tracking-[0.3em] text-linen-800 uppercase pt-2">
                 0{i + 1}
               </span>
               <div className="space-y-4">
