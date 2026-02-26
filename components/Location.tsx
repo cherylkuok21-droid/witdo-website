@@ -67,19 +67,19 @@ const Location: React.FC<LocationProps> = ({ lang }) => {
         <div className="lg:col-span-5 space-y-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-12">
             <div className="space-y-4">
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300">{t.addrLabel}</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-800">{t.addrLabel}</h4>
               <p className="text-xl text-linen-900 serif italic leading-relaxed whitespace-pre-line">
                 {t.address}
               </p>
             </div>
             <div className="space-y-4">
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300">{t.hoursLabel}</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-800">{t.hoursLabel}</h4>
               <p className="text-xl text-linen-900 serif italic leading-relaxed whitespace-pre-line">
                 {t.hours}
               </p>
             </div>
             <div className="space-y-4">
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-300">{t.contactLabel}</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-800">{t.contactLabel}</h4>
               <div className="space-y-2">
                 <p className="text-xl text-linen-900 serif italic leading-relaxed">
                   mo.witdo@gmail.com
