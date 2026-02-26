@@ -57,10 +57,8 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
     en: {
       title: "Artwork Gallery",
       sub: "Design Collections",
-      back: "Back to Prices",
       desc: "Every cast is a unique masterpiece, tailored to preserve the most delicate details of your family's connection.",
       categories: {
-        all: "All Works",
         duo: "The Duo",
         full: "Full Set",
         legacy: "The Kinship"
@@ -79,10 +77,8 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
     zh: {
       title: "作品集",
       sub: "設計系列",
-      back: "返回價格",
       desc: "每一件作品都是獨一無二的傑作，旨在為您的孩子留存最初幾年最細膩的溫柔細節。",
       categories: {
-        all: "全部作品",
         duo: "一手一腳",
         full: "經典全套",
         legacy: "親情系列"
@@ -101,31 +97,25 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
   };
 
   const t = content[lang];
-  const filteredDesigns = activeCategory === 'all' 
-    ? DESIGNS_DATA 
-    : DESIGNS_DATA.filter(d => d.category === activeCategory);
+  const filteredDesigns = DESIGNS_DATA.filter(d => d.category === activeCategory);
 
   return (
-    <div className="space-y-12 md:space-y-24 bg-linen-100 min-h-screen">
+    <div className="space-y-16 md:space-y-32">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 border-b border-linen-200 pb-12 md:pb-16">
-        <div className="max-w-2xl space-y-6">
-          <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.4em] md:tracking-[0.5em] text-linen-300 block">
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-12 border-b border-linen-200 pb-16">
+        <div className="lg:w-7/12 space-y-6">
+          <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
             {t.sub}
           </span>
-          <h2 className="text-5xl md:text-8xl serif italic text-linen-900 tracking-tighter leading-tight">
+          <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
             {t.title}
           </h2>
-          <p className="text-lg md:text-xl text-linen-800 font-light italic serif opacity-60 leading-relaxed">
+        </div>
+        <div className="lg:w-4/12 lg:pt-24 space-y-8">
+          <p className="text-lg md:text-xl text-linen-800 font-light italic serif opacity-70 leading-relaxed">
             {t.desc}
           </p>
         </div>
-        <button 
-          onClick={() => setCurrentPage('pricing')}
-          className="w-full md:w-auto bg-transparent border border-linen-900 text-linen-900 px-10 py-4 md:px-12 md:py-5 text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] hover:bg-linen-900 hover:text-linen-50 transition-all shadow-sm"
-        >
-          {t.back}
-        </button>
       </div>
 
       {/* Optimized Category Bar for Mobile */}
