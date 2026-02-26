@@ -50,7 +50,7 @@ const About: React.FC<AboutProps> = ({ lang, isPreview = false }) => {
         {/* Content Column */}
         <div className="w-full lg:w-7/12 space-y-12 md:space-y-20">
           <div className="space-y-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-800 block">
               {t.sub}
             </span>
             <h2 className="text-5xl md:text-7xl lg:text-8xl leading-[1] md:leading-[0.9] serif italic text-linen-900 tracking-tight whitespace-pre-line">
@@ -73,9 +73,9 @@ const About: React.FC<AboutProps> = ({ lang, isPreview = false }) => {
           <div className="pt-12 border-t border-linen-200/60 flex justify-between items-end">
              <div className="space-y-2">
                <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-linen-900">Witdo Macau</p>
-               <p className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300">Est. 2016</p>
+               <p className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-800">Est. 2016</p>
              </div>
-             <div className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-300 italic serif">
+             <div className="text-[9px] font-medium uppercase tracking-[0.4em] text-linen-800 italic serif">
                Architectural Precision
              </div>
           </div>
