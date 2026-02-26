@@ -1,14 +1,15 @@
 
 import React, { useState } from 'react';
-import { Language, Page } from '../App';
+import { useNavigate } from 'react-router-dom';
+import { Language } from '../App';
 
 interface FooterProps {
   lang: Language;
-  setCurrentPage: (p: Page) => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
+const Footer: React.FC<FooterProps> = ({ lang }) => {
   const [showToast, setShowToast] = useState(false);
+  const navigate = useNavigate();
 
   const labels = {
     en: {
@@ -60,18 +61,18 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
           <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].explore}</h4>
             <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
-              <li><button onClick={() => setCurrentPage('designs')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
-              <li><button onClick={() => setCurrentPage('why')} className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</button></li>
-              <li><button onClick={() => setCurrentPage('care')} className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</button></li>
-              <li><button onClick={() => setCurrentPage('faq')} className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</button></li>
+              <li><button onClick={() => navigate('/designs')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
+              <li><button onClick={() => navigate('/why')} className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</button></li>
+              <li><button onClick={() => navigate('/care')} className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</button></li>
+              <li><button onClick={() => navigate('/faq')} className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</button></li>
             </ul>
           </div>
           <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].studio}</h4>
             <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
-              <li><button onClick={() => setCurrentPage('studio')} className="hover:text-linen-900 transition-all text-left">{labels[lang].location}</button></li>
+              <li><button onClick={() => navigate('/studio')} className="hover:text-linen-900 transition-all text-left">{labels[lang].location}</button></li>
               <li><button onClick={handleBookNow} className="hover:text-linen-900 transition-all text-left">{labels[lang].bookings}</button></li>
-              <li><button onClick={() => setCurrentPage('giftcards')} className="hover:text-linen-900 transition-all text-left">{labels[lang].giftcards}</button></li>
+              <li><button onClick={() => navigate('/giftcards')} className="hover:text-linen-900 transition-all text-left">{labels[lang].giftcards}</button></li>
             </ul>
           </div>
           <div className="space-y-4">
