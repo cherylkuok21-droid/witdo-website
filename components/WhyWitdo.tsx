@@ -61,7 +61,7 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
       <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 items-start">
         <div className="lg:w-7/12 space-y-12">
           <div className="space-y-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">{t.sub}</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-800 block">{t.sub}</span>
             <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
               {t.title}
             </h2>
@@ -121,7 +121,7 @@ const WhyWitdo: React.FC<WhyWitdoProps> = ({ lang }) => {
             Every material is selected not just for its aesthetic quality, but for its archival permanence. We build for generations.
           </p>
         </div>
-        <div className="text-[9px] font-medium uppercase tracking-[0.6em] text-linen-300 vertical-text hidden md:block">
+        <div className="text-[9px] font-medium uppercase tracking-[0.6em] text-linen-800 vertical-text hidden md:block">
           Witdo Macau • Est. 2016
         </div>
       </div>
