@@ -9,9 +9,10 @@ import FAQ from './components/FAQ';
 import CaringTips from './components/CaringTips';
 import Footer from './components/Footer';
 import Designs from './components/Designs';
+import GiftCards from './components/GiftCards';
 
 export type Language = 'en' | 'zh';
-export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq';
+export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq' | 'giftcards';
 export type Category = 'duo' | 'full' | 'legacy';
 
 const App: React.FC = () => {
@@ -75,6 +76,12 @@ const App: React.FC = () => {
         return (
           <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
             <FAQ lang={lang} />
+          </section>
+        );
+      case 'giftcards':
+        return (
+          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+            <GiftCards lang={lang} />
           </section>
         );
       default:
