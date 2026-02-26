@@ -21,7 +21,10 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       faq: "FAQ",
       philosophy: "The Standard",
       care: "Care",
-      follow: "Follow"
+      follow: "Follow",
+      location: "Location",
+      bookings: "Bookings",
+      giftcards: "Gift Cards"
     },
     zh: {
       desc: "生命最初形態的匠心留存。於澳門以建築美學精神設計與製作。",
@@ -33,7 +36,10 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
       faq: "常見問題",
       philosophy: "極致標準",
       care: "保養",
-      follow: "關注我們"
+      follow: "關注我們",
+      location: "工作室地點",
+      bookings: "預約製作",
+      giftcards: "禮品卡"
     }
   };
 
@@ -63,9 +69,9 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
           <div className="space-y-8">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].studio}</h4>
             <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-300 font-medium">
-              <li><button onClick={() => setCurrentPage('studio')} className="hover:text-linen-900 transition-all text-left">Location</button></li>
-              <li><button onClick={handleBookNow} className="hover:text-linen-900 transition-all text-left">Bookings</button></li>
-              <li><a href="#" className="hover:text-linen-900 transition-all block">Gift Cards</a></li>
+              <li><button onClick={() => setCurrentPage('studio')} className="hover:text-linen-900 transition-all text-left">{labels[lang].location}</button></li>
+              <li><button onClick={handleBookNow} className="hover:text-linen-900 transition-all text-left">{labels[lang].bookings}</button></li>
+              <li><button onClick={() => setCurrentPage('giftcards')} className="hover:text-linen-900 transition-all text-left">{labels[lang].giftcards}</button></li>
             </ul>
           </div>
           <div className="space-y-8">
