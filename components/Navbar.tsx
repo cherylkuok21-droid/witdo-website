@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Instagram, Facebook, X } from 'lucide-react';
 import { Language, Page } from '../App';
 
 interface NavbarProps {
@@ -101,10 +100,10 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang }) => {
             {/* Desktop Social Links */}
             <div className={`hidden lg:flex items-center gap-4 transition-colors duration-500 ${isTransparentHome ? 'text-linen-800' : 'text-linen-800'}`}>
               <a href="https://www.instagram.com/witdo.macau/" target="_blank" rel="noopener noreferrer" className="hover:text-linen-900 transition-all">
-                <Instagram size={16} strokeWidth={1.5} />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
               </a>
               <a href="https://www.facebook.com/witdomacao" target="_blank" rel="noopener noreferrer" className="hover:text-linen-900 transition-all">
-                <Facebook size={16} strokeWidth={1.5} />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
               </a>
               <button onClick={handleBookNow} className="hover:text-linen-900 transition-all">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8.228 9c.493 0 .892.412.892.921s-.399.92-.892.92a.907.907 0 0 1-.892-.92c0-.509.4-.921.892-.921zm4.76 0c.493 0 .891.412.891.921s-.398.92-.891.92a.907.907 0 0 1-.892-.92c0-.509.4-.921.892-.921zM24 10.158c0-4.633-4.545-8.389-10.152-8.389C8.24 1.769 3.696 5.525 3.696 10.158c0 2.503 1.328 4.75 3.425 6.257L6.11 19.33l3.292-1.745c.477.133.974.218 1.48.243-.372-.614-.582-1.323-.582-2.079 0-3.13 3.197-5.666 7.142-5.666 1.458 0 2.808.347 3.903.94-.038-.288-.063-.58-.063-.875-.037-.013-.037-.013-.037-.013L24 10.158zm-7.143 4.45c-3.151 0-5.706 2.029-5.706 4.532 0 2.503 2.555 4.532 5.706 4.532.404 0 .8-.035 1.183-.1l2.632 1.395-.808-2.316c1.677-1.205 2.739-3.003 2.739-5.004 0-2.503-2.555-4.532-5.706-4.532zm-2.031 4.532c-.394 0-.713-.33-.713-.736s.319-.737.713-.737.713.33.713.737-.319.736-.713.736zm4.062 0c-.394 0-.714-.33-.714-.736s.32-.737.714-.737c.393 0 .713.33.713.737s-.32.736-.713.736z"/></svg>
@@ -181,16 +180,16 @@ const Navbar: React.FC<NavbarProps> = ({ scrolled, lang, setLang }) => {
               className="text-linen-800 hover:text-linen-900 transition-colors"
               aria-label={labels[lang].close}
             >
-              <X size={20} strokeWidth={1.5} />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
           
           <div className="flex gap-8 text-linen-800">
             <a href="https://www.instagram.com/witdo.macau/" target="_blank" rel="noopener noreferrer" className="hover:text-linen-900 transition-all">
-              <Instagram size={20} strokeWidth={1.5} />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
             </a>
             <a href="https://www.facebook.com/witdomacao" target="_blank" rel="noopener noreferrer" className="hover:text-linen-900 transition-all">
-              <Facebook size={20} strokeWidth={1.5} />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
             </a>
             <button onClick={handleBookNow} className="hover:text-linen-900 transition-all">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.228 9c.493 0 .892.412.892.921s-.399.92-.892.92a.907.907 0 0 1-.892-.92c0-.509.4-.921.892-.921zm4.76 0c.493 0 .891.412.891.921s-.398.92-.891.92a.907.907 0 0 1-.892-.92c0-.509.4-.921.892-.921zM24 10.158c0-4.633-4.545-8.389-10.152-8.389C8.24 1.769 3.696 5.525 3.696 10.158c0 2.503 1.328 4.75 3.425 6.257L6.11 19.33l3.292-1.745c.477.133.974.218 1.48.243-.372-.614-.582-1.323-.582-2.079 0-3.13 3.197-5.666 7.142-5.666 1.458 0 2.808.347 3.903.94-.038-.288-.063-.58-.063-.875-.037-.013-.037-.013-.037-.013L24 10.158zm-7.143 4.45c-3.151 0-5.706 2.029-5.706 4.532 0 2.503 2.555 4.532 5.706 4.532.404 0 .8-.035 1.183-.1l2.632 1.395-.808-2.316c1.677-1.205 2.739-3.003 2.739-5.004 0-2.503-2.555-4.532-5.706-4.532zm-2.031 4.532c-.394 0-.713-.33-.713-.736s.319-.737.713-.737.713.33.713.737-.319.736-.713.736zm4.062 0c-.394 0-.714-.33-.714-.736s.32-.737.714-.737c.393 0 .713.33.713.737s-.32.736-.713.736z"/></svg>
