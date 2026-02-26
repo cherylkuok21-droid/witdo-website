@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Language } from '../App';
 
 interface FooterProps {
@@ -14,7 +14,7 @@ const Footer: React.FC<FooterProps> = ({ lang }) => {
   const labels = {
     en: {
       desc: "Artisanal preservation of life's first forms. Designed and crafted with architectural intent in Macau.",
-      explore: "Curation",
+      explore: "Explore Witdo",
       studio: "The Studio",
       rights: "© Witdo. Est. 2016",
       collections: "Collections",
@@ -29,7 +29,7 @@ const Footer: React.FC<FooterProps> = ({ lang }) => {
     },
     zh: {
       desc: "生命最初形態的匠心留存。於澳門以建築美學精神設計與製作。",
-      explore: "作品策劃",
+      explore: "探索 Witdo",
       studio: "工作室",
       rights: "© Witdo. Est. 2016",
       collections: "系列方案",
@@ -61,18 +61,18 @@ const Footer: React.FC<FooterProps> = ({ lang }) => {
           <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].explore}</h4>
             <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
-              <li><button onClick={() => navigate('/designs')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
-              <li><button onClick={() => navigate('/why')} className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</button></li>
-              <li><button onClick={() => navigate('/care')} className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</button></li>
-              <li><button onClick={() => navigate('/faq')} className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</button></li>
+              <li><Link to="/designs" className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</Link></li>
+              <li><Link to="/why" className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</Link></li>
+              <li><Link to="/care" className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</Link></li>
+              <li><Link to="/faq" className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</Link></li>
             </ul>
           </div>
           <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].studio}</h4>
             <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
-              <li><button onClick={() => navigate('/studio')} className="hover:text-linen-900 transition-all text-left">{labels[lang].location}</button></li>
+              <li><Link to="/studio" className="hover:text-linen-900 transition-all text-left">{labels[lang].location}</Link></li>
               <li><button onClick={handleBookNow} className="hover:text-linen-900 transition-all text-left">{labels[lang].bookings}</button></li>
-              <li><button onClick={() => navigate('/giftcards')} className="hover:text-linen-900 transition-all text-left">{labels[lang].giftcards}</button></li>
+              <li><Link to="/giftcards" className="hover:text-linen-900 transition-all text-left">{labels[lang].giftcards}</Link></li>
             </ul>
           </div>
           <div className="space-y-4">
