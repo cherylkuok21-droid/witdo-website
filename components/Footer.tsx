@@ -88,6 +88,16 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
                 </a>
               </li>
               <li>
+                <a 
+                  href="https://www.facebook.com/witdomacao" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-linen-900 transition-all block"
+                >
+                  Facebook
+                </a>
+              </li>
+              <li>
                 <button 
                   onClick={handleBookNow} 
                   className="hover:text-linen-900 transition-all text-left"
