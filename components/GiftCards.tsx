@@ -49,7 +49,7 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
     <div className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in space-y-24">
       <div className="flex flex-col md:flex-row justify-between items-start gap-12 border-b border-linen-200 pb-16">
         <div className="md:w-7/12 space-y-6">
-          <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+          <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-800 block">
             {t.sub}
           </span>
           <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
@@ -69,7 +69,7 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
           <div className="space-y-8">
             {t.steps.map((step, i) => (
               <div key={i} className="flex items-start gap-6">
-                <span className="text-[10px] font-bold text-linen-300">0{i + 1}</span>
+                <span className="text-[10px] font-bold text-linen-800">0{i + 1}</span>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-linen-800 font-medium">
                   {step}
                 </p>
