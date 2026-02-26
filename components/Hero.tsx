@@ -1,16 +1,17 @@
 
 import React from 'react';
-import { Language, Page } from '../App';
+import { useNavigate } from 'react-router-dom';
+import { Language } from '../App';
 
 interface HeroProps {
   lang: Language;
-  setCurrentPage: (p: Page) => void;
 }
 
 // Updated with the new image ID from the provided link
 const HERO_IMAGE = "https://lh3.googleusercontent.com/d/1v9V0tNryf00lC9H7z5ql6IJ4UOVHxTza";
 
-const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
+const Hero: React.FC<HeroProps> = ({ lang }) => {
+  const navigate = useNavigate();
   const content = {
     en: {
       sub: "Professional Hand & Foot Casting",
@@ -62,7 +63,7 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
           
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16">
             <button 
-              onClick={() => setCurrentPage('why')}
+              onClick={() => navigate('/why')}
               className="group relative text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-linen-900 py-2"
             >
               {content[lang].btn1}
@@ -70,7 +71,7 @@ const Hero: React.FC<HeroProps> = ({ lang, setCurrentPage }) => {
             </button>
             
             <button 
-              onClick={() => setCurrentPage('studio')}
+              onClick={() => navigate('/studio')}
               className="group relative text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-linen-900 py-2"
             >
               {content[lang].btn2}
