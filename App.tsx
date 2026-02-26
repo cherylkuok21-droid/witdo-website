@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import WhyWitdo from './components/WhyWitdo';
@@ -15,11 +16,19 @@ export type Language = 'en' | 'zh';
 export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq' | 'giftcards';
 export type Category = 'duo' | 'full' | 'legacy';
 
-const App: React.FC = () => {
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
+const AppContent: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [lang, setLang] = useState<Language>('zh');
-  const [currentPage, setCurrentPage] = useState<Page>('home');
   const [initialCategory, setInitialCategory] = useState<Category>('duo');
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,84 +38,68 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentPage]);
-
-  const navigateToDesigns = (category: Category) => {
-    setInitialCategory(category);
-    setCurrentPage('designs');
-  };
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'why':
-        return (
-          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-            <WhyWitdo lang={lang} />
-          </section>
-        );
-      case 'designs':
-        return (
-          <section className="py-32 bg-linen-100 px-6 fade-in min-h-[80vh]">
-            <div className="max-w-7xl mx-auto w-full">
-              <Designs lang={lang} setCurrentPage={setCurrentPage} initialCategory={initialCategory} />
-            </div>
-          </section>
-        );
-      case 'about':
-        return (
-          <section className="px-8 md:px-12 max-w-7xl mx-auto fade-in">
-            <About lang={lang} />
-          </section>
-        );
-      case 'studio':
-        return (
-          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-            <Location lang={lang} />
-          </section>
-        );
-      case 'care':
-        return (
-          <section className="py-32 px-6 max-w-7xl mx-auto fade-in">
-            <CaringTips lang={lang} />
-          </section>
-        );
-      case 'faq':
-        return (
-          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-            <FAQ lang={lang} />
-          </section>
-        );
-      case 'giftcards':
-        return (
-          <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-            <GiftCards lang={lang} />
-          </section>
-        );
-      default:
-        return (
-          <>
-            <Hero lang={lang} setCurrentPage={setCurrentPage} />
-          </>
-        );
-    }
-  };
+  const isHome = location.pathname === '/';
 
   return (
     <div className="min-h-screen flex flex-col bg-linen-100 selection:bg-linen-300">
+      <ScrollToTop />
       <Navbar 
         scrolled={scrolled} 
         lang={lang} 
         setLang={setLang} 
-        currentPage={currentPage} 
-        setCurrentPage={setCurrentPage} 
       />
-      <main className={`flex-grow ${currentPage === 'home' ? '' : 'pt-16'}`}>
-        {renderPage()}
+      <main className={`flex-grow ${isHome ? '' : 'pt-16'}`}>
+        <Routes>
+          <Route path="/" element={<Hero lang={lang} />} />
+          <Route path="/why" element={
+            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+              <WhyWitdo lang={lang} />
+            </section>
+          } />
+          <Route path="/designs" element={
+            <section className="py-32 bg-linen-100 px-6 fade-in min-h-[80vh]">
+              <div className="max-w-7xl mx-auto w-full">
+                <Designs lang={lang} initialCategory={initialCategory} />
+              </div>
+            </section>
+          } />
+          <Route path="/about" element={
+            <section className="px-8 md:px-12 max-w-7xl mx-auto fade-in">
+              <About lang={lang} />
+            </section>
+          } />
+          <Route path="/studio" element={
+            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+              <Location lang={lang} />
+            </section>
+          } />
+          <Route path="/care" element={
+            <section className="py-32 px-6 max-w-7xl mx-auto fade-in">
+              <CaringTips lang={lang} />
+            </section>
+          } />
+          <Route path="/faq" element={
+            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+              <FAQ lang={lang} />
+            </section>
+          } />
+          <Route path="/giftcards" element={
+            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+              <GiftCards lang={lang} />
+            </section>
+          } />
+        </Routes>
       </main>
-      <Footer lang={lang} setCurrentPage={setCurrentPage} />
+      <Footer lang={lang} />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 };
 
