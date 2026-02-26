@@ -104,7 +104,7 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-start gap-12 border-b border-linen-200 pb-16">
         <div className="lg:w-7/12 space-y-6">
-          <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-300 block">
+          <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-800 block">
             {t.sub}
           </span>
           <h2 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] serif italic text-linen-900 tracking-tight">
@@ -125,7 +125,7 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
             <button
               key={cat}
               onClick={() => setActiveCategory(cat as Category)}
-              className={`transition-all relative py-2 whitespace-nowrap ${activeCategory === cat ? 'text-linen-900' : 'text-linen-300 hover:text-linen-900'}`}
+              className={`transition-all relative py-2 whitespace-nowrap ${activeCategory === cat ? 'text-linen-900' : 'text-linen-800 hover:text-linen-900'}`}
             >
               {t.categories[cat as keyof typeof t.categories]}
               {activeCategory === cat && (
@@ -168,7 +168,7 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
               
               {/* Detailed Mobile Meta */}
               <div className="mt-4 flex justify-between items-baseline px-2 pb-2">
-                 <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.3em] text-linen-300">#{design.id}</span>
+                 <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.3em] text-linen-800">#{design.id}</span>
                  { price && (
                    <span className="text-xs md:text-sm font-medium tracking-widest text-linen-900">{price}</span>
                  )}
@@ -190,8 +190,8 @@ const Designs: React.FC<DesignsProps> = ({ lang, setCurrentPage, initialCategory
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6 px-4 md:px-0">
             {t.terms.map((term, idx) => (
               <div key={idx} className="flex items-start gap-4">
-                <span className="w-px h-4 bg-linen-300 mt-1 shrink-0"></span>
-                <p className="text-[9px] md:text-[10px] font-medium uppercase tracking-[0.15em] md:tracking-[0.2em] text-linen-800/70 leading-relaxed">
+                <span className="w-px h-4 bg-linen-800 mt-1 shrink-0"></span>
+                <p className="text-[9px] md:text-[10px] font-medium uppercase tracking-[0.15em] md:tracking-[0.2em] text-linen-800 leading-relaxed">
                   {term}
                 </p>
               </div>
