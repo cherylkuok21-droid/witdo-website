@@ -52,31 +52,31 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
   };
 
   return (
-    <footer className="bg-linen-100 border-t border-linen-200 pt-32 pb-16 px-8 relative">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-24">
+    <footer className="bg-linen-100 border-t border-linen-200 pt-16 pb-12 px-8 relative">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
 
         
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-16 lg:gap-32">
-          <div className="space-y-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 lg:gap-24">
+          <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].explore}</h4>
-            <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
+            <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
               <li><button onClick={() => setCurrentPage('designs')} className="hover:text-linen-900 transition-all text-left">{labels[lang].collections}</button></li>
               <li><button onClick={() => setCurrentPage('why')} className="hover:text-linen-900 transition-all text-left">{labels[lang].philosophy}</button></li>
               <li><button onClick={() => setCurrentPage('care')} className="hover:text-linen-900 transition-all text-left">{labels[lang].care}</button></li>
               <li><button onClick={() => setCurrentPage('faq')} className="hover:text-linen-900 transition-all text-left">{labels[lang].faq}</button></li>
             </ul>
           </div>
-          <div className="space-y-8">
+          <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].studio}</h4>
-            <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
+            <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
               <li><button onClick={() => setCurrentPage('studio')} className="hover:text-linen-900 transition-all text-left">{labels[lang].location}</button></li>
               <li><button onClick={handleBookNow} className="hover:text-linen-900 transition-all text-left">{labels[lang].bookings}</button></li>
               <li><button onClick={() => setCurrentPage('giftcards')} className="hover:text-linen-900 transition-all text-left">{labels[lang].giftcards}</button></li>
             </ul>
           </div>
-          <div className="space-y-8">
+          <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.5em] font-bold text-linen-900">{labels[lang].follow}</h4>
-            <ul className="space-y-4 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
+            <ul className="space-y-2 text-[11px] uppercase tracking-[0.3em] text-linen-800 font-medium">
               <li>
                 <a 
                   href="https://www.instagram.com/witdo.macau/" 
@@ -110,7 +110,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setCurrentPage }) => {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-linen-200 flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-800 font-bold">
+      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-linen-200 flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-800 font-bold">
         <div>{labels[lang].rights}</div>
       </div>
 
