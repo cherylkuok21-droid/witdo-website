@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Language } from '../App';
 
 interface GiftCardsProps {
@@ -7,6 +8,8 @@ interface GiftCardsProps {
 }
 
 const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
+  const [showToast, setShowToast] = useState(false);
+
   const content = {
     en: {
       title: "Gift Cards",
@@ -19,7 +22,8 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
         "Receive a digital gift card",
         "The recipient can book their session at their convenience"
       ],
-      cta: "Purchase via WeChat"
+      cta: "Purchase via WeChat",
+      copied: "ID Copied: witdomacau2"
     },
     zh: {
       title: "禮品卡",
@@ -32,7 +36,8 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
         "獲取電子版禮品卡",
         "收禮人可隨時預約製作時間"
       ],
-      cta: "通過微信購買"
+      cta: "通過微信購買",
+      copied: "ID 已複製: witdomacau2"
     }
   };
 
@@ -41,7 +46,8 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
   const handleBookNow = () => {
     const wechatId = 'witdomacau2';
     navigator.clipboard.writeText(wechatId).then(() => {
-      alert(lang === 'en' ? 'WeChat ID Copied: witdomacau2' : '微信 ID 已複製: witdomacau2');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     });
   };
 
@@ -91,6 +97,17 @@ const GiftCards: React.FC<GiftCardsProps> = ({ lang }) => {
           </button>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {createPortal(
+        <div className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] transition-all duration-500 ${showToast ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+          <div className="bg-linen-900 text-linen-50 px-8 py-4 shadow-2xl flex flex-col items-center gap-2 border border-linen-800 w-[90vw] max-w-sm text-center">
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">{t.copied}</span>
+            <span className="text-[9px] opacity-60 uppercase tracking-widest">{lang === 'en' ? 'Please add us on WeChat' : '請在微信中添加我們'}</span>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
