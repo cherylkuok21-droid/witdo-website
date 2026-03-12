@@ -14,12 +14,19 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
+      optimizeDeps: {
+        include: ['signature_pad']
+      },
+      ssr: {
+        noExternal: ['signature_pad']
+      },
       define: {
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
+          'signature_pad': path.resolve(__dirname, 'node_modules/signature_pad/dist/signature_pad.js'),
         }
       }
     };
