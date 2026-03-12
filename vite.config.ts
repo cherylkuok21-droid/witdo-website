@@ -15,14 +15,15 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       optimizeDeps: {
-        include: ['firebase/app', 'firebase/firestore', 'firebase/auth', 'react-signature-canvas']
+        include: ['firebase/app', 'firebase/firestore', 'firebase/auth', 'react-signature-canvas', 'signature_pad']
       },
       ssr: {
-        noExternal: ['firebase', 'react-signature-canvas']
+        noExternal: ['firebase', 'react-signature-canvas', 'signature_pad']
       },
       build: {
         commonjsOptions: {
-          include: [/react-signature-canvas/, /node_modules/]
+          include: [/react-signature-canvas/, /signature_pad/, /node_modules/],
+          transformMixedEsModules: true
         }
       },
       define: {
@@ -32,6 +33,7 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
+          'react-signature-canvas': path.resolve(__dirname, 'node_modules/react-signature-canvas/build/index.js'),
         }
       }
     };
