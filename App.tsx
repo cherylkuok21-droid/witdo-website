@@ -11,6 +11,7 @@ import CaringTips from './components/CaringTips';
 import Footer from './components/Footer';
 import Designs from './components/Designs';
 import GiftCards from './components/GiftCards';
+import OwnerPortal from './components/OwnerPortal';
 
 export type Language = 'en' | 'zh';
 export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq' | 'giftcards';
@@ -88,6 +89,7 @@ const AppContent: React.FC = () => {
               <GiftCards lang={lang} />
             </section>
           } />
+          <Route path="/witdo-studio-management" element={<OwnerPortal />} />
         </Routes>
       </main>
       <Footer lang={lang} />
