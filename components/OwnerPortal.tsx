@@ -3,23 +3,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  Timestamp,
-  doc,
-  deleteDoc
-} from 'firebase/firestore';
-import { 
+  db, 
+  auth,
   signInWithPopup, 
   GoogleAuthProvider, 
   onAuthStateChanged, 
   signOut,
-  User
-} from 'firebase/auth';
-import { db, auth } from '../firebase';
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  Timestamp,
+  doc,
+  deleteDoc
+} from '../firebase';
+import { User } from 'firebase/auth';
 import SignatureCanvas from 'react-signature-canvas';
 
 interface OrderItem {
