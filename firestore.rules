@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: workOrders
+    // Fields:
+    //   - workOrderId: string (required)
+    //   - clientName: string (required)
+    //   - wechatId: string (required)
+    //   - creationDate: string (required)
+    //   - expectedCompletionDate: string (required)
+    //   - style: string
+    //   - font: string
+    //   - fontContent: string
+    //   - orderItems: list of maps
+    //   - totalAmount: number (required)
+    //   - notes: string
+    //   - terms: string
+    //   - signature: string
+    //   - signatureDate: string
+    //   - status: string
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "mo.witdo@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    function isValidWorkOrder(data) {
+      return data.keys().hasAll(['workOrderId', 'clientName', 'wechatId', 'creationDate', 'expectedCompletionDate', 'totalAmount']) &&
+             data.workOrderId is string &&
+             data.clientName is string && data.clientName.size() > 0 && data.clientName.size() < 100 &&
+             data.wechatId is string && data.wechatId.size() > 0 &&
+             data.totalAmount is number && data.totalAmount >= 0;
+    }
+
+    match /workOrders/{orderId} {
+      allow read, write: if isAdmin() && isValidWorkOrder(request.resource.data);
+      // Allow read for existing docs if admin
+      allow read: if isAdmin();
+      // Allow delete if admin
+      allow delete: if isAdmin();
+    }
+    
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
