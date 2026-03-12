@@ -19,7 +19,7 @@ import {
   deleteDoc,
   User
 } from '../firebase';
-import SignatureCanvas from 'react-signature-canvas';
+import SignaturePad from 'signature_pad';
 
 interface OrderItem {
   description: string;
@@ -66,7 +66,17 @@ const OwnerPortal: React.FC = () => {
     orderItems: [{ description: '', options: '', unitPrice: 0, totalPrice: 0 }]
   });
 
-  const sigPad = useRef<SignatureCanvas>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sigPad = useRef<SignaturePad | null>(null);
+
+  useEffect(() => {
+    if (view === 'create' && canvasRef.current && !sigPad.current) {
+      sigPad.current = new SignaturePad(canvasRef.current, {
+        backgroundColor: 'rgba(0,0,0,0)',
+        penColor: 'black'
+      });
+    }
+  }, [view]);
 
   // You can change this password here
   const SECRET_PASSWORD = 'witdo2026';
@@ -157,7 +167,7 @@ const OwnerPortal: React.FC = () => {
     const workOrderId = generateOrderId();
     const creationDate = new Date().toISOString();
     const expectedCompletionDate = calculateCompletionDate();
-    const signature = sigPad.current.getTrimmedCanvas().toDataURL('image/png');
+    const signature = sigPad.current.toDataURL('image/png');
     const totalAmount = formData.orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
     const newOrder: WorkOrder = {
@@ -484,10 +494,9 @@ const OwnerPortal: React.FC = () => {
           <div className="space-y-4">
             <label className="text-[10px] font-bold uppercase tracking-widest text-linen-400">客戶簽署 (Client Signature)</label>
             <div className="border border-linen-200 bg-linen-50/20 h-48 relative">
-              <SignatureCanvas 
-                ref={sigPad}
-                penColor='black'
-                canvasProps={{className: 'w-full h-full'}}
+              <canvas 
+                ref={canvasRef}
+                className="w-full h-full touch-none"
               />
               <button 
                 onClick={() => sigPad.current?.clear()}
