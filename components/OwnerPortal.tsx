@@ -16,9 +16,9 @@ import {
   onSnapshot,
   Timestamp,
   doc,
-  deleteDoc
+  deleteDoc,
+  User
 } from '../firebase';
-import { User } from 'firebase/auth';
 import SignatureCanvas from 'react-signature-canvas';
 
 interface OrderItem {
