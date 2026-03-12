@@ -19,7 +19,7 @@ import {
   deleteDoc,
   User
 } from '../firebase';
-import SignaturePad from 'signature_pad';
+import SignaturePad from 'signature_pad/dist/signature_pad.js';
 
 interface OrderItem {
   description: string;
