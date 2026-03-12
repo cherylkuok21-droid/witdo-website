@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { 
   getFirestore, 
   collection, 
@@ -31,5 +31,7 @@ export {
   doc,
   deleteDoc
 };
+
+export type { User };
 
 export default app;
