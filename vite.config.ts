@@ -11,10 +11,10 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       optimizeDeps: {
-        include: ['firebase/app', 'firebase/firestore', 'firebase/auth']
+        include: ['firebase/app', 'firebase/firestore', 'firebase/auth', 'react-signature-canvas']
       },
       ssr: {
-        noExternal: ['firebase']
+        noExternal: ['firebase', 'react-signature-canvas']
       },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
