@@ -11,6 +11,22 @@ interface WorkOrderFormProps {
   initialData?: any;
 }
 
+const STYLE_OPTIONS = [
+  { label: '1手1腳 (玻璃罩款)', price: 999 },
+  { label: '1手 / 1 腳', price: 1099 },
+  { label: '1手1腳', price: 1299 },
+  { label: '2BB 各1手1腳 + 父母手', price: 2999 },
+  { label: '1手1腳 (>1 歲)', price: 1499 },
+  { label: '2手2腳', price: 1899 },
+  { label: '兄弟姐妹(各1手1腳)', price: 2799 },
+  { label: '兄弟姐妹(各1腳)', price: 1499 },
+  { label: '合併框費 / 換新框費', price: 250 },
+  { label: '上門費', price: 500 },
+  { label: '自帶作品 - 維修加工 包換框盒, 新名牌及沖印照片', price: 750 },
+  { label: '送貨上門費', price: 50 },
+  { label: '送貨上門費 成品送到府上 / 管理處', price: 0 },
+];
+
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const sigPad = useRef<SignatureCanvas>(null);
   
@@ -49,6 +65,20 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    if (name === 'style') {
+      const selectedOption = STYLE_OPTIONS.find(opt => opt.label === value);
+      if (selectedOption) {
+        setFormData(prev => ({ 
+          ...prev, 
+          style: value,
+          unitPrice: selectedOption.price.toString(),
+          totalPrice: selectedOption.price.toString()
+        }));
+        return;
+      }
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -162,13 +192,32 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">款式 (Style)</label>
-              <input 
+              <select 
                 name="style"
                 value={formData.style}
                 onChange={handleChange}
                 className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
+              >
+                <option value="">Select a style...</option>
+                {STYLE_OPTIONS.map((opt) => (
+                  <option key={opt.label} value={opt.label}>
+                    {opt.label} - MOP {opt.price === 0 ? 'FREE' : opt.price}
+                  </option>
+                ))}
+                <option value="custom">Custom Style...</option>
+              </select>
             </div>
+            {formData.style === 'custom' && (
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">自定義款式 (Custom Style)</label>
+                <input 
+                  name="customStyle"
+                  onChange={(e) => setFormData(prev => ({ ...prev, style: e.target.value }))}
+                  className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+                  placeholder="Enter custom style name"
+                />
+              </div>
+            )}
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font)</label>
               <input 
