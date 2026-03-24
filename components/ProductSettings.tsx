@@ -59,10 +59,27 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'products' | 'presets'>('products');
+  const [error, setError] = useState<string | null>(null);
   
   // Form states
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [editingPreset, setEditingPreset] = useState<Partial<Preset> | null>(null);
+  const [presetInputValue, setPresetInputValue] = useState('');
+
+  const addPresetValue = () => {
+    const val = presetInputValue.trim();
+    if (val) {
+      const newVals = val.split(',').map(v => v.trim()).filter(v => v !== '');
+      setEditingPreset(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          values: [...(prev.values || []), ...newVals]
+        };
+      });
+      setPresetInputValue('');
+    }
+  };
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -103,6 +120,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     };
 
     try {
+      setError(null);
       if (editingProduct.id) {
         await updateDoc(doc(db, 'products', editingProduct.id), data);
       } else {
@@ -110,6 +128,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       }
       setEditingProduct(null);
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save product');
       handleFirestoreError(err, editingProduct.id ? OperationType.UPDATE : OperationType.CREATE, 'products');
     }
   };
@@ -118,21 +137,32 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     e.preventDefault();
     if (!auth.currentUser || !editingPreset?.name) return;
 
+    // Add any pending input value
+    let finalValues = [...(editingPreset.values || [])];
+    const pendingVal = presetInputValue.trim();
+    if (pendingVal) {
+      const newVals = pendingVal.split(',').map(v => v.trim()).filter(v => v !== '');
+      finalValues = [...finalValues, ...newVals];
+    }
+
     const data = {
       name: editingPreset.name,
-      values: editingPreset.values || [],
+      values: finalValues,
       ownerUid: auth.currentUser.uid,
       updatedAt: serverTimestamp(),
     };
 
     try {
+      setError(null);
       if (editingPreset.id) {
         await updateDoc(doc(db, 'presets', editingPreset.id), data);
       } else {
         await addDoc(collection(db, 'presets'), data);
       }
       setEditingPreset(null);
+      setPresetInputValue('');
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save preset');
       handleFirestoreError(err, editingPreset.id ? OperationType.UPDATE : OperationType.CREATE, 'presets');
     }
   };
@@ -184,7 +214,10 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Available Products</h3>
             <button 
-              onClick={() => setEditingProduct({ name: '', price: 0, options: [] })}
+              onClick={() => {
+                setEditingProduct({ name: '', price: 0, options: [] });
+                setError(null);
+              }}
               className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
             >
               + Add Product
@@ -200,7 +233,10 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <p className="text-sm text-linen-500">MOP {product.price}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setEditingProduct(product)} className="text-linen-400 hover:text-linen-900">
+                    <button onClick={() => {
+                      setEditingProduct(product);
+                      setError(null);
+                    }} className="text-linen-400 hover:text-linen-900">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
                     <button onClick={() => deleteItem('products', product.id)} className="text-linen-400 hover:text-red-500">
@@ -229,7 +265,11 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Reusable Presets</h3>
             <button 
-              onClick={() => setEditingPreset({ name: '', values: [] })}
+              onClick={() => {
+                setEditingPreset({ name: '', values: [] });
+                setPresetInputValue('');
+                setError(null);
+              }}
               className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
             >
               + Add Preset
@@ -242,7 +282,11 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <div className="flex justify-between items-start">
                   <h4 className="text-lg serif italic text-linen-900">{preset.name}</h4>
                   <div className="flex gap-2">
-                    <button onClick={() => setEditingPreset(preset)} className="text-linen-400 hover:text-linen-900">
+                    <button onClick={() => {
+                      setEditingPreset(preset);
+                      setPresetInputValue('');
+                      setError(null);
+                    }} className="text-linen-400 hover:text-linen-900">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
                     <button onClick={() => deleteItem('presets', preset.id)} className="text-linen-400 hover:text-red-500">
@@ -271,6 +315,11 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               className="bg-white p-8 border border-linen-200 shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
             >
               <h3 className="text-xl serif italic text-linen-900 mb-6">{editingProduct.id ? 'Edit Product' : 'New Product'}</h3>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] uppercase tracking-widest animate-pulse">
+                  {error}
+                </div>
+              )}
               <form onSubmit={handleSaveProduct} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -372,17 +421,21 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                           ))}
                           <input 
                             className="text-[10px] bg-transparent border-b border-linen-100 focus:outline-none focus:border-linen-900 w-24"
-                            placeholder="+ Add value"
+                            placeholder="+ Add value(s)"
+                            onBlur={e => {
+                              const val = e.target.value.trim();
+                              if (val) {
+                                const newVals = val.split(',').map(v => v.trim()).filter(v => v !== '');
+                                const newOpts = [...(editingProduct.options || [])];
+                                newOpts[optIdx].values = [...new Set([...newOpts[optIdx].values, ...newVals])];
+                                setEditingProduct({ ...editingProduct, options: newOpts });
+                                e.target.value = '';
+                              }
+                            }}
                             onKeyDown={e => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
-                                const val = e.currentTarget.value.trim();
-                                if (val) {
-                                  const newOpts = [...(editingProduct.options || [])];
-                                  newOpts[optIdx].values = [...newOpts[optIdx].values, val];
-                                  setEditingProduct({ ...editingProduct, options: newOpts });
-                                  e.currentTarget.value = '';
-                                }
+                                e.currentTarget.blur();
                               }
                             }}
                           />
@@ -423,6 +476,11 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               className="bg-white p-8 border border-linen-200 shadow-2xl max-w-md w-full"
             >
               <h3 className="text-xl serif italic text-linen-900 mb-6">{editingPreset.id ? 'Edit Preset' : 'New Preset'}</h3>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] uppercase tracking-widest animate-pulse">
+                  {error}
+                </div>
+              )}
               <form onSubmit={handleSavePreset} className="space-y-6">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Preset Name</label>
@@ -436,37 +494,49 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Values</label>
-                  <div className="flex flex-wrap gap-2 p-4 border border-linen-50 bg-linen-50/20 min-h-[100px]">
-                    {editingPreset.values?.map((v, i) => (
-                      <span key={i} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded flex items-center gap-2">
-                        {v}
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            const newVals = editingPreset.values?.filter((_, idx) => idx !== i);
-                            setEditingPreset({ ...editingPreset, values: newVals });
-                          }}
-                          className="text-linen-300 hover:text-red-500"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                    <input 
-                      className="text-[10px] bg-transparent border-b border-linen-100 focus:outline-none focus:border-linen-900 w-full mt-2"
-                      placeholder="Type and press Enter to add value"
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const val = e.currentTarget.value.trim();
-                          if (val) {
-                            setEditingPreset({ ...editingPreset, values: [...(editingPreset.values || []), val] });
-                            e.currentTarget.value = '';
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Values (Comma separated for multiple)</label>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input 
+                        className="flex-1 bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                        placeholder="e.g. Gold, Silver, White"
+                        value={presetInputValue}
+                        onChange={e => setPresetInputValue(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addPresetValue();
                           }
-                        }
-                      }}
-                    />
+                        }}
+                      />
+                      <button 
+                        type="button"
+                        onClick={addPresetValue}
+                        className="bg-linen-100 px-4 text-[10px] font-bold uppercase tracking-widest hover:bg-linen-200 transition-colors"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 p-4 border border-linen-50 bg-linen-50/20 min-h-[60px]">
+                      {editingPreset.values?.map((v, i) => (
+                        <span key={i} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded flex items-center gap-2">
+                          {v}
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const newVals = editingPreset.values?.filter((_, idx) => idx !== i);
+                              setEditingPreset({ ...editingPreset, values: newVals });
+                            }}
+                            className="text-linen-300 hover:text-red-500"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      {(!editingPreset.values || editingPreset.values.length === 0) && (
+                        <p className="text-[10px] text-linen-300 italic">No values added yet</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
