@@ -67,6 +67,17 @@
         "ownerUid": { "type": "string", "description": "UID of the owner who created this discount" }
       },
       "required": ["code", "type", "value", "applicableProductIds", "ownerUid"]
+    },
+    "nameTagFonts": {
+      "title": "Name Tag Font",
+      "description": "A font option for nameplates with a preview image.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the font" },
+        "imageUrl": { "type": "string", "description": "URL to the preview image of the font" },
+        "ownerUid": { "type": "string", "description": "UID of the owner who created this font" }
+      },
+      "required": ["name", "imageUrl", "ownerUid"]
     }
   },
   "firestore": {
@@ -85,6 +96,10 @@
     "/discounts/{discountId}": {
       "schema": "discounts",
       "description": "Collection of available discounts and coupons."
+    },
+    "/nameTagFonts/{fontId}": {
+      "schema": "nameTagFonts",
+      "description": "Collection of font options for nameplates."
     }
   }
 }
