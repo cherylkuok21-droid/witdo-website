@@ -1,0 +1,497 @@
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { db, auth } from '../firebase';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: any;
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
+interface Preset {
+  id: string;
+  name: string;
+  values: string[];
+}
+
+interface ProductOption {
+  name: string;
+  values: string[];
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  options: ProductOption[];
+}
+
+const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'products' | 'presets'>('products');
+  
+  // Form states
+  const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
+  const [editingPreset, setEditingPreset] = useState<Partial<Preset> | null>(null);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const productsQuery = query(collection(db, 'products'), where('ownerUid', '==', user.uid));
+    const presetsQuery = query(collection(db, 'presets'), where('ownerUid', '==', user.uid));
+
+    const unsubProducts = onSnapshot(productsQuery, (snapshot) => {
+      setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+      setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'products');
+    });
+
+    const unsubPresets = onSnapshot(presetsQuery, (snapshot) => {
+      setPresets(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Preset)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'presets');
+    });
+
+    return () => {
+      unsubProducts();
+      unsubPresets();
+    };
+  }, []);
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser || !editingProduct?.name) return;
+
+    const data = {
+      name: editingProduct.name,
+      price: Number(editingProduct.price) || 0,
+      options: editingProduct.options || [],
+      ownerUid: auth.currentUser.uid,
+      updatedAt: serverTimestamp(),
+    };
+
+    try {
+      if (editingProduct.id) {
+        await updateDoc(doc(db, 'products', editingProduct.id), data);
+      } else {
+        await addDoc(collection(db, 'products'), data);
+      }
+      setEditingProduct(null);
+    } catch (err) {
+      handleFirestoreError(err, editingProduct.id ? OperationType.UPDATE : OperationType.CREATE, 'products');
+    }
+  };
+
+  const handleSavePreset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser || !editingPreset?.name) return;
+
+    const data = {
+      name: editingPreset.name,
+      values: editingPreset.values || [],
+      ownerUid: auth.currentUser.uid,
+      updatedAt: serverTimestamp(),
+    };
+
+    try {
+      if (editingPreset.id) {
+        await updateDoc(doc(db, 'presets', editingPreset.id), data);
+      } else {
+        await addDoc(collection(db, 'presets'), data);
+      }
+      setEditingPreset(null);
+    } catch (err) {
+      handleFirestoreError(err, editingPreset.id ? OperationType.UPDATE : OperationType.CREATE, 'presets');
+    }
+  };
+
+  const deleteItem = async (collectionName: string, id: string) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await deleteDoc(doc(db, collectionName, id));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, collectionName);
+    }
+  };
+
+  if (loading) return <div className="p-8 text-center">Loading settings...</div>;
+
+  return (
+    <div className="bg-white p-8 border border-linen-200 shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative">
+      <button 
+        onClick={onClose}
+        className="absolute top-6 right-6 text-linen-400 hover:text-linen-900 transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div className="mb-8 space-y-2">
+        <h2 className="text-2xl serif italic text-linen-900">Product Settings</h2>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-linen-400">Configure your studio offerings</p>
+      </div>
+
+      <div className="flex gap-8 border-b border-linen-100 mb-8">
+        <button 
+          onClick={() => setActiveTab('products')}
+          className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'products' ? 'text-linen-900 border-b-2 border-linen-900' : 'text-linen-400'}`}
+        >
+          Products
+        </button>
+        <button 
+          onClick={() => setActiveTab('presets')}
+          className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'presets' ? 'text-linen-900 border-b-2 border-linen-900' : 'text-linen-400'}`}
+        >
+          Option Presets
+        </button>
+      </div>
+
+      {activeTab === 'products' ? (
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Available Products</h3>
+            <button 
+              onClick={() => setEditingProduct({ name: '', price: 0, options: [] })}
+              className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
+            >
+              + Add Product
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {products.map(product => (
+              <div key={product.id} className="p-6 border border-linen-100 bg-linen-50/30 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-lg serif italic text-linen-900">{product.name}</h4>
+                    <p className="text-sm text-linen-500">MOP {product.price}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setEditingProduct(product)} className="text-linen-400 hover:text-linen-900">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onClick={() => deleteItem('products', product.id)} className="text-linen-400 hover:text-red-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </div>
+                {product.options?.length > 0 && (
+                  <div className="pt-4 border-t border-linen-100">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-linen-400 mb-2">Configured Options</p>
+                    <div className="flex flex-wrap gap-2">
+                      {product.options.map((opt, i) => (
+                        <span key={i} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded text-linen-600">
+                          {opt.name} ({opt.values.length})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Reusable Presets</h3>
+            <button 
+              onClick={() => setEditingPreset({ name: '', values: [] })}
+              className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
+            >
+              + Add Preset
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {presets.map(preset => (
+              <div key={preset.id} className="p-6 border border-linen-100 bg-linen-50/30 space-y-4">
+                <div className="flex justify-between items-start">
+                  <h4 className="text-lg serif italic text-linen-900">{preset.name}</h4>
+                  <div className="flex gap-2">
+                    <button onClick={() => setEditingPreset(preset)} className="text-linen-400 hover:text-linen-900">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onClick={() => deleteItem('presets', preset.id)} className="text-linen-400 hover:text-red-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {preset.values.map((v, i) => (
+                    <span key={i} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded text-linen-600">{v}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Product Edit Modal */}
+      <AnimatePresence>
+        {editingProduct && (
+          <div className="fixed inset-0 bg-linen-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-8 border border-linen-200 shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            >
+              <h3 className="text-xl serif italic text-linen-900 mb-6">{editingProduct.id ? 'Edit Product' : 'New Product'}</h3>
+              <form onSubmit={handleSaveProduct} className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Product Name</label>
+                    <input 
+                      required
+                      value={editingProduct.name}
+                      onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                      className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Base Price (MOP)</label>
+                    <input 
+                      required
+                      type="number"
+                      value={editingProduct.price}
+                      onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
+                      className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-linen-50 pb-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-800">Product Options</h4>
+                    <button 
+                      type="button"
+                      onClick={() => setEditingProduct({ 
+                        ...editingProduct, 
+                        options: [...(editingProduct.options || []), { name: '', values: [] }] 
+                      })}
+                      className="text-[9px] font-bold uppercase tracking-widest text-linen-600 hover:text-linen-900"
+                    >
+                      + Add Option
+                    </button>
+                  </div>
+
+                  {editingProduct.options?.map((opt, optIdx) => (
+                    <div key={optIdx} className="p-4 border border-linen-50 bg-linen-50/20 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <input 
+                          placeholder="Option Name (e.g. Color)"
+                          value={opt.name}
+                          onChange={e => {
+                            const newOpts = [...(editingProduct.options || [])];
+                            newOpts[optIdx].name = e.target.value;
+                            setEditingProduct({ ...editingProduct, options: newOpts });
+                          }}
+                          className="bg-transparent border-b border-linen-200 text-sm focus:outline-none focus:border-linen-900"
+                        />
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newOpts = editingProduct.options?.filter((_, i) => i !== optIdx);
+                            setEditingProduct({ ...editingProduct, options: newOpts });
+                          }}
+                          className="text-red-400 hover:text-red-600"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[9px] font-bold uppercase tracking-widest text-linen-400">Values</label>
+                          <select 
+                            className="text-[9px] font-bold uppercase tracking-widest bg-white border border-linen-200 px-2 py-1"
+                            onChange={e => {
+                              const preset = presets.find(p => p.id === e.target.value);
+                              if (preset) {
+                                const newOpts = [...(editingProduct.options || [])];
+                                newOpts[optIdx].values = [...new Set([...newOpts[optIdx].values, ...preset.values])];
+                                setEditingProduct({ ...editingProduct, options: newOpts });
+                              }
+                            }}
+                            value=""
+                          >
+                            <option value="">Populate from Preset...</option>
+                            {presets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                          </select>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {opt.values.map((v, vIdx) => (
+                            <span key={vIdx} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded flex items-center gap-2">
+                              {v}
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const newOpts = [...(editingProduct.options || [])];
+                                  newOpts[optIdx].values = newOpts[optIdx].values.filter((_, i) => i !== vIdx);
+                                  setEditingProduct({ ...editingProduct, options: newOpts });
+                                }}
+                                className="text-linen-300 hover:text-red-500"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                          <input 
+                            className="text-[10px] bg-transparent border-b border-linen-100 focus:outline-none focus:border-linen-900 w-24"
+                            placeholder="+ Add value"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const val = e.currentTarget.value.trim();
+                                if (val) {
+                                  const newOpts = [...(editingProduct.options || [])];
+                                  newOpts[optIdx].values = [...newOpts[optIdx].values, val];
+                                  setEditingProduct({ ...editingProduct, options: newOpts });
+                                  e.currentTarget.value = '';
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setEditingProduct(null)}
+                    className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800"
+                  >
+                    Save Product
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Preset Edit Modal */}
+      <AnimatePresence>
+        {editingPreset && (
+          <div className="fixed inset-0 bg-linen-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-8 border border-linen-200 shadow-2xl max-w-md w-full"
+            >
+              <h3 className="text-xl serif italic text-linen-900 mb-6">{editingPreset.id ? 'Edit Preset' : 'New Preset'}</h3>
+              <form onSubmit={handleSavePreset} className="space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Preset Name</label>
+                  <input 
+                    required
+                    value={editingPreset.name}
+                    onChange={e => setEditingPreset({ ...editingPreset, name: e.target.value })}
+                    className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                    placeholder="e.g. Hand & Foot Colors"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Values</label>
+                  <div className="flex flex-wrap gap-2 p-4 border border-linen-50 bg-linen-50/20 min-h-[100px]">
+                    {editingPreset.values?.map((v, i) => (
+                      <span key={i} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded flex items-center gap-2">
+                        {v}
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newVals = editingPreset.values?.filter((_, idx) => idx !== i);
+                            setEditingPreset({ ...editingPreset, values: newVals });
+                          }}
+                          className="text-linen-300 hover:text-red-500"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    <input 
+                      className="text-[10px] bg-transparent border-b border-linen-100 focus:outline-none focus:border-linen-900 w-full mt-2"
+                      placeholder="Type and press Enter to add value"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const val = e.currentTarget.value.trim();
+                          if (val) {
+                            setEditingPreset({ ...editingPreset, values: [...(editingPreset.values || []), val] });
+                            e.currentTarget.value = '';
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setEditingPreset(null)}
+                    className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800"
+                  >
+                    Save Preset
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default ProductSettings;
