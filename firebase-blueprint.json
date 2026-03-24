@@ -54,6 +54,19 @@
         "ownerUid": { "type": "string", "description": "UID of the owner who created this preset" }
       },
       "required": ["name", "values", "ownerUid"]
+    },
+    "discounts": {
+      "title": "Discount",
+      "description": "A coupon or discount that can be applied to products.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "Coupon code" },
+        "type": { "type": "string", "enum": ["percentage", "fixed"], "description": "Type of discount" },
+        "value": { "type": "number", "description": "Value of the discount (percentage or amount)" },
+        "applicableProductIds": { "type": "array", "items": { "type": "string" }, "description": "List of product IDs this discount applies to" },
+        "ownerUid": { "type": "string", "description": "UID of the owner who created this discount" }
+      },
+      "required": ["code", "type", "value", "applicableProductIds", "ownerUid"]
     }
   },
   "firestore": {
@@ -68,6 +81,10 @@
     "/presets/{presetId}": {
       "schema": "presets",
       "description": "Collection of reusable option presets."
+    },
+    "/discounts/{discountId}": {
+      "schema": "discounts",
+      "description": "Collection of available discounts and coupons."
     }
   }
 }
