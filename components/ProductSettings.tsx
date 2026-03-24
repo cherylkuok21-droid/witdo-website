@@ -392,6 +392,8 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               const preset = presets.find(p => p.id === e.target.value);
                               if (preset) {
                                 const newOpts = [...(editingProduct.options || [])];
+                                // Auto-populate name from preset
+                                newOpts[optIdx].name = preset.name;
                                 newOpts[optIdx].values = [...new Set([...newOpts[optIdx].values, ...preset.values])];
                                 setEditingProduct({ ...editingProduct, options: newOpts });
                               }
