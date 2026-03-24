@@ -191,28 +191,41 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
           <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-linen-800 border-b border-linen-50 pb-2">訂單詳情 (Order Details)</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">款式 (Style)</label>
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">款式 (Style)</label>
+                {formData.unitPrice && (
+                  <motion.span 
+                    key={formData.unitPrice}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-[10px] font-bold text-linen-900 bg-linen-100 px-2 py-0.5 rounded tracking-widest"
+                  >
+                    MOP {formData.unitPrice}
+                  </motion.span>
+                )}
+              </div>
               <select 
                 name="style"
-                value={formData.style}
+                value={STYLE_OPTIONS.some(opt => opt.label === formData.style) ? formData.style : formData.style ? 'custom' : ''}
                 onChange={handleChange}
                 className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
               >
                 <option value="">Select a style...</option>
                 {STYLE_OPTIONS.map((opt) => (
                   <option key={opt.label} value={opt.label}>
-                    {opt.label} - MOP {opt.price === 0 ? 'FREE' : opt.price}
+                    {opt.label}
                   </option>
                 ))}
                 <option value="custom">Custom Style...</option>
               </select>
             </div>
-            {formData.style === 'custom' && (
+            {(formData.style === 'custom' || !STYLE_OPTIONS.some(opt => opt.label === formData.style && formData.style !== '')) && formData.style !== '' && !STYLE_OPTIONS.some(opt => opt.label === formData.style) && (
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">自定義款式 (Custom Style)</label>
                 <input 
-                  name="customStyle"
-                  onChange={(e) => setFormData(prev => ({ ...prev, style: e.target.value }))}
+                  name="style"
+                  value={formData.style === 'custom' ? '' : formData.style}
+                  onChange={handleChange}
                   className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
                   placeholder="Enter custom style name"
                 />
