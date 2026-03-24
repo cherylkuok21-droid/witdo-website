@@ -6,24 +6,68 @@
       "type": "object",
       "properties": {
         "customerName": { "type": "string", "description": "Name of the customer" },
-        "contactInfo": { "type": "string", "description": "Contact information of the customer" },
-        "babyName": { "type": "string", "description": "Name of the baby" },
-        "babyAge": { "type": "string", "description": "Age of the baby" },
-        "castingType": { "type": "string", "enum": ["hands", "feet", "both"], "description": "Type of casting" },
-        "frameChoice": { "type": "string", "description": "Choice of frame or display" },
-        "materialChoice": { "type": "string", "description": "Choice of material or color" },
+        "wechatId": { "type": "string", "description": "WeChat ID of the customer" },
+        "estimatedCompletionDate": { "type": "string", "description": "Estimated completion date" },
+        "style": { "type": "string", "description": "Style of the casting" },
+        "nameplateFont": { "type": "string", "description": "Font for the nameplate" },
+        "nameplateContent": { "type": "string", "description": "Content for the nameplate" },
+        "orderDescription": { "type": "string", "description": "Description of the order" },
+        "options": { "type": "string", "description": "Additional options selected" },
+        "unitPrice": { "type": "number", "description": "Unit price of the style" },
+        "totalPrice": { "type": "number", "description": "Total price of the order" },
         "orderDate": { "type": "string", "format": "date-time", "description": "Date of the order" },
         "status": { "type": "string", "enum": ["pending", "in-progress", "completed", "delivered"], "description": "Status of the order" },
-        "notes": { "type": "string", "description": "Additional notes" },
+        "signatureData": { "type": "string", "description": "Base64 signature image" },
+        "signatureTime": { "type": "string", "description": "Time the signature was captured" },
         "ownerUid": { "type": "string", "description": "UID of the owner who created this order" }
       },
-      "required": ["customerName", "contactInfo", "babyName", "castingType", "orderDate", "status", "ownerUid"]
+      "required": ["customerName", "wechatId", "style", "totalPrice", "status", "ownerUid"]
+    },
+    "products": {
+      "title": "Product",
+      "description": "A product or style available for work orders.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the product" },
+        "price": { "type": "number", "description": "Base price of the product" },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Name of the option (e.g., Color)" },
+              "values": { "type": "array", "items": { "type": "string" }, "description": "Possible values for this option" }
+            }
+          }
+        },
+        "ownerUid": { "type": "string", "description": "UID of the owner who created this product" }
+      },
+      "required": ["name", "price", "ownerUid"]
+    },
+    "presets": {
+      "title": "Preset",
+      "description": "A reusable list of options (e.g., colors, fonts).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the preset" },
+        "values": { "type": "array", "items": { "type": "string" }, "description": "List of values in the preset" },
+        "ownerUid": { "type": "string", "description": "UID of the owner who created this preset" }
+      },
+      "required": ["name", "values", "ownerUid"]
     }
   },
   "firestore": {
     "/workOrders/{orderId}": {
       "schema": "workOrders",
       "description": "Collection of baby hand and foot casting work orders."
+    },
+    "/products/{productId}": {
+      "schema": "products",
+      "description": "Collection of products available for selection."
+    },
+    "/presets/{presetId}": {
+      "schema": "presets",
+      "description": "Collection of reusable option presets."
     }
   }
 }
