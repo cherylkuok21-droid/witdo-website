@@ -10,15 +10,34 @@ service cloud.firestore {
     // Document ID: auto-generated
     // Fields:
     //   - customerName: string (required)
-    //   - contactInfo: string (required)
-    //   - babyName: string (required)
-    //   - babyAge: string (optional)
-    //   - castingType: string (required, enum: ['hands', 'feet', 'both'])
-    //   - frameChoice: string (optional)
-    //   - materialChoice: string (optional)
+    //   - wechatId: string (required)
+    //   - estimatedCompletionDate: string (optional)
+    //   - style: string (required)
+    //   - nameplateFont: string (optional)
+    //   - nameplateContent: string (optional)
+    //   - orderDescription: string (optional)
+    //   - options: string (optional)
+    //   - unitPrice: number (optional)
+    //   - totalPrice: number (required)
     //   - orderDate: timestamp (required)
     //   - status: string (required, enum: ['pending', 'in-progress', 'completed', 'delivered'])
-    //   - notes: string (optional)
+    //   - signatureData: string (optional)
+    //   - signatureTime: string (optional)
+    //   - ownerUid: string (required)
+    //
+    // Collection: products
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - price: number (required)
+    //   - options: list (optional)
+    //   - ownerUid: string (required)
+    //
+    // Collection: presets
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - values: list (required)
     //   - ownerUid: string (required)
     //
     // ===============================================================
@@ -32,7 +51,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (request.auth.token.email == "mo.witdo@gmail.com" && request.auth.token.email_verified == true);
+        (request.auth.token.email == "mo.witdo@gmail.com"); 
     }
 
     function isOwner(userId) {
@@ -41,18 +60,44 @@ service cloud.firestore {
 
     function isValidWorkOrder(data) {
       return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
-             data.contactInfo is string && data.contactInfo.size() > 0 && data.contactInfo.size() < 200 &&
-             data.babyName is string && data.babyName.size() > 0 && data.babyName.size() < 100 &&
-             data.castingType in ['hands', 'feet', 'both'] &&
+             data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() < 100 &&
+             data.style is string && data.style.size() > 0 && data.style.size() < 200 &&
+             data.totalPrice is number && data.totalPrice >= 0 &&
              data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
-             data.orderDate is timestamp &&
+             (data.orderDate is timestamp || data.orderDate == null) &&
+             data.ownerUid is string && data.ownerUid == request.auth.uid;
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.price is number && data.price >= 0 &&
+             data.ownerUid is string && data.ownerUid == request.auth.uid;
+    }
+
+    function isValidPreset(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.values is list && data.values.size() >= 0 &&
              data.ownerUid is string && data.ownerUid == request.auth.uid;
     }
 
     match /workOrders/{orderId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
       allow create: if isAdmin() && isValidWorkOrder(request.resource.data);
       allow update: if isAdmin() && isValidWorkOrder(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
+      allow create: if isAdmin() && isValidProduct(request.resource.data);
+      allow update: if isAdmin() && isValidProduct(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /presets/{presetId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
+      allow create: if isAdmin() && isValidPreset(request.resource.data);
+      allow update: if isAdmin() && isValidPreset(request.resource.data);
       allow delete: if isAdmin();
     }
   }
