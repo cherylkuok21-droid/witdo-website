@@ -2,6 +2,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDocFromCache, getDocFromServer } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+
 // Firebase configuration inlined to resolve Vercel build issues
 const firebaseConfig = {
   "projectId": "ai-studio-applet-webapp-91cfd",
@@ -17,6 +19,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 
 // Test connection to Firestore
 async function testConnection() {
