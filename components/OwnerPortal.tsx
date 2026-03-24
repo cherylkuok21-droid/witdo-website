@@ -3,8 +3,41 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, db } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { collection, query, orderBy, onSnapshot, where, Timestamp, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where, Timestamp, deleteDoc, doc, getDocs } from 'firebase/firestore';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: any;
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 import WorkOrderForm from './WorkOrderForm';
+import ProductSettings from './ProductSettings';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
@@ -15,6 +48,7 @@ const OwnerPortal: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingOrder, setEditingOrder] = useState<any | null>(null);
   const [workOrders, setWorkOrders] = useState<any[]>([]);
+  const [showSettings, setShowSettings] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [printingOrder, setPrintingOrder] = useState<any | null>(null);
@@ -53,7 +87,7 @@ const OwnerPortal: React.FC = () => {
         }));
         setWorkOrders(orders);
       }, (err) => {
-        console.error('Error fetching work orders:', err);
+        handleFirestoreError(err, OperationType.LIST, 'workOrders');
       });
 
       return () => unsubscribe();
@@ -87,8 +121,7 @@ const OwnerPortal: React.FC = () => {
       await deleteDoc(doc(db, 'workOrders', id));
       setDeletingId(null);
     } catch (err) {
-      console.error('Error deleting order:', err);
-      setError('Failed to delete order.');
+      handleFirestoreError(err, OperationType.DELETE, 'workOrders');
     }
   };
 
@@ -290,6 +323,12 @@ const OwnerPortal: React.FC = () => {
             >
               + Create New Work Order
             </button>
+            <button 
+              onClick={() => setShowSettings(true)}
+              className="text-left text-sm serif italic text-linen-600 hover:text-linen-900"
+            >
+              ⚙ Product & Option Settings
+            </button>
             <a href="https://www.instagram.com/witdo.macau/" target="_blank" className="text-sm serif italic text-linen-600 hover:text-linen-900">Check Instagram DMs</a>
           </div>
         </div>
@@ -326,6 +365,14 @@ const OwnerPortal: React.FC = () => {
           <p className="text-[9px] text-linen-400 uppercase tracking-widest">Last Sync: Just now</p>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showSettings && (
+          <div className="fixed inset-0 bg-linen-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <ProductSettings onClose={() => setShowSettings(false)} />
+          </div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showForm && (
