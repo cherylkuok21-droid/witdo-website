@@ -1,9 +1,53 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
-import { motion } from 'framer-motion';
+import { collection, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: any;
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+import { motion, AnimatePresence } from 'framer-motion';
 import SignatureCanvas from 'react-signature-canvas';
+
+interface ProductOption {
+  name: string;
+  values: string[];
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  options: ProductOption[];
+}
 
 interface WorkOrderFormProps {
   onSuccess: () => void;
@@ -11,25 +55,38 @@ interface WorkOrderFormProps {
   initialData?: any;
 }
 
-const STYLE_OPTIONS = [
-  { label: '1手1腳 (玻璃罩款)', price: 999 },
-  { label: '1手 / 1 腳', price: 1099 },
-  { label: '1手1腳', price: 1299 },
-  { label: '2BB 各1手1腳 + 父母手', price: 2999 },
-  { label: '1手1腳 (>1 歲)', price: 1499 },
-  { label: '2手2腳', price: 1899 },
-  { label: '兄弟姐妹(各1手1腳)', price: 2799 },
-  { label: '兄弟姐妹(各1腳)', price: 1499 },
-  { label: '合併框費 / 換新框費', price: 250 },
-  { label: '上門費', price: 500 },
-  { label: '自帶作品 - 維修加工 包換框盒, 新名牌及沖印照片', price: 750 },
-  { label: '送貨上門費', price: 50 },
-  { label: '送貨上門費 成品送到府上 / 管理處', price: 0 },
-];
-
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const sigPad = useRef<SignatureCanvas>(null);
-  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!auth.currentUser) return;
+      const q = query(collection(db, 'products'), where('ownerUid', '==', auth.currentUser.uid));
+      const snapshot = await getDocs(q);
+      const fetchedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(fetchedProducts);
+
+      // If editing, try to find the selected product
+      if (initialData?.style) {
+        const found = fetchedProducts.find(p => p.name === initialData.style);
+        if (found) {
+          setSelectedProduct(found);
+          // Parse options if they are stored in a specific format
+          try {
+            const parsedOptions = JSON.parse(initialData.options);
+            setSelectedOptions(parsedOptions);
+          } catch (e) {
+            // Fallback for legacy text options
+          }
+        }
+      }
+    };
+    fetchProducts();
+  }, [initialData]);
+
   const generateOrderId = () => {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
@@ -67,19 +124,37 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     const { name, value } = e.target;
     
     if (name === 'style') {
-      const selectedOption = STYLE_OPTIONS.find(opt => opt.label === value);
-      if (selectedOption) {
+      const product = products.find(p => p.name === value);
+      if (product) {
+        setSelectedProduct(product);
+        setSelectedOptions({}); // Reset options when product changes
         setFormData(prev => ({ 
           ...prev, 
           style: value,
-          unitPrice: selectedOption.price.toString(),
-          totalPrice: selectedOption.price.toString()
+          unitPrice: product.price.toString(),
+          totalPrice: product.price.toString(),
+          options: '' // Reset options string
         }));
         return;
+      } else if (value === 'custom') {
+        setSelectedProduct(null);
+        setSelectedOptions({});
       }
     }
     
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleOptionChange = (optionName: string, value: string) => {
+    const newOptions = { ...selectedOptions, [optionName]: value };
+    setSelectedOptions(newOptions);
+    
+    // Update the options string for storage
+    const optionsString = Object.entries(newOptions)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ');
+    
+    setFormData(prev => ({ ...prev, options: optionsString }));
   };
 
   const clearSignature = () => {
@@ -125,8 +200,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       }
       onSuccess();
     } catch (err: any) {
-      console.error('Error saving work order:', err);
-      setError('Failed to save work order. Check permissions.');
+      handleFirestoreError(err, initialData?.id ? OperationType.UPDATE : OperationType.CREATE, 'workOrders');
     } finally {
       setLoading(false);
     }
@@ -206,20 +280,20 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
               </div>
               <select 
                 name="style"
-                value={STYLE_OPTIONS.some(opt => opt.label === formData.style) ? formData.style : formData.style ? 'custom' : ''}
+                value={products.some(p => p.name === formData.style) ? formData.style : formData.style ? 'custom' : ''}
                 onChange={handleChange}
                 className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
               >
-                <option value="">Select a style...</option>
-                {STYLE_OPTIONS.map((opt) => (
-                  <option key={opt.label} value={opt.label}>
-                    {opt.label}
+                <option value="">Select a product...</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name}
                   </option>
                 ))}
-                <option value="custom">Custom Style...</option>
+                <option value="custom">Custom Product...</option>
               </select>
             </div>
-            {(formData.style === 'custom' || !STYLE_OPTIONS.some(opt => opt.label === formData.style && formData.style !== '')) && formData.style !== '' && !STYLE_OPTIONS.some(opt => opt.label === formData.style) && (
+            {(formData.style === 'custom' || (formData.style && !products.some(p => p.name === formData.style))) && (
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">自定義款式 (Custom Style)</label>
                 <input 
@@ -231,6 +305,28 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
                 />
               </div>
             )}
+            
+            {/* Dynamic Options */}
+            {selectedProduct && selectedProduct.options?.length > 0 && (
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-linen-50/50 border border-linen-50">
+                {selectedProduct.options.map((opt, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">{opt.name}</label>
+                    <select
+                      value={selectedOptions[opt.name] || ''}
+                      onChange={(e) => handleOptionChange(opt.name, e.target.value)}
+                      className="w-full bg-white border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900"
+                    >
+                      <option value="">Select {opt.name}...</option>
+                      {opt.values.map((val, vIdx) => (
+                        <option key={vIdx} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font)</label>
               <input 
