@@ -1,44 +1,29 @@
 {
   "entities": {
-    "WorkOrder": {
+    "workOrders": {
       "title": "Work Order",
-      "description": "A work order for a custom casting project",
+      "description": "A baby hand and foot casting work order.",
       "type": "object",
       "properties": {
-        "workOrderId": { "type": "string", "description": "Unique ID for the order" },
-        "clientName": { "type": "string", "description": "Customer name (姓名)" },
-        "wechatId": { "type": "string", "description": "WeChat ID (微信號)" },
-        "creationDate": { "type": "string", "format": "date-time", "description": "Date the order was created" },
-        "expectedCompletionDate": { "type": "string", "format": "date-time", "description": "Estimated completion date (預計成品完成日)" },
-        "style": { "type": "string", "description": "Selected style (款式)" },
-        "font": { "type": "string", "description": "Selected font (名牌字型)" },
-        "fontContent": { "type": "string", "description": "Content for the nameplate (名牌內容)" },
-        "orderItems": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "description": { "type": "string" },
-              "options": { "type": "string" },
-              "unitPrice": { "type": "number" },
-              "totalPrice": { "type": "number" }
-            }
-          }
-        },
-        "totalAmount": { "type": "number", "description": "Total price of the order" },
-        "notes": { "type": "string", "description": "Notes (備註)" },
-        "terms": { "type": "string", "description": "Terms and conditions (條款及細則)" },
-        "signature": { "type": "string", "description": "Base64 signature image" },
-        "signatureDate": { "type": "string", "format": "date-time", "description": "Date and time of signature" },
-        "status": { "type": "string", "enum": ["pending", "completed", "delivered"], "description": "Current status of the order" }
+        "customerName": { "type": "string", "description": "Name of the customer" },
+        "contactInfo": { "type": "string", "description": "Contact information of the customer" },
+        "babyName": { "type": "string", "description": "Name of the baby" },
+        "babyAge": { "type": "string", "description": "Age of the baby" },
+        "castingType": { "type": "string", "enum": ["hands", "feet", "both"], "description": "Type of casting" },
+        "frameChoice": { "type": "string", "description": "Choice of frame or display" },
+        "materialChoice": { "type": "string", "description": "Choice of material or color" },
+        "orderDate": { "type": "string", "format": "date-time", "description": "Date of the order" },
+        "status": { "type": "string", "enum": ["pending", "in-progress", "completed", "delivered"], "description": "Status of the order" },
+        "notes": { "type": "string", "description": "Additional notes" },
+        "ownerUid": { "type": "string", "description": "UID of the owner who created this order" }
       },
-      "required": ["workOrderId", "clientName", "wechatId", "creationDate", "expectedCompletionDate", "totalAmount"]
+      "required": ["customerName", "contactInfo", "babyName", "castingType", "orderDate", "status", "ownerUid"]
     }
   },
   "firestore": {
     "/workOrders/{orderId}": {
-      "schema": "WorkOrder",
-      "description": "Collection of work orders"
+      "schema": "workOrders",
+      "description": "Collection of baby hand and foot casting work orders."
     }
   }
 }
