@@ -49,6 +49,12 @@ interface Product {
   options: ProductOption[];
 }
 
+interface NameTagFont {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
 interface WorkOrderFormProps {
   onSuccess: () => void;
   onCancel: () => void;
@@ -58,16 +64,24 @@ interface WorkOrderFormProps {
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const sigPad = useRef<SignatureCanvas>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [nameTagFonts, setNameTagFonts] = useState<NameTagFont[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       if (!auth.currentUser) return;
-      const q = query(collection(db, 'products'), where('ownerUid', '==', auth.currentUser.uid));
-      const snapshot = await getDocs(q);
-      const fetchedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      
+      // Fetch Products
+      const productsQuery = query(collection(db, 'products'), where('ownerUid', '==', auth.currentUser.uid));
+      const productsSnapshot = await getDocs(productsQuery);
+      const fetchedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
       setProducts(fetchedProducts);
+
+      // Fetch Name Tag Fonts
+      const fontsQuery = query(collection(db, 'nameTagFonts'), where('ownerUid', '==', auth.currentUser.uid));
+      const fontsSnapshot = await getDocs(fontsQuery);
+      setNameTagFonts(fontsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NameTagFont)));
 
       // If editing, try to find the selected product
       if (initialData?.style) {
@@ -84,7 +98,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
         }
       }
     };
-    fetchProducts();
+    fetchData();
   }, [initialData]);
 
   const generateOrderId = () => {
@@ -291,12 +305,36 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
             <div className="md:col-span-4 space-y-1">
               <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font)</label>
-              <input 
-                name="nameplateFont"
-                value={formData.nameplateFont}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
+              <div className="grid grid-cols-4 gap-1 max-h-24 overflow-y-auto border border-linen-100 p-1 bg-linen-50/30">
+                {nameTagFonts.map(font => (
+                  <button
+                    key={font.id}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, nameplateFont: font.name }))}
+                    className={`aspect-square border flex flex-col items-center justify-center p-1 transition-all ${formData.nameplateFont === font.name ? 'border-linen-900 bg-linen-100' : 'border-linen-100 bg-white hover:border-linen-400'}`}
+                    title={font.name}
+                  >
+                    <img 
+                      src={font.imageUrl} 
+                      alt={font.name} 
+                      className="w-full h-full object-contain"
+                      referrerPolicy="no-referrer"
+                    />
+                  </button>
+                ))}
+                {nameTagFonts.length === 0 && (
+                  <input 
+                    name="nameplateFont"
+                    placeholder="Type font name..."
+                    value={formData.nameplateFont}
+                    onChange={handleChange}
+                    className="col-span-4 w-full bg-transparent px-2 py-1 text-xs focus:outline-none"
+                  />
+                )}
+              </div>
+              {formData.nameplateFont && (
+                <p className="text-[8px] font-bold text-linen-900 uppercase tracking-widest mt-1">Selected: {formData.nameplateFont}</p>
+              )}
             </div>
 
             <div className="md:col-span-4 space-y-1">
