@@ -111,8 +111,14 @@ const Footer: React.FC<FooterProps> = ({ lang }) => {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-linen-200 flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-800 font-bold">
+      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-linen-200 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] uppercase tracking-[0.5em] text-linen-800 font-bold">
         <div>{labels[lang].rights}</div>
+        <Link 
+          to="/witdo-studio-management" 
+          className="opacity-30 hover:opacity-100 transition-opacity text-[8px] tracking-[0.2em]"
+        >
+          {lang === 'en' ? 'Management' : '管理後台'}
+        </Link>
       </div>
 
       {/* Toast Notification */}
