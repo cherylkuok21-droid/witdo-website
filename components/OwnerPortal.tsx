@@ -57,10 +57,18 @@ const OwnerPortal: React.FC = () => {
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
+      setError(null);
       await signInWithPopup(auth, provider);
     } catch (err: any) {
       console.error('Login error:', err);
-      setError('Failed to login. Please try again.');
+      // Provide more descriptive error messages
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain not authorized. Please add this URL to Firebase Console > Auth > Settings > Authorized Domains.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setError('Popup blocked by browser. Please allow popups for this site.');
+      } else {
+        setError(`Login failed: ${err.message || 'Please try again.'}`);
+      }
     }
   };
 
