@@ -99,12 +99,13 @@ const OwnerPortal: React.FC = () => {
     doc.setTextColor(100);
     doc.text(`Exported on: ${new Date().toLocaleString()}`, 14, 30);
 
-    const tableColumn = ["Date", "Customer", "Baby", "Type", "Status"];
+    const tableColumn = ["ID", "Date", "Customer", "WeChat", "Style", "Status"];
     const tableRows = workOrders.map(order => [
+      order.workOrderId || 'N/A',
       order.orderDate?.toDate ? order.orderDate.toDate().toLocaleDateString() : 'N/A',
       order.customerName,
-      order.babyName,
-      order.castingType,
+      order.wechatId || 'N/A',
+      order.style || 'N/A',
       order.status
     ]);
 
@@ -296,10 +297,11 @@ const OwnerPortal: React.FC = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-linen-100">
+                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Order ID</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Date</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Customer</th>
-                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Baby</th>
-                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Type</th>
+                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">WeChat</th>
+                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Style</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Status</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400 text-right">Actions</th>
               </tr>
@@ -312,12 +314,13 @@ const OwnerPortal: React.FC = () => {
               ) : (
                 workOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-linen-50/50 transition-colors group">
+                    <td className="py-4 text-[10px] font-mono text-linen-500">{order.workOrderId}</td>
                     <td className="py-4 text-[10px] text-linen-600">
                       {order.orderDate?.toDate ? order.orderDate.toDate().toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="py-4 text-sm serif italic text-linen-900">{order.customerName}</td>
-                    <td className="py-4 text-sm text-linen-600">{order.babyName}</td>
-                    <td className="py-4 text-[10px] uppercase tracking-widest text-linen-500">{order.castingType}</td>
+                    <td className="py-4 text-sm text-linen-600">{order.wechatId}</td>
+                    <td className="py-4 text-sm text-linen-600">{order.style}</td>
                     <td className="py-4">
                       <span className={`px-3 py-1 text-[9px] uppercase tracking-widest rounded-full ${
                         order.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
