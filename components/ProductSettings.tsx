@@ -54,16 +54,26 @@ interface Product {
   options: ProductOption[];
 }
 
+interface Discount {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  applicableProductIds: string[];
+}
+
 const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'products' | 'presets'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'presets' | 'discounts'>('products');
   const [error, setError] = useState<string | null>(null);
   
   // Form states
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [editingPreset, setEditingPreset] = useState<Partial<Preset> | null>(null);
+  const [editingDiscount, setEditingDiscount] = useState<Partial<Discount> | null>(null);
   const [presetInputValue, setPresetInputValue] = useState('');
 
   const addPresetValue = () => {
@@ -87,6 +97,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
     const productsQuery = query(collection(db, 'products'), where('ownerUid', '==', user.uid));
     const presetsQuery = query(collection(db, 'presets'), where('ownerUid', '==', user.uid));
+    const discountsQuery = query(collection(db, 'discounts'), where('ownerUid', '==', user.uid));
 
     const unsubProducts = onSnapshot(productsQuery, (snapshot) => {
       setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
@@ -101,9 +112,16 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       handleFirestoreError(error, OperationType.LIST, 'presets');
     });
 
+    const unsubDiscounts = onSnapshot(discountsQuery, (snapshot) => {
+      setDiscounts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Discount)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'discounts');
+    });
+
     return () => {
       unsubProducts();
       unsubPresets();
+      unsubDiscounts();
     };
   }, []);
 
@@ -167,6 +185,33 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
+  const handleSaveDiscount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser || !editingDiscount?.code || !editingDiscount?.type || editingDiscount?.value === undefined) return;
+
+    const data = {
+      code: editingDiscount.code.toUpperCase(),
+      type: editingDiscount.type,
+      value: Number(editingDiscount.value),
+      applicableProductIds: editingDiscount.applicableProductIds || [],
+      ownerUid: auth.currentUser.uid,
+      updatedAt: serverTimestamp(),
+    };
+
+    try {
+      setError(null);
+      if (editingDiscount.id) {
+        await updateDoc(doc(db, 'discounts', editingDiscount.id), data);
+      } else {
+        await addDoc(collection(db, 'discounts'), data);
+      }
+      setEditingDiscount(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save discount');
+      handleFirestoreError(err, editingDiscount.id ? OperationType.UPDATE : OperationType.CREATE, 'discounts');
+    }
+  };
+
   const deleteItem = async (collectionName: string, id: string) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
@@ -206,6 +251,12 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'presets' ? 'text-linen-900 border-b-2 border-linen-900' : 'text-linen-400'}`}
         >
           Option Presets
+        </button>
+        <button 
+          onClick={() => setActiveTab('discounts')}
+          className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'discounts' ? 'text-linen-900 border-b-2 border-linen-900' : 'text-linen-400'}`}
+        >
+          Discounts
         </button>
       </div>
 
@@ -260,7 +311,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             ))}
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'presets' ? (
         <div className="space-y-8">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Reusable Presets</h3>
@@ -298,6 +349,64 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   {preset.values.map((v, i) => (
                     <span key={i} className="text-[10px] bg-white border border-linen-100 px-2 py-1 rounded text-linen-600">{v}</span>
                   ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Active Discounts</h3>
+            <button 
+              onClick={() => {
+                setEditingDiscount({ code: '', type: 'percentage', value: 0, applicableProductIds: products.map(p => p.id) });
+                setError(null);
+              }}
+              className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
+            >
+              + Add Discount
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {discounts.map(discount => (
+              <div key={discount.id} className="p-6 border border-linen-100 bg-linen-50/30 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-lg serif italic text-linen-900">{discount.code}</h4>
+                    <p className="text-[10px] uppercase tracking-widest text-linen-500">
+                      {discount.type === 'percentage' ? `${discount.value}% OFF` : `MOP ${discount.value} OFF`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => {
+                      setEditingDiscount(discount);
+                      setError(null);
+                    }} className="text-linen-400 hover:text-linen-900">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onClick={() => deleteItem('discounts', discount.id)} className="text-linen-400 hover:text-red-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-linen-100">
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-linen-400 mb-2">Applies to:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {discount.applicableProductIds.length === products.length ? (
+                      <span className="text-[9px] bg-linen-100 text-linen-700 px-2 py-0.5 rounded">All Products</span>
+                    ) : (
+                      discount.applicableProductIds.map(pid => {
+                        const p = products.find(prod => prod.id === pid);
+                        return p ? (
+                          <span key={pid} className="text-[9px] bg-linen-50 text-linen-600 px-2 py-0.5 rounded border border-linen-100">
+                            {p.name}
+                          </span>
+                        ) : null;
+                      })
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -555,6 +664,119 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800"
                   >
                     Save Preset
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Discount Edit Modal */}
+      <AnimatePresence>
+        {editingDiscount && (
+          <div className="fixed inset-0 bg-linen-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-8 border border-linen-200 shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            >
+              <h3 className="text-xl serif italic text-linen-900 mb-6">{editingDiscount.id ? 'Edit Discount' : 'New Discount'}</h3>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] uppercase tracking-widest animate-pulse">
+                  {error}
+                </div>
+              )}
+              <form onSubmit={handleSaveDiscount} className="space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Coupon Code</label>
+                  <input 
+                    required
+                    className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 uppercase"
+                    placeholder="e.g. WELCOME10"
+                    value={editingDiscount.code}
+                    onChange={e => setEditingDiscount({ ...editingDiscount, code: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Type</label>
+                    <select 
+                      className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                      value={editingDiscount.type}
+                      onChange={e => setEditingDiscount({ ...editingDiscount, type: e.target.value as 'percentage' | 'fixed' })}
+                    >
+                      <option value="percentage">Percentage (%)</option>
+                      <option value="fixed">Fixed Amount (MOP)</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Value</label>
+                    <input 
+                      type="number"
+                      required
+                      className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                      value={editingDiscount.value}
+                      onChange={e => setEditingDiscount({ ...editingDiscount, value: Number(e.target.value) })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Apply Discount to</label>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const allIds = products.map(p => p.id);
+                        const currentIds = editingDiscount.applicableProductIds || [];
+                        if (currentIds.length === allIds.length) {
+                          setEditingDiscount({ ...editingDiscount, applicableProductIds: [] });
+                        } else {
+                          setEditingDiscount({ ...editingDiscount, applicableProductIds: allIds });
+                        }
+                      }}
+                      className="text-[9px] font-bold uppercase tracking-widest text-linen-400 hover:text-linen-900"
+                    >
+                      {editingDiscount.applicableProductIds?.length === products.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto border border-linen-100 bg-linen-50/20 p-4 space-y-2">
+                    {products.map(product => (
+                      <label key={product.id} className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                          type="checkbox"
+                          className="w-4 h-4 border-linen-200 text-linen-900 focus:ring-linen-900"
+                          checked={editingDiscount.applicableProductIds?.includes(product.id)}
+                          onChange={e => {
+                            const currentIds = editingDiscount.applicableProductIds || [];
+                            if (e.target.checked) {
+                              setEditingDiscount({ ...editingDiscount, applicableProductIds: [...currentIds, product.id] });
+                            } else {
+                              setEditingDiscount({ ...editingDiscount, applicableProductIds: currentIds.filter(id => id !== product.id) });
+                            }
+                          }}
+                        />
+                        <span className="text-xs text-linen-700 group-hover:text-linen-900 transition-colors">{product.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setEditingDiscount(null)}
+                    className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800"
+                  >
+                    Save Discount
                   </button>
                 </div>
               </form>
