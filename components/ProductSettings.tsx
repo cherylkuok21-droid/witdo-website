@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { db, auth } from '../firebase';
+import { db, auth, storage } from '../firebase';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 enum OperationType {
   CREATE = 'create',
@@ -62,19 +63,29 @@ interface Discount {
   applicableProductIds: string[];
 }
 
+interface NameTagFont {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
 const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [nameTagFonts, setNameTagFonts] = useState<NameTagFont[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'products' | 'presets' | 'discounts'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'presets' | 'discounts' | 'nametags'>('products');
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   // Form states
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [editingPreset, setEditingPreset] = useState<Partial<Preset> | null>(null);
   const [editingDiscount, setEditingDiscount] = useState<Partial<Discount> | null>(null);
+  const [editingNameTagFont, setEditingNameTagFont] = useState<Partial<NameTagFont> | null>(null);
   const [presetInputValue, setPresetInputValue] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addPresetValue = () => {
     const val = presetInputValue.trim();
@@ -98,6 +109,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const productsQuery = query(collection(db, 'products'), where('ownerUid', '==', user.uid));
     const presetsQuery = query(collection(db, 'presets'), where('ownerUid', '==', user.uid));
     const discountsQuery = query(collection(db, 'discounts'), where('ownerUid', '==', user.uid));
+    const nameTagFontsQuery = query(collection(db, 'nameTagFonts'), where('ownerUid', '==', user.uid));
 
     const unsubProducts = onSnapshot(productsQuery, (snapshot) => {
       setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
@@ -118,10 +130,17 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       handleFirestoreError(error, OperationType.LIST, 'discounts');
     });
 
+    const unsubNameTagFonts = onSnapshot(nameTagFontsQuery, (snapshot) => {
+      setNameTagFonts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NameTagFont)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'nameTagFonts');
+    });
+
     return () => {
       unsubProducts();
       unsubPresets();
       unsubDiscounts();
+      unsubNameTagFonts();
     };
   }, []);
 
@@ -212,6 +231,52 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !auth.currentUser) return;
+
+    setUploading(true);
+    setError(null);
+
+    const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+    
+    try {
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      setEditingNameTagFont(prev => ({ ...prev, imageUrl: downloadURL }));
+    } catch (err) {
+      setError('Failed to upload image. Please try again.');
+      console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveNameTagFont = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser || !editingNameTagFont?.name || !editingNameTagFont?.imageUrl) return;
+
+    const data = {
+      name: editingNameTagFont.name,
+      imageUrl: editingNameTagFont.imageUrl,
+      ownerUid: auth.currentUser.uid,
+      updatedAt: serverTimestamp(),
+    };
+
+    try {
+      setError(null);
+      if (editingNameTagFont.id) {
+        await updateDoc(doc(db, 'nameTagFonts', editingNameTagFont.id), data);
+      } else {
+        await addDoc(collection(db, 'nameTagFonts'), data);
+      }
+      setEditingNameTagFont(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save font');
+      handleFirestoreError(err, editingNameTagFont.id ? OperationType.UPDATE : OperationType.CREATE, 'nameTagFonts');
+    }
+  };
+
   const deleteItem = async (collectionName: string, id: string) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
@@ -257,6 +322,12 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'discounts' ? 'text-linen-900 border-b-2 border-linen-900' : 'text-linen-400'}`}
         >
           Discounts
+        </button>
+        <button 
+          onClick={() => setActiveTab('nametags')}
+          className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'nametags' ? 'text-linen-900 border-b-2 border-linen-900' : 'text-linen-400'}`}
+        >
+          Name Tags
         </button>
       </div>
 
@@ -352,6 +423,55 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      ) : activeTab === 'nametags' ? (
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Name Tag Fonts</h3>
+            <button 
+              onClick={() => {
+                setEditingNameTagFont({ name: '', imageUrl: '' });
+                setError(null);
+              }}
+              className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
+            >
+              + Add Font
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {nameTagFonts.map(font => (
+              <div key={font.id} className="p-4 border border-linen-100 bg-linen-50/30 space-y-3 group relative">
+                <div className="aspect-[3/2] bg-white border border-linen-50 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={font.imageUrl} 
+                    alt={font.name} 
+                    className="max-w-full max-h-full object-contain"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-linen-900">{font.name}</h4>
+                  <div className="flex gap-2">
+                    <button onClick={() => {
+                      setEditingNameTagFont(font);
+                      setError(null);
+                    }} className="text-linen-400 hover:text-linen-900">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onClick={() => deleteItem('nameTagFonts', font.id)} className="text-linen-400 hover:text-red-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {nameTagFonts.length === 0 && (
+              <div className="col-span-full py-12 text-center border-2 border-dashed border-linen-100">
+                <p className="text-linen-400 text-xs italic">No fonts uploaded yet. Add your first font style image.</p>
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -777,6 +897,91 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800"
                   >
                     Save Discount
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Name Tag Font Edit Modal */}
+      <AnimatePresence>
+        {editingNameTagFont && (
+          <div className="fixed inset-0 bg-linen-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-8 border border-linen-200 shadow-2xl max-w-md w-full"
+            >
+              <h3 className="text-xl serif italic text-linen-900 mb-6">{editingNameTagFont.id ? 'Edit Font' : 'New Font'}</h3>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] uppercase tracking-widest animate-pulse">
+                  {error}
+                </div>
+              )}
+              <form onSubmit={handleSaveNameTagFont} className="space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Font Name</label>
+                  <input 
+                    required
+                    className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
+                    placeholder="e.g. Classic Serif"
+                    value={editingNameTagFont.name}
+                    onChange={e => setEditingNameTagFont({ ...editingNameTagFont, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Font Style Image</label>
+                  <div 
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    className={`aspect-[3/2] border-2 border-dashed border-linen-100 flex flex-col items-center justify-center cursor-pointer hover:bg-linen-50 transition-all overflow-hidden relative ${uploading ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    {editingNameTagFont.imageUrl ? (
+                      <img 
+                        src={editingNameTagFont.imageUrl} 
+                        alt="Preview" 
+                        className="w-full h-full object-contain"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="text-center p-4">
+                        <svg className="w-8 h-8 text-linen-200 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-linen-400">Click to upload font preview</p>
+                      </div>
+                    )}
+                    {uploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                        <div className="w-6 h-6 border-2 border-linen-900 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+                  <input 
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setEditingNameTagFont(null)}
+                    className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={uploading || !editingNameTagFont.imageUrl}
+                    className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Save Font
                   </button>
                 </div>
               </form>
