@@ -100,13 +100,14 @@ const OwnerPortal: React.FC = () => {
     doc.setTextColor(100);
     doc.text(`Exported on: ${new Date().toLocaleString()}`, 14, 30);
 
-    const tableColumn = ["ID", "Date", "Customer", "WeChat", "Style", "Status"];
+    const tableColumn = ["ID", "Date", "Customer", "WeChat", "Style", "Price", "Status"];
     const tableRows = workOrders.map(order => [
       order.workOrderId || 'N/A',
       order.orderDate?.toDate ? order.orderDate.toDate().toLocaleDateString() : 'N/A',
       order.customerName,
       order.wechatId || 'N/A',
       order.style || 'N/A',
+      `MOP ${order.totalPrice || 0}`,
       order.status
     ]);
 
@@ -386,6 +387,7 @@ const OwnerPortal: React.FC = () => {
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Customer</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">WeChat</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Style</th>
+                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Price</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Status</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400 text-right">Actions</th>
               </tr>
@@ -405,6 +407,7 @@ const OwnerPortal: React.FC = () => {
                     <td className="py-4 text-sm serif italic text-linen-900">{order.customerName}</td>
                     <td className="py-4 text-sm text-linen-600">{order.wechatId}</td>
                     <td className="py-4 text-sm text-linen-600">{order.style}</td>
+                    <td className="py-4 text-sm font-bold text-linen-900">MOP {order.totalPrice}</td>
                     <td className="py-4">
                       <span className={`px-3 py-1 text-[9px] uppercase tracking-widest rounded-full ${
                         order.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
