@@ -5,8 +5,8 @@ import { auth, db } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot, where, Timestamp, deleteDoc, doc } from 'firebase/firestore';
 import WorkOrderForm from './WorkOrderForm';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
 const OwnerPortal: React.FC = () => {
@@ -108,7 +108,7 @@ const OwnerPortal: React.FC = () => {
       order.status
     ]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 40,
