@@ -17,6 +17,7 @@ const OwnerPortal: React.FC = () => {
   const [workOrders, setWorkOrders] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [printingOrder, setPrintingOrder] = useState<any | null>(null);
 
   const OWNER_EMAIL = 'mo.witdo@gmail.com';
 
@@ -118,6 +119,89 @@ const OwnerPortal: React.FC = () => {
     });
 
     doc.save(`witdo-orders-${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
+  const exportSingleOrderToPDF = (order: any) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(20, 20, 20);
+    doc.text('造白美學館 - 訂單', 105, 20, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text('Witdo Studio Work Order', 105, 26, { align: 'center' });
+
+    // Order Info
+    doc.setFontSize(12);
+    doc.setTextColor(50);
+    doc.text(`Order ID: ${order.workOrderId}`, 14, 40);
+    doc.text(`Date: ${order.orderDate?.toDate ? order.orderDate.toDate().toLocaleDateString() : 'N/A'}`, 14, 48);
+
+    // Customer Info Table
+    autoTable(doc, {
+      startY: 55,
+      head: [['Customer Info', 'Details']],
+      body: [
+        ['Name (姓名)', order.customerName],
+        ['WeChat (微信號)', order.wechatId],
+        ['Est. Completion (預計完成日)', order.estimatedCompletionDate],
+      ],
+      theme: 'striped',
+      headStyles: { fillColor: [40, 40, 40] }
+    });
+
+    // Order Details Table
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Order Details', 'Value']],
+      body: [
+        ['Style (款式)', order.style],
+        ['Font (名牌字型)', order.nameplateFont],
+        ['Content (名牌內容)', order.nameplateContent],
+        ['Description (訂單內容)', order.orderDescription],
+        ['Options (選項)', order.options],
+        ['Unit Price (單價)', `$${order.unitPrice}`],
+        ['Total Price (總價)', `$${order.totalPrice}`],
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [40, 40, 40] }
+    });
+
+    // Signature
+    if (order.signatureData) {
+      const finalY = (doc as any).lastAutoTable.finalY + 20;
+      doc.text('Client Signature:', 14, finalY);
+      doc.addImage(order.signatureData, 'PNG', 14, finalY + 5, 50, 20);
+      doc.setFontSize(8);
+      doc.text(`Signed at: ${order.signatureTime}`, 14, finalY + 30);
+    }
+
+    doc.save(`Order-${order.workOrderId}.pdf`);
+  };
+
+  const exportSingleOrderToJPG = async (order: any) => {
+    setPrintingOrder(order);
+    // Wait for state to update and render
+    setTimeout(async () => {
+      const element = document.getElementById('printable-order');
+      if (!element) return;
+      const canvas = await html2canvas(element, { scale: 2 });
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const link = document.createElement('a');
+      link.download = `Order-${order.workOrderId}.jpg`;
+      link.href = dataUrl;
+      link.click();
+      setPrintingOrder(null);
+    }, 500);
+  };
+
+  const printOrder = (order: any) => {
+    setPrintingOrder(order);
+    setTimeout(() => {
+      window.print();
+      setPrintingOrder(null);
+    }, 500);
   };
 
   const exportToJPG = async () => {
@@ -331,22 +415,57 @@ const OwnerPortal: React.FC = () => {
                         {order.status}
                       </span>
                     </td>
-                    <td className="py-4 text-right space-x-4">
-                      <button 
-                        onClick={() => {
-                          setEditingOrder(order);
-                          setShowForm(true);
-                        }}
-                        className="text-[9px] font-bold uppercase tracking-widest text-linen-400 hover:text-linen-900 transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => setDeletingId(order.id)}
-                        className="text-[9px] font-bold uppercase tracking-widest text-red-300 hover:text-red-600 transition-colors"
-                      >
-                        Delete
-                      </button>
+                    <td className="py-4 text-right space-x-3">
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          onClick={() => exportSingleOrderToPDF(order)}
+                          className="p-1.5 hover:bg-linen-100 rounded-full transition-colors group/btn"
+                          title="Export PDF"
+                        >
+                          <svg className="w-4 h-4 text-linen-400 group-hover/btn:text-linen-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => exportSingleOrderToJPG(order)}
+                          className="p-1.5 hover:bg-linen-100 rounded-full transition-colors group/btn"
+                          title="Export JPG"
+                        >
+                          <svg className="w-4 h-4 text-linen-400 group-hover/btn:text-linen-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => printOrder(order)}
+                          className="p-1.5 hover:bg-linen-100 rounded-full transition-colors group/btn"
+                          title="Print"
+                        >
+                          <svg className="w-4 h-4 text-linen-400 group-hover/btn:text-linen-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setEditingOrder(order);
+                            setShowForm(true);
+                          }}
+                          className="p-1.5 hover:bg-linen-100 rounded-full transition-colors group/btn"
+                          title="Edit"
+                        >
+                          <svg className="w-4 h-4 text-linen-400 group-hover/btn:text-linen-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => setDeletingId(order.id)}
+                          className="p-1.5 hover:bg-red-50 rounded-full transition-colors group/btn"
+                          title="Delete"
+                        >
+                          <svg className="w-4 h-4 text-red-300 group-hover/btn:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -355,6 +474,91 @@ const OwnerPortal: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Hidden Printable Order */}
+      {printingOrder && (
+        <div className="fixed left-[-9999px] top-0">
+          <div id="printable-order" className="w-[800px] bg-white p-12 border border-linen-200">
+            <div className="flex justify-between items-center mb-12 border-b border-linen-100 pb-6">
+              <div>
+                <h2 className="text-3xl serif italic text-linen-900">造白美學館 - 訂單</h2>
+                <p className="text-xs uppercase tracking-[0.3em] text-linen-400">Witdo Studio Work Order</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold uppercase tracking-widest text-linen-500">Order ID</p>
+                <p className="text-lg font-mono text-linen-900">{printingOrder.workOrderId}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-12 mb-12">
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-linen-800 border-b border-linen-50 pb-2">Customer Info</h3>
+                <div className="space-y-2">
+                  <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest mr-2">Name:</span> {printingOrder.customerName}</p>
+                  <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest mr-2">WeChat:</span> {printingOrder.wechatId}</p>
+                  <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest mr-2">Completion:</span> {printingOrder.estimatedCompletionDate}</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-linen-800 border-b border-linen-50 pb-2">Order Summary</h3>
+                <div className="space-y-2">
+                  <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest mr-2">Style:</span> {printingOrder.style}</p>
+                  <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest mr-2">Total:</span> ${printingOrder.totalPrice}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 mb-12">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-linen-800 border-b border-linen-50 pb-2">Order Details</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest block mb-1">Font</span> {printingOrder.nameplateFont}</p>
+                <p className="text-sm"><span className="text-linen-400 uppercase text-[10px] tracking-widest block mb-1">Content</span> {printingOrder.nameplateContent}</p>
+                <p className="text-sm col-span-2"><span className="text-linen-400 uppercase text-[10px] tracking-widest block mb-1">Description</span> {printingOrder.orderDescription}</p>
+                <p className="text-sm col-span-2"><span className="text-linen-400 uppercase text-[10px] tracking-widest block mb-1">Options</span> {printingOrder.options}</p>
+              </div>
+            </div>
+
+            <div className="bg-linen-50 p-8 mb-12 border border-linen-100">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-800 mb-4">Terms & Conditions</h4>
+              <div className="text-[10px] text-linen-400 leading-relaxed space-y-2">
+                <p>1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；</p>
+                <p>2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；</p>
+                <p>3. 客製化作品一律不接受退換，恕不退款；</p>
+                <p>4. 如因原料有延長或縮短製作期，仍以實際情況為主，不便之處敬請見諒；</p>
+                <p>5. 如作品有任何瑕疵，客戶必須在收貨後的7天內以文字形式通知造白美學館；</p>
+                <p>6. 本司保留一切權利，可於任何時間及不時更改、增加、減少及／或修改本條款及細則，無需作出通知。</p>
+              </div>
+            </div>
+
+            {printingOrder.signatureData && (
+              <div className="pt-8 border-t border-linen-100">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-linen-500 mb-4">Client Signature</p>
+                <img src={printingOrder.signatureData} alt="Signature" className="h-24 object-contain mb-2" />
+                <p className="text-[9px] text-linen-400 uppercase tracking-widest">Signed at: {printingOrder.signatureTime}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-order, #printable-order * {
+            visibility: visible;
+          }
+          #printable-order {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none;
+            padding: 0;
+          }
+        }
+      `}} />
     </div>
   );
 };
