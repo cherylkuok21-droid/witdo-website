@@ -1,24 +1,26 @@
 
 import React, { useState } from 'react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 
 interface WorkOrderFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: any;
 }
 
-const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel }) => {
+const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const [formData, setFormData] = useState({
-    customerName: '',
-    contactInfo: '',
-    babyName: '',
-    babyAge: '',
-    castingType: 'both',
-    frameChoice: '',
-    materialChoice: '',
-    notes: '',
+    customerName: initialData?.customerName || '',
+    contactInfo: initialData?.contactInfo || '',
+    babyName: initialData?.babyName || '',
+    babyAge: initialData?.babyAge || '',
+    castingType: initialData?.castingType || 'both',
+    frameChoice: initialData?.frameChoice || '',
+    materialChoice: initialData?.materialChoice || '',
+    notes: initialData?.notes || '',
+    status: initialData?.status || 'pending',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,22 +31,32 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel }) =>
     setError('');
 
     if (!auth.currentUser) {
-      setError('You must be logged in to create a work order.');
+      setError('You must be logged in to manage work orders.');
       setLoading(false);
       return;
     }
 
     try {
-      await addDoc(collection(db, 'workOrders'), {
-        ...formData,
-        status: 'pending',
-        orderDate: serverTimestamp(),
-        ownerUid: auth.currentUser.uid,
-      });
+      if (initialData?.id) {
+        // Update existing order
+        const { id, ...updateData } = initialData;
+        await setDoc(doc(db, 'workOrders', initialData.id), {
+          ...formData,
+          updatedAt: serverTimestamp(),
+          ownerUid: auth.currentUser.uid,
+        }, { merge: true });
+      } else {
+        // Create new order
+        await addDoc(collection(db, 'workOrders'), {
+          ...formData,
+          orderDate: serverTimestamp(),
+          ownerUid: auth.currentUser.uid,
+        });
+      }
       onSuccess();
     } catch (err: any) {
-      console.error('Error creating work order:', err);
-      setError('Failed to create work order. Check permissions.');
+      console.error('Error saving work order:', err);
+      setError('Failed to save work order. Check permissions.');
     } finally {
       setLoading(false);
     }
@@ -137,6 +149,20 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel }) =>
               onChange={handleChange}
               className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
             />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Order Status</label>
+            <select 
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+            >
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="delivered">Delivered</option>
+            </select>
           </div>
         </div>
 
