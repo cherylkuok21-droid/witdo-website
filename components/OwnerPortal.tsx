@@ -63,7 +63,7 @@ const OwnerPortal: React.FC = () => {
       console.error('Login error:', err);
       // Provide more descriptive error messages
       if (err.code === 'auth/unauthorized-domain') {
-        setError('Domain not authorized. Please add this URL to Firebase Console > Auth > Settings > Authorized Domains.');
+        setError(`Domain not authorized (${window.location.hostname}). Please add this URL to Firebase Console > Auth > Settings > Authorized Domains.`);
       } else if (err.code === 'auth/popup-blocked') {
         setError('Popup blocked by browser. Please allow popups for this site.');
       } else {
