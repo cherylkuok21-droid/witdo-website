@@ -3,15 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, db } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { collection, query, orderBy, onSnapshot, where, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where, Timestamp, deleteDoc, doc } from 'firebase/firestore';
 import WorkOrderForm from './WorkOrderForm';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 const OwnerPortal: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<any | null>(null);
   const [workOrders, setWorkOrders] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const OWNER_EMAIL = 'mo.witdo@gmail.com';
 
@@ -76,6 +81,56 @@ const OwnerPortal: React.FC = () => {
     signOut(auth);
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'workOrders', id));
+      setDeletingId(null);
+    } catch (err) {
+      console.error('Error deleting order:', err);
+      setError('Failed to delete order.');
+    }
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Witdo Studio - Work Orders', 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Exported on: ${new Date().toLocaleString()}`, 14, 30);
+
+    const tableColumn = ["Date", "Customer", "Baby", "Type", "Status"];
+    const tableRows = workOrders.map(order => [
+      order.orderDate?.toDate ? order.orderDate.toDate().toLocaleDateString() : 'N/A',
+      order.customerName,
+      order.babyName,
+      order.castingType,
+      order.status
+    ]);
+
+    (doc as any).autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      styles: { font: 'helvetica', fontSize: 9 },
+      headStyles: { fillColor: [20, 20, 20] }
+    });
+
+    doc.save(`witdo-orders-${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
+  const exportToJPG = async () => {
+    const element = document.getElementById('orders-table');
+    if (!element) return;
+    
+    const canvas = await html2canvas(element);
+    const dataUrl = canvas.toDataURL('image/jpeg');
+    const link = document.createElement('a');
+    link.download = `witdo-orders-${new Date().toISOString().split('T')[0]}.jpg`;
+    link.href = dataUrl;
+    link.click();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-linen-100 flex items-center justify-center">
@@ -136,17 +191,38 @@ const OwnerPortal: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="bg-white p-8 border border-linen-200 shadow-sm space-y-4">
           <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-800">Quick Actions</h3>
           <div className="flex flex-col gap-3">
             <button 
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                setEditingOrder(null);
+                setShowForm(true);
+              }}
               className="text-left text-sm serif italic text-linen-600 hover:text-linen-900"
             >
               + Create New Work Order
             </button>
             <a href="https://www.instagram.com/witdo.macau/" target="_blank" className="text-sm serif italic text-linen-600 hover:text-linen-900">Check Instagram DMs</a>
+          </div>
+        </div>
+
+        <div className="bg-white p-8 border border-linen-200 shadow-sm space-y-4">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-800">Export Records</h3>
+          <div className="flex flex-col gap-3">
+            <button 
+              onClick={exportToPDF}
+              className="text-left text-sm serif italic text-linen-600 hover:text-linen-900"
+            >
+              ↓ Download PDF Report
+            </button>
+            <button 
+              onClick={exportToJPG}
+              className="text-left text-sm serif italic text-linen-600 hover:text-linen-900"
+            >
+              ↓ Save Table as Image
+            </button>
           </div>
         </div>
         
@@ -169,16 +245,54 @@ const OwnerPortal: React.FC = () => {
         {showForm && (
           <div className="fixed inset-0 bg-linen-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
             <WorkOrderForm 
-              onSuccess={() => setShowForm(false)} 
-              onCancel={() => setShowForm(false)} 
+              initialData={editingOrder}
+              onSuccess={() => {
+                setShowForm(false);
+                setEditingOrder(null);
+              }} 
+              onCancel={() => {
+                setShowForm(false);
+                setEditingOrder(null);
+              }} 
             />
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deletingId && (
+          <div className="fixed inset-0 bg-linen-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-12 border border-linen-200 shadow-xl max-w-md w-full text-center space-y-8"
+            >
+              <div className="space-y-2">
+                <h3 className="text-xl serif italic text-linen-900">Delete Order?</h3>
+                <p className="text-[10px] uppercase tracking-widest text-linen-400">This action cannot be undone.</p>
+              </div>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setDeletingId(null)}
+                  className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleDelete(deletingId)}
+                  className="flex-1 bg-red-600 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-red-700 transition-all"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>
 
       <div className="bg-white p-12 border border-linen-200 shadow-sm">
         <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-linen-900 mb-8">Recent Work Orders</h3>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" id="orders-table">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-linen-100">
@@ -187,16 +301,17 @@ const OwnerPortal: React.FC = () => {
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Baby</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Type</th>
                 <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400">Status</th>
+                <th className="py-4 text-[9px] uppercase tracking-widest text-linen-400 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-linen-50">
               {workOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-sm serif italic text-linen-400">No work orders found.</td>
+                  <td colSpan={6} className="py-12 text-center text-sm serif italic text-linen-400">No work orders found.</td>
                 </tr>
               ) : (
                 workOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-linen-50/50 transition-colors">
+                  <tr key={order.id} className="hover:bg-linen-50/50 transition-colors group">
                     <td className="py-4 text-[10px] text-linen-600">
                       {order.orderDate?.toDate ? order.orderDate.toDate().toLocaleDateString() : 'N/A'}
                     </td>
@@ -212,6 +327,23 @@ const OwnerPortal: React.FC = () => {
                       }`}>
                         {order.status}
                       </span>
+                    </td>
+                    <td className="py-4 text-right space-x-4">
+                      <button 
+                        onClick={() => {
+                          setEditingOrder(order);
+                          setShowForm(true);
+                        }}
+                        className="text-[9px] font-bold uppercase tracking-widest text-linen-400 hover:text-linen-900 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => setDeletingId(order.id)}
+                        className="text-[9px] font-bold uppercase tracking-widest text-red-300 hover:text-red-600 transition-colors"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))
