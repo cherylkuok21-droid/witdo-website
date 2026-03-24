@@ -1,26 +1,27 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // ===============================================================
     // Assumed Data Model
     // ===============================================================
+    //
     // Collection: workOrders
+    // Document ID: auto-generated
     // Fields:
-    //   - workOrderId: string (required)
-    //   - clientName: string (required)
-    //   - wechatId: string (required)
-    //   - creationDate: string (required)
-    //   - expectedCompletionDate: string (required)
-    //   - style: string
-    //   - font: string
-    //   - fontContent: string
-    //   - orderItems: list of maps
-    //   - totalAmount: number (required)
-    //   - notes: string
-    //   - terms: string
-    //   - signature: string
-    //   - signatureDate: string
-    //   - status: string
+    //   - customerName: string (required)
+    //   - contactInfo: string (required)
+    //   - babyName: string (required)
+    //   - babyAge: string (optional)
+    //   - castingType: string (required, enum: ['hands', 'feet', 'both'])
+    //   - frameChoice: string (optional)
+    //   - materialChoice: string (optional)
+    //   - orderDate: timestamp (required)
+    //   - status: string (required, enum: ['pending', 'in-progress', 'completed', 'delivered'])
+    //   - notes: string (optional)
+    //   - ownerUid: string (required)
+    //
+    // ===============================================================
 
     // ===============================================================
     // Helper Functions
@@ -30,28 +31,29 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() && 
+      return isAuthenticated() &&
         (request.auth.token.email == "mo.witdo@gmail.com" && request.auth.token.email_verified == true);
     }
 
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
     function isValidWorkOrder(data) {
-      return data.keys().hasAll(['workOrderId', 'clientName', 'wechatId', 'creationDate', 'expectedCompletionDate', 'totalAmount']) &&
-             data.workOrderId is string &&
-             data.clientName is string && data.clientName.size() > 0 && data.clientName.size() < 100 &&
-             data.wechatId is string && data.wechatId.size() > 0 &&
-             data.totalAmount is number && data.totalAmount >= 0;
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
+             data.contactInfo is string && data.contactInfo.size() > 0 && data.contactInfo.size() < 200 &&
+             data.babyName is string && data.babyName.size() > 0 && data.babyName.size() < 100 &&
+             data.castingType in ['hands', 'feet', 'both'] &&
+             data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
+             data.orderDate is timestamp &&
+             data.ownerUid is string && data.ownerUid == request.auth.uid;
     }
 
     match /workOrders/{orderId} {
-      allow read, write: if isAdmin() && isValidWorkOrder(request.resource.data);
-      // Allow read for existing docs if admin
       allow read: if isAdmin();
-      // Allow delete if admin
+      allow create: if isAdmin() && isValidWorkOrder(request.resource.data);
+      allow update: if isAdmin() && isValidWorkOrder(request.resource.data);
       allow delete: if isAdmin();
-    }
-    
-    match /{path=**} {
-      allow read, write: if false;
     }
   }
 }
