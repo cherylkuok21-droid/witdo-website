@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth, storage } from '../firebase';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import imageCompression from 'browser-image-compression';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 enum OperationType {
   CREATE = 'create',
@@ -261,41 +262,72 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const uploadAndSetImage = async (file: File | Blob, fileName: string) => {
     if (!auth.currentUser) {
       console.error('Upload failed: User not authenticated');
+      setError('Please sign in to upload images.');
       return;
     }
 
-    // Ensure we have a valid File object or Blob
+    if (!storage) {
+      console.error('Upload failed: Storage not initialized');
+      setError('Storage service is currently unavailable.');
+      return;
+    }
+
     if (!file || file.size === 0) {
-      console.error('Upload failed: File is empty or invalid');
+      setError('Invalid image file.');
       return;
     }
 
-    console.log(`Starting upload for: ${fileName}, type: ${file.type}, size: ${file.size}`);
     setUploading(true);
     setError(null);
 
     try {
+      // 1. Compress image before upload
+      console.log(`Original size: ${file.size / 1024 / 1024} MB`);
+      const options = {
+        maxSizeMB: 0.5, // 500KB limit for font previews
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      };
+      
+      const compressedFile = await imageCompression(file as File, options);
+      console.log(`Compressed size: ${compressedFile.size / 1024 / 1024} MB`);
+
       const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${fileName}`);
-      console.log('Storage reference created:', storageRef.fullPath);
       
-      const snapshot = await uploadBytes(storageRef, file);
-      console.log('Upload successful');
-      
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log('Download URL obtained');
+      // 2. Use a resumable upload for better reliability
+      const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+
+      // Add a manual timeout of 45 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Upload timed out. Please check your internet connection.')), 45000);
+      });
+
+      // Wrap the upload status in a promise
+      const uploadResult = await Promise.race([
+        new Promise((resolve, reject) => {
+          uploadTask.on('state_changed', 
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log('Upload is ' + progress + '% done');
+            }, 
+            (error) => reject(error), 
+            () => resolve(uploadTask.snapshot)
+          );
+        }),
+        timeoutPromise
+      ]) as any;
+
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+      console.log('Upload and URL retrieval successful');
       
       setEditingNameTagFont(prev => {
-        if (!prev) {
-          console.warn('editingNameTagFont state was lost during upload');
-          return null;
-        }
+        if (!prev) return null;
         return { ...prev, imageUrl: downloadURL };
       });
     } catch (err) {
       console.error('Upload process failed:', err);
-      setError('Failed to upload image. Please ensure it is a valid image file and check your connection.');
+      setError(err instanceof Error ? err.message : 'Failed to upload image. Please try again.');
     } finally {
-      console.log('Upload state resetting to false');
       setUploading(false);
     }
   };
@@ -1011,8 +1043,20 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       </div>
                     )}
                     {uploading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                        <div className="w-6 h-6 border-2 border-linen-900 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">
+                        <div className="w-6 h-6 border-2 border-linen-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+                        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-linen-900 animate-pulse">Uploading...</p>
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUploading(false);
+                            setError('Upload interrupted by user.');
+                          }}
+                          className="mt-4 text-[8px] font-bold uppercase tracking-widest text-red-500 hover:text-red-700 underline"
+                        >
+                          Cancel Upload
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1028,7 +1072,11 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <div className="flex gap-4 pt-4">
                   <button 
                     type="button"
-                    onClick={() => setEditingNameTagFont(null)}
+                    onClick={() => {
+                      setEditingNameTagFont(null);
+                      setUploading(false);
+                      setError(null);
+                    }}
                     className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
                   >
                     Cancel
