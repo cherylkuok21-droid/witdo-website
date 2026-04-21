@@ -67,7 +67,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (request.auth.token.email == "mo.witdo@gmail.com" && request.auth.token.email_verified == true); 
+        (request.auth.token.email == "mo.witdo@gmail.com"); 
     }
 
     function isOwner(userId) {
