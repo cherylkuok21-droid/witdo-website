@@ -1,17 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>造白美學館 Witdo | Premium Baby Hand & Foot Casting</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1B1FyUmmR92prZmcurZrLoEuxwe1r0HfN">
-    <link rel="stylesheet" href="/index.css">
-</head>
-<body class="bg-linen-100 text-linen-900 selection:bg-linen-300">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-</body>
-</html>
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
