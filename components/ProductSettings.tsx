@@ -145,17 +145,22 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }, []);
 
   useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
+    const handlePaste = async (e: ClipboardEvent) => {
       if (!editingNameTagFont || uploading) return;
       
       const items = e.clipboardData?.items;
       if (!items) return;
 
       for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const blob = items[i].getAsFile();
+        const item = items[i];
+        if (item.type.indexOf('image') !== -1) {
+          const blob = item.getAsFile();
           if (blob) {
-            uploadAndSetImage(blob, 'pasted_image.png');
+            e.preventDefault();
+            console.log('Pasted image detected, type:', blob.type, 'size:', blob.size);
+            // Ensuring unique name for each paste
+            const fileName = `pasted_font_${Date.now()}.png`;
+            await uploadAndSetImage(blob, fileName);
             break;
           }
         }
@@ -254,24 +259,43 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   const uploadAndSetImage = async (file: File | Blob, fileName: string) => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser) {
+      console.error('Upload failed: User not authenticated');
+      return;
+    }
 
+    // Ensure we have a valid File object or Blob
+    if (!file || file.size === 0) {
+      console.error('Upload failed: File is empty or invalid');
+      return;
+    }
+
+    console.log(`Starting upload for: ${fileName}, type: ${file.type}, size: ${file.size}`);
     setUploading(true);
     setError(null);
 
-    const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${fileName}`);
-    
     try {
+      const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${fileName}`);
+      console.log('Storage reference created:', storageRef.fullPath);
+      
       const snapshot = await uploadBytes(storageRef, file);
+      console.log('Upload successful');
+      
       const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('Download URL obtained');
+      
       setEditingNameTagFont(prev => {
-        if (!prev) return null;
+        if (!prev) {
+          console.warn('editingNameTagFont state was lost during upload');
+          return null;
+        }
         return { ...prev, imageUrl: downloadURL };
       });
     } catch (err) {
-      setError('Failed to upload image. Please try again.');
-      console.error('Upload error:', err);
+      console.error('Upload process failed:', err);
+      setError('Failed to upload image. Please ensure it is a valid image file and check your connection.');
     } finally {
+      console.log('Upload state resetting to false');
       setUploading(false);
     }
   };
@@ -280,6 +304,8 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const file = e.target.files?.[0];
     if (file) {
       await uploadAndSetImage(file, file.name);
+      // Reset to allow re-upload if needed
+      e.target.value = '';
     }
   };
 
