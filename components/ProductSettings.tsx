@@ -144,6 +144,28 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!editingNameTagFont || uploading) return;
+      
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const blob = items[i].getAsFile();
+          if (blob) {
+            uploadAndSetImage(blob, 'pasted_image.png');
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [editingNameTagFont, uploading]);
+
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth.currentUser || !editingProduct?.name) return;
@@ -231,24 +253,33 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !auth.currentUser) return;
+  const uploadAndSetImage = async (file: File | Blob, fileName: string) => {
+    if (!auth.currentUser) return;
 
     setUploading(true);
     setError(null);
 
-    const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+    const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${fileName}`);
     
     try {
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
-      setEditingNameTagFont(prev => ({ ...prev, imageUrl: downloadURL }));
+      setEditingNameTagFont(prev => {
+        if (!prev) return null;
+        return { ...prev, imageUrl: downloadURL };
+      });
     } catch (err) {
       setError('Failed to upload image. Please try again.');
       console.error('Upload error:', err);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadAndSetImage(file, file.name);
     }
   };
 
@@ -950,7 +981,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <svg className="w-8 h-8 text-linen-200 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-linen-400">Click to upload font preview</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-linen-400">Click to upload or PASTE font preview</p>
                       </div>
                     )}
                     {uploading && (
