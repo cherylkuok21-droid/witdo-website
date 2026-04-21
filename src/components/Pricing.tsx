@@ -1,0 +1,12 @@
+{
+  "name": "Witdo Macau - Baby Hand & Foot Casting Studio",
+  "short_name": "Witdo",
+  "description": "Premium baby hand and foot casting studio in Macau. Preserving infancy through architectural precision and museum-grade materials.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f0eb",
+  "theme_color": "#2c2825",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
