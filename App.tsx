@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -11,7 +11,8 @@ import CaringTips from './components/CaringTips';
 import Footer from './components/Footer';
 import Designs from './components/Designs';
 import GiftCards from './components/GiftCards';
-import OwnerPortal from './components/OwnerPortal';
+
+const OwnerPortal = lazy(() => import('./components/OwnerPortal'));
 
 export type Language = 'en' | 'zh';
 export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq' | 'giftcards';
@@ -89,7 +90,11 @@ const AppContent: React.FC = () => {
               <GiftCards lang={lang} />
             </section>
           } />
-          <Route path="/witdo-studio-management" element={<OwnerPortal />} />
+          <Route path="/witdo-studio-management" element={
+            <Suspense fallback={<div className="min-h-screen bg-linen-100 flex items-center justify-center pt-16"><div className="w-8 h-8 border-2 border-linen-900 border-t-transparent rounded-full animate-spin"></div></div>}>
+              <OwnerPortal />
+            </Suspense>
+          } />
         </Routes>
       </main>
       <Footer lang={lang} />
