@@ -309,37 +309,42 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
               </select>
             </div>
 
-            <div className="md:col-span-4 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font)</label>
-              <div className="grid grid-cols-4 gap-1 max-h-24 overflow-y-auto border border-linen-100 p-1 bg-linen-50/30">
+            <div className="md:col-span-8 space-y-1">
+              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font Selection)</label>
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-2 border border-linen-100 p-2 bg-linen-50/30">
                 {nameTagFonts.map(font => (
                   <button
                     key={font.id}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, nameplateFont: font.name }))}
-                    className={`aspect-square border flex flex-col items-center justify-center p-1 transition-all ${formData.nameplateFont === font.name ? 'border-linen-900 bg-linen-100' : 'border-linen-100 bg-white hover:border-linen-400'}`}
+                    className={`aspect-square border flex flex-col items-center justify-center p-1 transition-all ${formData.nameplateFont === font.name ? 'border-linen-900 bg-linen-100 shadow-inner' : 'border-linen-100 bg-white hover:border-linen-400'}`}
                     title={font.name}
                   >
-                    <img 
-                      src={font.imageUrl} 
-                      alt={font.name} 
-                      className="w-full h-full object-contain"
-                      referrerPolicy="no-referrer"
-                    />
+                    <div className="flex-1 w-full flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={font.imageUrl} 
+                        alt={font.name} 
+                        className="max-w-full max-h-full object-contain"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <span className="text-[6px] font-bold uppercase truncate w-full text-center mt-0.5">{font.name}</span>
                   </button>
                 ))}
                 {nameTagFonts.length === 0 && (
-                  <input 
-                    name="nameplateFont"
-                    placeholder="Type font name..."
-                    value={formData.nameplateFont}
-                    onChange={handleChange}
-                    className="col-span-4 w-full bg-transparent px-2 py-1 text-xs focus:outline-none"
-                  />
+                  <div className="col-span-full">
+                    <input 
+                      name="nameplateFont"
+                      placeholder="Type font name manually..."
+                      value={formData.nameplateFont}
+                      onChange={handleChange}
+                      className="w-full bg-transparent px-2 py-1 text-xs focus:outline-none border-b border-linen-100"
+                    />
+                  </div>
                 )}
               </div>
               {formData.nameplateFont && (
-                <p className="text-[8px] font-bold text-linen-900 uppercase tracking-widest mt-1">Selected: {formData.nameplateFont}</p>
+                <p className="text-[8px] font-bold text-linen-900 uppercase tracking-widest mt-1">Current Choice: {formData.nameplateFont}</p>
               )}
             </div>
 
