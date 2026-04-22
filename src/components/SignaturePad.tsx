@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import SignaturePad from '@/lib/signature_pad';
+import SignaturePad from '@/lib/signature_pad.js';
 
 interface SignaturePadProps {
   onEnd?: () => void;
@@ -20,7 +20,7 @@ export interface SignaturePadRef {
 const CustomSignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>((props, ref) => {
   const { onEnd, penColor = 'black', backgroundColor = 'rgba(0,0,0,0)', className, style } = props;
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const signaturePadRef = useRef<typeof SignaturePad | null>(null);
+  const signaturePadRef = useRef<any>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -32,7 +32,7 @@ const CustomSignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>((props
       signaturePadRef.current = pad;
 
       if (onEnd) {
-        pad.addEventListener('endStroke', onEnd);
+        pad.addEventListener('endStroke', onEnd as any, undefined);
       }
 
       // Handle resize
@@ -43,9 +43,11 @@ const CustomSignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>((props
           const data = pad.toData();
           canvas.width = canvas.offsetWidth * ratio;
           canvas.height = canvas.offsetHeight * ratio;
-          canvas.getContext('2d')?.scale(ratio, ratio);
-          pad.clear(); // clear resets the internal state
-          pad.fromData(data);
+          canvas.getContext('2d')?.setTransform(ratio, 0, 0, ratio, 0, 0);
+          pad.clear(); 
+          if (data && data.length > 0) {
+            pad.fromData(data);
+          }
         }
       };
 
