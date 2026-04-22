@@ -11,12 +11,9 @@ import CaringTips from './components/CaringTips';
 import Footer from './components/Footer';
 import Designs from './components/Designs';
 import GiftCards from './components/GiftCards';
+import OwnerPortal from './components/OwnerPortal';
 
-const OwnerPortal = lazy(() => import('./components/OwnerPortal'));
-
-export type Language = 'en' | 'zh';
-export type Page = 'home' | 'why' | 'about' | 'studio' | 'care' | 'designs' | 'faq' | 'giftcards';
-export type Category = 'duo' | 'full' | 'legacy';
+import { Language, Page, Category } from './types';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -91,9 +88,7 @@ const AppContent: React.FC = () => {
             </section>
           } />
           <Route path="/witdo-studio-management" element={
-            <Suspense fallback={<div className="min-h-screen bg-linen-100 flex items-center justify-center pt-16"><div className="w-8 h-8 border-2 border-linen-900 border-t-transparent rounded-full animate-spin"></div></div>}>
-              <OwnerPortal />
-            </Suspense>
+            <OwnerPortal />
           } />
         </Routes>
       </main>
