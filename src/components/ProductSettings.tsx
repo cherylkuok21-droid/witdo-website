@@ -380,18 +380,21 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           <div className="bg-linen-50/50 p-6 border border-linen-100 rounded-sm space-y-4">
             <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-600">Available Font Styles (Used in Work Orders)</h4>
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {DEFAULT_FONT_IMAGES.map((font, idx) => (
-                <div key={idx} className="space-y-3">
-                  <div className="aspect-[3/2] bg-white border border-linen-200 flex items-center justify-center p-2 rounded-sm group relative overflow-hidden">
+                <div key={idx} className="space-y-4 border border-linen-50 p-4 bg-white/50 group hover:border-linen-200 transition-all">
+                  <div className="aspect-[2/1] bg-white border border-linen-100 flex items-center justify-center p-4 rounded-sm relative overflow-hidden shadow-sm">
                     <img 
                       src={font.imageUrl} 
                       alt={font.name} 
-                      className="max-w-full max-h-full object-contain"
+                      className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                     />
                   </div>
-                  <p className="text-[9px] text-center uppercase tracking-widest text-linen-400 font-bold">{font.name}</p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-linen-900 font-bold">{font.name}</p>
+                    <span className="text-[8px] text-linen-300 font-mono">STYLE {idx + 1}</span>
+                  </div>
                 </div>
               ))}
             </div>
