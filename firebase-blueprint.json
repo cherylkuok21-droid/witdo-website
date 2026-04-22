@@ -9,6 +9,7 @@
         "wechatId": { "type": "string", "description": "WeChat ID of the customer" },
         "estimatedCompletionDate": { "type": "string", "description": "Estimated completion date" },
         "style": { "type": "string", "description": "Style of the casting" },
+        "couponCode": { "type": "string", "description": "Coupon code applied to the order" },
         "nameplateFont": { "type": "string", "description": "Font for the nameplate" },
         "nameplateContent": { "type": "string", "description": "Content for the nameplate" },
         "orderDescription": { "type": "string", "description": "Description of the order" },
