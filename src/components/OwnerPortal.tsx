@@ -204,8 +204,23 @@ const OwnerPortal: React.FC = () => {
     });
 
     // Signature
+    let finalY = (doc as any).lastAutoTable.finalY + 10;
+    
+    // Remarks & Terms
+    autoTable(doc, {
+      startY: finalY,
+      head: [['備註 (Remarks) & 條款及細則 (Terms & Conditions)']],
+      body: [
+        ['備註:\n1. 請把照片4:3 原圖 傳送到造白美學館之微信或電郵;\n2. 資料齊全後方可進行下一工序，其製作時間約 3 個月；\n3. 作品完成後，本館會立刻安排交收。'],
+        ['條款及細則:\n1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；\n2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；\n3. 客製化作品一律不接受退換，恕不退款；\n4. 如因原料有延長或縮短製作期，仍以實際情況為主，不便之處敬請見諒；\n5. 如作品有任何瑕疵，客戶必須在收貨後的7天內以文字形式通知造白美學館；\n6. 本司保留一切權利，可於任何時間及不時更改、增加、減少及／或修改本條款及細則，無需作出通知。']
+      ],
+      styles: { fontSize: 8, cellPadding: 2 },
+      theme: 'plain'
+    });
+
+    finalY = (doc as any).lastAutoTable.finalY + 15;
+
     if (order.signatureData) {
-      const finalY = (doc as any).lastAutoTable.finalY + 20;
       doc.text('Client Signature:', 14, finalY);
       doc.addImage(order.signatureData, 'PNG', 14, finalY + 5, 50, 20);
       doc.setFontSize(8);
