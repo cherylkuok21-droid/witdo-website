@@ -203,6 +203,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     try {
       const finalData = {
         ...formData,
+        totalPrice: Number(formData.totalPrice) || 0,
         updatedAt: serverTimestamp(),
         ownerUid: auth.currentUser.uid,
       };
