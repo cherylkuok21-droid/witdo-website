@@ -78,6 +78,7 @@ service cloud.firestore {
       return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
              data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() < 100 &&
              data.style is string && data.style.size() > 0 && data.style.size() < 1000 &&
+             (data.couponCode == null || (data.couponCode is string && data.couponCode.size() < 50)) &&
              data.totalPrice is number && data.totalPrice >= 0 &&
              data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
              (data.orderDate is timestamp || data.orderDate == null) &&
