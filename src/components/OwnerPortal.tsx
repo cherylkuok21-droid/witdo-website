@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { auth, db } from '../firebase';
+import { auth, db } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot, where, Timestamp, deleteDoc, doc, getDocs } from 'firebase/firestore';
 
