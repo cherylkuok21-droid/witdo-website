@@ -1,5 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import SignatureCanvas from 'react-signature-canvas';
 import { db, auth } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
 
@@ -34,8 +36,6 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
-import { motion, AnimatePresence } from 'framer-motion';
-import SignatureCanvas from 'react-signature-canvas';
 
 interface ProductOption {
   name: string;
