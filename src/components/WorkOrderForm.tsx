@@ -245,7 +245,8 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       let currentSignature = formData.signatureData;
       let currentSignatureTime = formData.signatureTime;
       
-      if (!currentSignature && sigPad.current && !sigPad.current.isEmpty()) {
+      // If the signature pad has CONTENT, it means the user signed something new
+      if (sigPad.current && !sigPad.current.isEmpty()) {
         currentSignature = sigPad.current.toDataURL('image/png');
         currentSignatureTime = new Date().toLocaleString();
       }
