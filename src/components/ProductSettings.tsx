@@ -62,17 +62,10 @@ interface Discount {
   applicableProductIds: string[];
 }
 
-interface NameTagFont {
-  id: string;
-  name: string;
-  imageUrl: string;
-}
-
 const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
-  const [nameTagFonts, setNameTagFonts] = useState<NameTagFont[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'products' | 'presets' | 'discounts' | 'nametags'>('products');
   const [error, setError] = useState<string | null>(null);
@@ -81,13 +74,18 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [editingPreset, setEditingPreset] = useState<Partial<Preset> | null>(null);
   const [editingDiscount, setEditingDiscount] = useState<Partial<Discount> | null>(null);
-  const [editingNameTagFont, setEditingNameTagFont] = useState<Partial<NameTagFont> | null>(null);
   const [presetInputValue, setPresetInputValue] = useState('');
 
   const DEFAULT_FONT_IMAGES = [
-    'https://lh3.googleusercontent.com/d/1ZSP4Y30AIIr3RM3-Y_AocKL9xfvYOimj',
-    'https://lh3.googleusercontent.com/d/1USRIUHR_fNR_Pzbo1tToHOzClZkBgG7T',
-    'https://lh3.googleusercontent.com/d/1a_ThiLXFprrJ-Ao3YAiDphWVf1Azuudc'
+    { name: '名牌字型 1', imageUrl: 'https://lh3.googleusercontent.com/d/1ZSP4Y30AIIr3RM3-Y_AocKL9xfvYOimj' },
+    { name: '名牌字型 2', imageUrl: 'https://lh3.googleusercontent.com/d/1USRIUHR_fNR_Pzbo1tToHOzClZkBgG7T' },
+    { name: '名牌字型 3', imageUrl: 'https://lh3.googleusercontent.com/d/1a_ThiLXFprrJ-Ao3YAiDphWVf1Azuudc' },
+    { name: '名牌字型 4', imageUrl: 'https://lh3.googleusercontent.com/d/16MTsK3i_HelpWQ3lQHbjx_Tzfrqj8Y1d' },
+    { name: '名牌字型 5', imageUrl: 'https://lh3.googleusercontent.com/d/1Q6K70SC4JY-8yNFZ0n5IsS8QkoMLjaYC' },
+    { name: '名牌字型 6', imageUrl: 'https://lh3.googleusercontent.com/d/1VwSh0SH4myrF1EGdts8kR1k4YJ2jY2M8' },
+    { name: '名牌字型 7', imageUrl: 'https://lh3.googleusercontent.com/d/1g19O6VjEW_GxEUtfqVxT0jnejPSn2mbC' },
+    { name: '名牌字型 8', imageUrl: 'https://lh3.googleusercontent.com/d/1gF2NQo3K8nY05Ii35o_0OjcTx7SfIE51' },
+    { name: '名牌字型 9', imageUrl: 'https://lh3.googleusercontent.com/d/1r4NrMpCmhI6PTJOoL6CzImk3wu_xAAdn' }
   ];
 
   const addPresetValue = () => {
@@ -112,7 +110,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const productsQuery = query(collection(db, 'products'), where('ownerUid', '==', user.uid));
     const presetsQuery = query(collection(db, 'presets'), where('ownerUid', '==', user.uid));
     const discountsQuery = query(collection(db, 'discounts'), where('ownerUid', '==', user.uid));
-    const nameTagFontsQuery = query(collection(db, 'nameTagFonts'), where('ownerUid', '==', user.uid));
 
     const unsubProducts = onSnapshot(productsQuery, (snapshot) => {
       setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
@@ -133,17 +130,10 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       handleFirestoreError(error, OperationType.LIST, 'discounts');
     });
 
-    const unsubNameTagFonts = onSnapshot(nameTagFontsQuery, (snapshot) => {
-      setNameTagFonts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NameTagFont)));
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'nameTagFonts');
-    });
-
     return () => {
       unsubProducts();
       unsubPresets();
       unsubDiscounts();
-      unsubNameTagFonts();
     };
   }, []);
 
@@ -231,31 +221,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save discount');
       handleFirestoreError(err, editingDiscount.id ? OperationType.UPDATE : OperationType.CREATE, 'discounts');
-    }
-  };
-
-  const handleSaveNameTagFont = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!auth.currentUser || !editingNameTagFont?.name || !editingNameTagFont?.imageUrl) return;
-
-    const data = {
-      name: editingNameTagFont.name,
-      imageUrl: editingNameTagFont.imageUrl,
-      ownerUid: auth.currentUser.uid,
-      updatedAt: serverTimestamp(),
-    };
-
-    try {
-      setError(null);
-      if (editingNameTagFont.id) {
-        await updateDoc(doc(db, 'nameTagFonts', editingNameTagFont.id), data);
-      } else {
-        await addDoc(collection(db, 'nameTagFonts'), data);
-      }
-      setEditingNameTagFont(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save font');
-      handleFirestoreError(err, editingNameTagFont.id ? OperationType.UPDATE : OperationType.CREATE, 'nameTagFonts');
     }
   };
 
@@ -411,76 +376,26 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="space-y-8">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Studio Name Tag Fonts</h3>
-            <button 
-              onClick={() => {
-                setEditingNameTagFont({ name: '', imageUrl: '' });
-                setError(null);
-              }}
-              className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
-            >
-              + Add Custom Font
-            </button>
           </div>
 
           <div className="bg-linen-50/50 p-6 border border-linen-100 rounded-sm space-y-4">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-600">Style Templates (Select an image to add)</h4>
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-600">Available Font Styles (Used in Work Orders)</h4>
             <div className="grid grid-cols-3 gap-6">
-              {DEFAULT_FONT_IMAGES.map((url, idx) => (
+              {DEFAULT_FONT_IMAGES.map((font, idx) => (
                 <div key={idx} className="space-y-3">
                   <div className="aspect-[3/2] bg-white border border-linen-200 flex items-center justify-center p-2 rounded-sm group relative overflow-hidden">
                     <img 
-                      src={url} 
-                      alt={`Template ${idx + 1}`} 
+                      src={font.imageUrl} 
+                      alt={font.name} 
                       className="max-w-full max-h-full object-contain"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-linen-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button 
-                        onClick={() => setEditingNameTagFont({ name: `Style ${idx + 1}`, imageUrl: url })}
-                        className="bg-white text-linen-900 px-4 py-2 text-[9px] font-bold uppercase tracking-widest hover:bg-linen-100"
-                      >
-                        Add this Style
-                      </button>
-                    </div>
                   </div>
-                  <p className="text-[9px] text-center uppercase tracking-widest text-linen-400 font-bold">Option {idx + 1}</p>
+                  <p className="text-[9px] text-center uppercase tracking-widest text-linen-400 font-bold">{font.name}</p>
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {nameTagFonts.map(font => (
-              <div key={font.id} className="p-4 border border-linen-100 bg-linen-50/30 space-y-3 group relative">
-                <div className="aspect-[3/2] bg-white border border-linen-50 flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={font.imageUrl} 
-                    alt={font.name} 
-                    className="max-w-full max-h-full object-contain"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-linen-900">{font.name}</h4>
-                  <div className="flex gap-2">
-                    <button onClick={() => {
-                      setEditingNameTagFont(font);
-                      setError(null);
-                    }} className="text-linen-400 hover:text-linen-900">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    </button>
-                    <button onClick={() => deleteItem('nameTagFonts', font.id)} className="text-linen-400 hover:text-red-500">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {nameTagFonts.length === 0 && (
-              <div className="col-span-full py-12 text-center border-2 border-dashed border-linen-100">
-                <p className="text-linen-400 text-xs italic">No fonts added yet. Create your first font style.</p>
-              </div>
-            )}
+            <p className="text-[8px] text-linen-400 italic text-center mt-4">These styles are fixed and will be available for selection during work order creation.</p>
           </div>
         </div>
       ) : (
@@ -914,91 +829,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         )}
       </AnimatePresence>
 
-      {/* Name Tag Font Edit Modal */}
-      <AnimatePresence>
-        {editingNameTagFont && (
-          <div className="fixed inset-0 bg-linen-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white p-8 border border-linen-200 shadow-2xl max-w-md w-full"
-            >
-              <h3 className="text-xl serif italic text-linen-900 mb-6">{editingNameTagFont.id ? 'Edit Font' : 'New Font'}</h3>
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] uppercase tracking-widest animate-pulse">
-                  {error}
-                </div>
-              )}
-              <form onSubmit={handleSaveNameTagFont} className="space-y-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Font Name</label>
-                  <input 
-                    required
-                    className="w-full bg-linen-50 border border-linen-100 px-4 py-2 text-sm focus:outline-none focus:border-linen-900"
-                    placeholder="e.g. Classic Serif"
-                    value={editingNameTagFont.name}
-                    onChange={e => setEditingNameTagFont({ ...editingNameTagFont, name: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Select Font Style</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {DEFAULT_FONT_IMAGES.map((url, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setEditingNameTagFont({ ...editingNameTagFont, imageUrl: url })}
-                        className={`aspect-square border-2 transition-all p-1 bg-white flex items-center justify-center overflow-hidden rounded-sm ${editingNameTagFont.imageUrl === url ? 'border-linen-900 bg-linen-50' : 'border-linen-100 hover:border-linen-300'}`}
-                      >
-                        <img 
-                          src={url} 
-                          alt={`Style ${idx + 1}`} 
-                          className="w-full h-full object-contain"
-                          referrerPolicy="no-referrer"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                  {!editingNameTagFont.imageUrl && (
-                    <p className="text-[10px] text-red-500 italic">Please select a font style above.</p>
-                  )}
-                  {editingNameTagFont.imageUrl && (
-                    <div className="mt-4 p-4 border border-linen-100 bg-linen-50/30 flex items-center justify-center h-32 overflow-hidden rounded-sm">
-                      <img 
-                        src={editingNameTagFont.imageUrl} 
-                        alt="Selected Preview" 
-                        className="max-w-full max-h-full object-contain"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setEditingNameTagFont(null);
-                      setError(null);
-                    }}
-                    className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    disabled={!editingNameTagFont.imageUrl}
-                    className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Save Font
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
