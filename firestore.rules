@@ -77,7 +77,7 @@ service cloud.firestore {
     function isValidWorkOrder(data) {
       return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
              data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() < 100 &&
-             data.style is string && data.style.size() > 0 && data.style.size() < 200 &&
+             data.style is string && data.style.size() > 0 && data.style.size() < 1000 &&
              data.totalPrice is number && data.totalPrice >= 0 &&
              data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
              (data.orderDate is timestamp || data.orderDate == null) &&
@@ -111,31 +111,31 @@ service cloud.firestore {
     }
 
     match /workOrders/{orderId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
-      allow create: if isAdmin() && isValidWorkOrder(request.resource.data);
-      allow update: if isAdmin() && isValidWorkOrder(request.resource.data);
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidWorkOrder(request.resource.data);
+      allow update: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid) && isValidWorkOrder(request.resource.data);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
     }
 
     match /products/{productId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
-      allow create: if isAdmin() && isValidProduct(request.resource.data);
-      allow update: if isAdmin() && isValidProduct(request.resource.data);
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidProduct(request.resource.data);
+      allow update: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidProduct(request.resource.data);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
     }
 
     match /presets/{presetId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
-      allow create: if isAdmin() && isValidPreset(request.resource.data);
-      allow update: if isAdmin() && isValidPreset(request.resource.data);
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidPreset(request.resource.data);
+      allow update: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidPreset(request.resource.data);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
     }
 
     match /discounts/{discountId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
-      allow create: if isAdmin() && isValidDiscount(request.resource.data);
-      allow update: if isAdmin() && isValidDiscount(request.resource.data);
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidDiscount(request.resource.data);
+      allow update: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidDiscount(request.resource.data);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
     }
 
     match /nameTagFonts/{fontId} {
