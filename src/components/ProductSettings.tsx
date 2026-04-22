@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth, storage } from '@/firebase';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 enum OperationType {
   CREATE = 'create',
@@ -77,7 +76,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'products' | 'presets' | 'discounts' | 'nametags'>('products');
   const [error, setError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   
   // Form states
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
@@ -85,7 +83,12 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [editingDiscount, setEditingDiscount] = useState<Partial<Discount> | null>(null);
   const [editingNameTagFont, setEditingNameTagFont] = useState<Partial<NameTagFont> | null>(null);
   const [presetInputValue, setPresetInputValue] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const DEFAULT_FONT_IMAGES = [
+    'https://lh3.googleusercontent.com/d/1ZSP4Y30AIIr3RM3-Y_AocKL9xfvYOimj',
+    'https://lh3.googleusercontent.com/d/1USRIUHR_fNR_Pzbo1tToHOzClZkBgG7T',
+    'https://lh3.googleusercontent.com/d/1a_ThiLXFprrJ-Ao3YAiDphWVf1Azuudc'
+  ];
 
   const addPresetValue = () => {
     const val = presetInputValue.trim();
@@ -143,33 +146,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       unsubNameTagFonts();
     };
   }, []);
-
-  useEffect(() => {
-    const handlePaste = async (e: ClipboardEvent) => {
-      if (!editingNameTagFont || uploading) return;
-      
-      const items = e.clipboardData?.items;
-      if (!items) return;
-
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.type.indexOf('image') !== -1) {
-          const blob = item.getAsFile();
-          if (blob) {
-            e.preventDefault();
-            console.log('Pasted image detected, type:', blob.type, 'size:', blob.size);
-            // Ensuring unique name for each paste
-            const fileName = `pasted_font_${Date.now()}.png`;
-            await uploadAndSetImage(blob, fileName);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('paste', handlePaste);
-    return () => window.removeEventListener('paste', handlePaste);
-  }, [editingNameTagFont, uploading]);
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,128 +231,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save discount');
       handleFirestoreError(err, editingDiscount.id ? OperationType.UPDATE : OperationType.CREATE, 'discounts');
-    }
-  };
-
-  const compressImage = (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          canvas.toBlob(
-            (blob) => {
-              if (blob) resolve(blob);
-              else reject(new Error('Canvas toBlob failed'));
-            },
-            'image/jpeg',
-            0.7 // quality
-          );
-        };
-        img.onerror = (err) => reject(err);
-      };
-      reader.onerror = (err) => reject(err);
-    });
-  };
-
-  const uploadAndSetImage = async (file: File | Blob, fileName: string) => {
-    if (!auth.currentUser) {
-      console.error('Upload failed: User not authenticated');
-      setError('Please sign in to upload images.');
-      return;
-    }
-
-    if (!storage) {
-      console.error('Upload failed: Storage not initialized');
-      setError('Storage service is currently unavailable.');
-      return;
-    }
-
-    if (!file || file.size === 0) {
-      setError('Invalid image file.');
-      return;
-    }
-
-    setUploading(true);
-    setError(null);
-
-    try {
-      // 1. Compress image before upload using native Canvas
-      console.log(`Original size: ${file.size / 1024 / 1024} MB`);
-      const compressedFile = await compressImage(file as File);
-      console.log(`Compressed size: ${compressedFile.size / 1024 / 1024} MB`);
-
-      const storageRef = ref(storage, `fonts/${auth.currentUser.uid}/${Date.now()}_${fileName}`);
-      
-      // 2. Use a resumable upload for better reliability
-      const uploadTask = uploadBytesResumable(storageRef, compressedFile);
-
-      // Add a manual timeout of 45 seconds
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Upload timed out. Please check your internet connection.')), 45000);
-      });
-
-      // Wrap the upload status in a promise
-      const uploadResult = await Promise.race([
-        new Promise((resolve, reject) => {
-          uploadTask.on('state_changed', 
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log('Upload is ' + progress + '% done');
-            }, 
-            (error) => reject(error), 
-            () => resolve(uploadTask.snapshot)
-          );
-        }),
-        timeoutPromise
-      ]) as any;
-
-      const downloadURL = await getDownloadURL(uploadResult.ref);
-      console.log('Upload and URL retrieval successful');
-      
-      setEditingNameTagFont(prev => {
-        if (!prev) return null;
-        return { ...prev, imageUrl: downloadURL };
-      });
-    } catch (err) {
-      console.error('Upload process failed:', err);
-      setError(err instanceof Error ? err.message : 'Failed to upload image. Please try again.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await uploadAndSetImage(file, file.name);
-      // Reset to allow re-upload if needed
-      e.target.value = '';
     }
   };
 
@@ -597,7 +451,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             ))}
             {nameTagFonts.length === 0 && (
               <div className="col-span-full py-12 text-center border-2 border-dashed border-linen-100">
-                <p className="text-linen-400 text-xs italic">No fonts uploaded yet. Add your first font style image.</p>
+                <p className="text-linen-400 text-xs italic">No fonts added yet. Create your first font style.</p>
               </div>
             )}
           </div>
@@ -1060,52 +914,38 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Font Style Image</label>
-                  <div 
-                    onClick={() => !uploading && fileInputRef.current?.click()}
-                    className={`aspect-[3/2] border-2 border-dashed border-linen-100 flex flex-col items-center justify-center cursor-pointer hover:bg-linen-50 transition-all overflow-hidden relative ${uploading ? 'opacity-50 cursor-wait' : ''}`}
-                  >
-                    {editingNameTagFont.imageUrl ? (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-linen-500">Select Font Style</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {DEFAULT_FONT_IMAGES.map((url, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setEditingNameTagFont({ ...editingNameTagFont, imageUrl: url })}
+                        className={`aspect-square border-2 transition-all p-1 bg-white flex items-center justify-center overflow-hidden rounded-sm ${editingNameTagFont.imageUrl === url ? 'border-linen-900 bg-linen-50' : 'border-linen-100 hover:border-linen-300'}`}
+                      >
+                        <img 
+                          src={url} 
+                          alt={`Style ${idx + 1}`} 
+                          className="w-full h-full object-contain"
+                          referrerPolicy="no-referrer"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  {!editingNameTagFont.imageUrl && (
+                    <p className="text-[10px] text-red-500 italic">Please select a font style above.</p>
+                  )}
+                  {editingNameTagFont.imageUrl && (
+                    <div className="mt-4 p-4 border border-linen-100 bg-linen-50/30 flex items-center justify-center h-32 overflow-hidden rounded-sm">
                       <img 
                         src={editingNameTagFont.imageUrl} 
-                        alt="Preview" 
-                        className="w-full h-full object-contain"
+                        alt="Selected Preview" 
+                        className="max-w-full max-h-full object-contain"
                         referrerPolicy="no-referrer"
                       />
-                    ) : (
-                      <div className="text-center p-4">
-                        <svg className="w-8 h-8 text-linen-200 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-linen-400">Click to upload or PASTE font preview</p>
-                      </div>
-                    )}
-                    {uploading && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">
-                        <div className="w-6 h-6 border-2 border-linen-900 border-t-transparent rounded-full animate-spin mb-3"></div>
-                        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-linen-900 animate-pulse">Uploading...</p>
-                        <button 
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUploading(false);
-                            setError('Upload interrupted by user.');
-                          }}
-                          className="mt-4 text-[8px] font-bold uppercase tracking-widest text-red-500 hover:text-red-700 underline"
-                        >
-                          Cancel Upload
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <input 
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-4 pt-4">
@@ -1113,7 +953,6 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     type="button"
                     onClick={() => {
                       setEditingNameTagFont(null);
-                      setUploading(false);
                       setError(null);
                     }}
                     className="flex-1 border border-linen-200 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-50"
@@ -1122,7 +961,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </button>
                   <button 
                     type="submit"
-                    disabled={uploading || !editingNameTagFont.imageUrl}
+                    disabled={!editingNameTagFont.imageUrl}
                     className="flex-1 bg-linen-900 text-white py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-linen-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Save Font
