@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         'process': { env: {} },
       },
       optimizeDeps: {
-        include: ['react-signature-canvas', 'prop-types'],
+        include: ['react-signature-canvas'],
       },
       resolve: {
         alias: {
