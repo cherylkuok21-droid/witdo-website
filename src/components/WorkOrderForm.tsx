@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { db, auth } from '../firebase';
+import { db, auth } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
 
 enum OperationType {
