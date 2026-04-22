@@ -82,6 +82,8 @@ service cloud.firestore {
              data.totalPrice is number && data.totalPrice >= 0 &&
              data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
              (data.orderDate is timestamp || data.orderDate == null) &&
+             (data.signatureData == null || (data.signatureData is string && data.signatureData.size() < 1000000)) &&
+             (data.signatureTime == null || (data.signatureTime is string && data.signatureTime.size() < 100)) &&
              data.ownerUid is string && data.ownerUid == request.auth.uid;
     }
 
