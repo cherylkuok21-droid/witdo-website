@@ -77,15 +77,22 @@ const OwnerPortal: React.FC = () => {
     if (user) {
       const q = query(
         collection(db, 'workOrders'),
-        where('ownerUid', '==', user.uid),
-        orderBy('orderDate', 'desc')
+        where('ownerUid', '==', user.uid)
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const orders = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        }));
+        })) as any[];
+        
+        // Sort client-side to avoid Index requirement errors
+        orders.sort((a: any, b: any) => {
+          const dateA = a.orderDate?.toDate ? a.orderDate.toDate().getTime() : 0;
+          const dateB = b.orderDate?.toDate ? b.orderDate.toDate().getTime() : 0;
+          return dateB - dateA;
+        });
+
         setWorkOrders(orders);
       }, (err) => {
         handleFirestoreError(err, OperationType.LIST, 'workOrders');
@@ -392,7 +399,7 @@ const OwnerPortal: React.FC = () => {
 
       <AnimatePresence>
         {showForm && (
-          <div className="fixed inset-0 bg-linen-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="fixed inset-0 bg-linen-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-6">
             <WorkOrderForm 
               initialData={editingOrder}
               onSuccess={() => {
