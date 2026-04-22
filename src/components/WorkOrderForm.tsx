@@ -71,7 +71,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     { name: '名牌字型 8', imageUrl: 'https://lh3.googleusercontent.com/d/1gF2NQo3K8nY05Ii35o_0OjcTx7SfIE51' },
     { name: '名牌字型 9', imageUrl: 'https://lh3.googleusercontent.com/d/1r4NrMpCmhI6PTJOoL6CzImk3wu_xAAdn' }
   ];
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,13 +87,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
         const found = fetchedProducts.find(p => p.name === initialData.style);
         if (found) {
           setSelectedProduct(found);
-          // Parse options if they are stored in a specific format
-          try {
-            const parsedOptions = JSON.parse(initialData.options);
-            setSelectedOptions(parsedOptions);
-          } catch (e) {
-            // Fallback for legacy text options
-          }
         }
       }
     };
@@ -128,9 +120,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     style: initialData?.style || '',
     nameplateFont: initialData?.nameplateFont || '',
     nameplateContent: initialData?.nameplateContent || '',
-    orderDescription: initialData?.orderDescription || '',
-    options: initialData?.options || '',
-    unitPrice: initialData?.unitPrice || '',
     totalPrice: initialData?.totalPrice || '',
     status: initialData?.status || 'pending',
     signatureData: initialData?.signatureData || '',
@@ -147,34 +136,42 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       const product = products.find(p => p.name === value);
       if (product) {
         setSelectedProduct(product);
-        setSelectedOptions({}); // Reset options when product changes
         setFormData(prev => ({ 
           ...prev, 
           style: value,
-          unitPrice: product.price.toString(),
-          totalPrice: product.price.toString(),
-          options: '' // Reset options string
+          totalPrice: product.price.toString()
         }));
         return;
       } else if (value === 'custom') {
         setSelectedProduct(null);
-        setSelectedOptions({});
       }
     }
     
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleOptionChange = (optionName: string, value: string) => {
-    const newOptions = { ...selectedOptions, [optionName]: value };
-    setSelectedOptions(newOptions);
+  const toggleStyle = (productName: string) => {
+    const currentStyles = formData.style ? formData.style.split(', ').filter(s => s !== '') : [];
+    let newStyles: string[];
     
-    // Update the options string for storage
-    const optionsString = Object.entries(newOptions)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join(', ');
+    if (currentStyles.includes(productName)) {
+      newStyles = currentStyles.filter(s => s !== productName);
+    } else {
+      newStyles = [...currentStyles, productName];
+    }
+
+    const styleString = newStyles.join(', ');
     
-    setFormData(prev => ({ ...prev, options: optionsString }));
+    // Sum prices of selected products
+    const total = products
+      .filter(p => newStyles.includes(p.name))
+      .reduce((sum, p) => sum + p.price, 0);
+
+    setFormData(prev => ({
+      ...prev,
+      style: styleString,
+      totalPrice: total > 0 ? total.toString() : (newStyles.length === 0 ? '' : prev.totalPrice)
+    }));
   };
 
   const clearSignature = () => {
@@ -230,9 +227,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-6 border border-linen-200 shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto"
+      className="bg-white p-5 md:p-6 border border-linen-200 shadow-xl max-w-4xl w-full max-h-[98vh] overflow-y-auto"
     >
-      <div className="flex justify-between items-center mb-6 border-b border-linen-100 pb-3">
+      <div className="flex justify-between items-center mb-4 border-b border-linen-100 pb-2">
         <div>
           <h2 className="text-xl serif italic text-linen-900">造白美學館 - 訂單</h2>
           <p className="text-[9px] uppercase tracking-[0.3em] text-linen-400">Witdo Studio Work Order</p>
@@ -243,11 +240,11 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && <p className="text-xs text-red-500 bg-red-50 p-2 border border-red-100">{error}</p>}
 
         {/* INFO PART */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="space-y-1">
             <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">姓名 (Name)</label>
             <input 
@@ -255,7 +252,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
               name="customerName"
               value={formData.customerName}
               onChange={handleChange}
-              className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+              className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
             />
           </div>
           <div className="space-y-1">
@@ -265,7 +262,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
               name="wechatId"
               value={formData.wechatId}
               onChange={handleChange}
-              className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+              className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
             />
           </div>
           <div className="space-y-1">
@@ -275,212 +272,156 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
               name="estimatedCompletionDate"
               value={formData.estimatedCompletionDate}
               onChange={handleChange}
-              className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+              className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
             />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">訂單狀態 (Status)</label>
+            <select 
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+            >
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="delivered">Delivered</option>
+            </select>
           </div>
         </div>
 
         {/* ORDER PART */}
-        <div className="space-y-3">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-linen-800 border-b border-linen-50 pb-1">訂單詳情 (Order Details)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="md:col-span-4 space-y-1">
-              <div className="flex justify-between items-center">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">款式 (Style)</label>
-                {formData.unitPrice && (
-                  <span className="text-[8px] font-bold text-linen-900 bg-linen-100 px-1.5 py-0.5 rounded tracking-widest">
-                    MOP {formData.unitPrice}
-                  </span>
-                )}
+        <div className="space-y-2">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-linen-800 border-b border-linen-50 pb-0.5">訂單詳情 (Order Details)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div className="md:col-span-3 space-y-1">
+              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">款式 (Style - 可多選)</label>
+              <div className="bg-linen-50 border border-linen-100 p-2 max-h-40 overflow-y-auto space-y-1.5">
+                {products.length === 0 && <p className="text-[10px] text-linen-400 italic">No products found</p>}
+                {products.map(p => {
+                  const isSelected = formData.style.split(', ').includes(p.name);
+                  return (
+                    <label key={p.id} className="flex items-center gap-2 cursor-pointer group">
+                      <div 
+                        onClick={() => toggleStyle(p.name)}
+                        className={`w-3.5 h-3.5 border flex items-center justify-center transition-colors ${isSelected ? 'bg-linen-900 border-linen-900' : 'bg-white border-linen-200 group-hover:border-linen-400'}`}
+                      >
+                        {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                      </div>
+                      <span className={`text-[10px] select-none ${isSelected ? 'text-linen-900 font-bold' : 'text-linen-600'}`}>
+                        {p.name} (MOP {p.price})
+                      </span>
+                    </label>
+                  );
+                })}
+                <div className="pt-1 border-t border-linen-200">
+                  <input 
+                    placeholder="Other style..."
+                    name="style"
+                    value={formData.style}
+                    onChange={handleChange}
+                    className="w-full bg-transparent text-[10px] focus:outline-none placeholder:text-linen-300"
+                  />
+                </div>
               </div>
-              <select 
-                name="style"
-                value={products.some(p => p.name === formData.style) ? formData.style : formData.style ? 'custom' : ''}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              >
-                <option value="">Select a product...</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name}
-                  </option>
-                ))}
-                <option value="custom">Custom Product...</option>
-              </select>
+              
+              <div className="pt-2 space-y-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌內容 (Nameplate Content)</label>
+                <input 
+                  name="nameplateContent"
+                  value={formData.nameplateContent}
+                  onChange={handleChange}
+                  className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+                />
+              </div>
+
+              <div className="pt-2">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">總計 (Total Price)</label>
+                  <input 
+                    type="number"
+                    name="totalPrice"
+                    value={formData.totalPrice}
+                    onChange={handleChange}
+                    className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="md:col-span-8 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font Selection)</label>
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-2 border border-linen-100 p-2 bg-linen-50/30">
-                {DEFAULT_FONts.map(font => (
-                  <button
-                    key={font.name}
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, nameplateFont: font.name }))}
-                    className={`aspect-square border flex flex-col items-center justify-center p-1 transition-all ${formData.nameplateFont === font.name ? 'border-linen-900 bg-linen-100 shadow-inner' : 'border-linen-100 bg-white hover:border-linen-400'}`}
-                    title={font.name}
-                  >
-                    <div className="flex-1 w-full flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={font.imageUrl} 
-                        alt={font.name} 
-                        className="max-w-full max-h-full object-contain"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                    <span className="text-[6px] font-bold uppercase truncate w-full text-center mt-0.5">{font.name}</span>
-                  </button>
-                ))}
+            <div className="md:col-span-9 space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font Selection)</label>
+                <select
+                  value={formData.nameplateFont}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nameplateFont: e.target.value }))}
+                  className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+                >
+                  <option value="">選擇字型...</option>
+                  {DEFAULT_FONts.map(font => (
+                    <option key={font.name} value={font.name}>{font.name}</option>
+                  ))}
+                </select>
               </div>
+
               {formData.nameplateFont && (
-                <p className="text-[8px] font-bold text-linen-900 uppercase tracking-widest mt-1">Current Choice: {formData.nameplateFont}</p>
-              )}
-            </div>
-
-            <div className="md:col-span-4 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌內容 (Nameplate Content)</label>
-              <input 
-                name="nameplateContent"
-                value={formData.nameplateContent}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
-            </div>
-
-            {/* Dynamic Options */}
-            {selectedProduct && selectedProduct.options?.length > 0 && (
-              <div className="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-linen-50/50 border border-linen-50">
-                {selectedProduct.options.map((opt, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <label className="text-[8px] font-bold uppercase tracking-widest text-linen-500">{opt.name}</label>
-                    <select
-                      value={selectedOptions[opt.name] || ''}
-                      onChange={(e) => handleOptionChange(opt.name, e.target.value)}
-                      className="w-full bg-white border border-linen-100 px-2 py-1 text-xs focus:outline-none focus:border-linen-900"
-                    >
-                      <option value="">Select {opt.name}...</option>
-                      {opt.values.map((val, vIdx) => (
-                        <option key={vIdx} value={val}>{val}</option>
-                      ))}
-                    </select>
+                <div className="border border-linen-100 bg-white p-2 h-32 flex items-center justify-center relative group">
+                  <img 
+                    src={DEFAULT_FONts.find(f => f.name === formData.nameplateFont)?.imageUrl} 
+                    alt={formData.nameplateFont} 
+                    className="max-w-full max-h-full object-contain"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-1 right-1 bg-white/80 px-2 py-0.5 border border-linen-100 text-[8px] font-bold uppercase tracking-widest text-linen-900">
+                    Preview: {formData.nameplateFont}
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="md:col-span-6 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">訂單描述 (Description)</label>
-              <input 
-                name="orderDescription"
-                value={formData.orderDescription}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
-            </div>
-
-            <div className="md:col-span-6 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">選項 (Options)</label>
-              <input 
-                name="options"
-                value={formData.options}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
-            </div>
-
-            <div className="md:col-span-3 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">單價 (Unit Price)</label>
-              <input 
-                type="number"
-                name="unitPrice"
-                value={formData.unitPrice}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
-            </div>
-            <div className="md:col-span-3 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">總價 (Total Price)</label>
-              <input 
-                type="number"
-                name="totalPrice"
-                value={formData.totalPrice}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              />
-            </div>
-            <div className="md:col-span-6 space-y-1">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">訂單狀態 (Status)</label>
-              <select 
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
-              >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="delivered">Delivered</option>
-              </select>
+                </div>
+              )}
+              
+              {!formData.nameplateFont && (
+                <div className="border border-dashed border-linen-100 bg-linen-50/30 h-32 flex items-center justify-center">
+                  <span className="text-[10px] text-linen-300 uppercase tracking-widest italic">Please select a font to see preview</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* REMARKS & TERMS */}
-          <div className="space-y-4">
-            <div className="bg-linen-50 p-4 space-y-2 border border-linen-100">
-              <h4 className="text-[9px] font-bold uppercase tracking-widest text-linen-800">備註 (Remarks)</h4>
-              <ul className="text-[10px] text-linen-600 space-y-1 list-disc pl-4 leading-tight">
-                <li>請把照片4:3 原圖 傳送到造白美學館之微信或電郵;</li>
-                <li>資料齊全後方可進行下一工序，其製作時間約 3 個月；</li>
-                <li>作品完成後，本館會立刻安排交收。</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-[9px] font-bold uppercase tracking-widest text-linen-800">條款及細則 (Terms & Conditions)</h4>
-              <div className="text-[9px] text-linen-400 leading-tight space-y-1 max-h-24 overflow-y-auto border border-linen-50 p-3">
-                <p>1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；</p>
-                <p>2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；</p>
-                <p>3. 客製化作品一律不接受退換，恕不退款；</p>
-                <p>4. 如因原料有延長或縮短製作期，仍以實際情況為主，不便之處敬請見諒；</p>
-                <p>5. 如作品有任何瑕疵，客戶必須在收貨後的7天內以文字形式通知造白美學館；</p>
-                <p>6. 本司保留一切權利，可於任何時間及不時更改、增加、減少及／或修改本條款及細則，無需作出通知。</p>
-              </div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* SIGNATURE */}
-          <div className="space-y-3 border-l border-linen-100 pl-6">
+          <div className="space-y-2 col-span-2">
             <div className="flex justify-between items-end">
               <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">客戶簽署 (Client Signature)</label>
-              <button 
-                type="button"
-                onClick={clearSignature}
-                className="text-[8px] uppercase tracking-widest text-linen-400 hover:text-red-500"
-              >
-                Clear
-              </button>
+              <div className="flex gap-4 items-center">
+                {formData.signatureTime && (
+                  <p className="text-[8px] text-linen-400 uppercase tracking-widest">
+                    Signed at: {formData.signatureTime}
+                  </p>
+                )}
+                <button 
+                  type="button"
+                  onClick={clearSignature}
+                  className="text-[8px] uppercase tracking-widest text-linen-400 hover:text-red-500"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
             
-            <div className="border border-linen-200 bg-linen-50/30 rounded-sm overflow-hidden">
+            <div className="border border-linen-200 bg-linen-50/30 rounded-sm overflow-hidden h-16">
               <SignaturePad 
                 ref={sigPad}
                 onEnd={saveSignature}
                 penColor="#1a1a1a"
-                className="w-full h-32 cursor-crosshair"
-                style={{ width: '100%', height: '128px' }}
+                className="w-full h-full cursor-crosshair"
+                style={{ width: '100%', height: '100%' }}
               />
             </div>
-            
-            {formData.signatureTime && (
-              <p className="text-[8px] text-linen-400 uppercase tracking-widest">
-                Signed at: {formData.signatureTime}
-              </p>
-            )}
           </div>
         </div>
 
-        <div className="flex gap-4 pt-4 border-t border-linen-100">
+        <div className="flex gap-4 pt-2 border-t border-linen-100">
           <button 
             type="button"
             onClick={onCancel}
