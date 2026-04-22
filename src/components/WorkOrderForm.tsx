@@ -49,6 +49,14 @@ interface Product {
   options: ProductOption[];
 }
 
+interface Discount {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  applicableProductIds: string[];
+}
+
 interface WorkOrderFormProps {
   onSuccess: () => void;
   onCancel: () => void;
@@ -58,6 +66,7 @@ interface WorkOrderFormProps {
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const sigPad = useRef<SignaturePadRef>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const DEFAULT_FONts = [
@@ -81,6 +90,11 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       const productsSnapshot = await getDocs(productsQuery);
       const fetchedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
       setProducts(fetchedProducts);
+
+      // Fetch Discounts
+      const discountsQuery = query(collection(db, 'discounts'), where('ownerUid', '==', auth.currentUser.uid));
+      const discountsSnapshot = await getDocs(discountsQuery);
+      setDiscounts(discountsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Discount)));
 
       // If editing, try to find the selected product
       if (initialData?.style) {
@@ -118,6 +132,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     wechatId: initialData?.wechatId || '',
     estimatedCompletionDate: initialData?.estimatedCompletionDate || getThreeMonthsLater(),
     style: initialData?.style || '',
+    couponCode: initialData?.couponCode || '',
     nameplateFont: initialData?.nameplateFont || '',
     nameplateContent: initialData?.nameplateContent || '',
     totalPrice: initialData?.totalPrice || '',
@@ -129,6 +144,24 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const calculateTotal = (styleString: string, coupon: string) => {
+    const selectedStyleNames = styleString.split(', ').filter(s => s !== '');
+    const baseTotal = products
+      .filter(p => selectedStyleNames.includes(p.name))
+      .reduce((sum, p) => sum + p.price, 0);
+
+    if (baseTotal === 0) return formData.totalPrice;
+
+    const discount = discounts.find(d => d.code.toUpperCase() === coupon.toUpperCase().trim());
+    if (!discount) return baseTotal.toString();
+
+    if (discount.type === 'percentage') {
+      return Math.round(baseTotal * (1 - discount.value / 100)).toString();
+    } else {
+      return Math.max(0, baseTotal - discount.value).toString();
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
@@ -136,15 +169,27 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       const product = products.find(p => p.name === value);
       if (product) {
         setSelectedProduct(product);
-        setFormData(prev => ({ 
-          ...prev, 
-          style: value,
-          totalPrice: product.price.toString()
-        }));
+        setFormData(prev => {
+          const newStyle = value;
+          return { 
+            ...prev, 
+            style: newStyle,
+            totalPrice: calculateTotal(newStyle, prev.couponCode)
+          };
+        });
         return;
       } else if (value === 'custom') {
         setSelectedProduct(null);
       }
+    }
+
+    if (name === 'couponCode') {
+      setFormData(prev => ({
+        ...prev,
+        couponCode: value,
+        totalPrice: calculateTotal(prev.style, value)
+      }));
+      return;
     }
     
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -162,15 +207,10 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
     const styleString = newStyles.join(', ');
     
-    // Sum prices of selected products
-    const total = products
-      .filter(p => newStyles.includes(p.name))
-      .reduce((sum, p) => sum + p.price, 0);
-
     setFormData(prev => ({
       ...prev,
       style: styleString,
-      totalPrice: total > 0 ? total.toString() : (newStyles.length === 0 ? '' : prev.totalPrice)
+      totalPrice: calculateTotal(styleString, prev.couponCode)
     }));
   };
 
@@ -337,7 +377,20 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
                 />
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">優惠碼 (Coupon)</label>
+                  <input 
+                    name="couponCode"
+                    value={formData.couponCode}
+                    onChange={handleChange}
+                    placeholder="Enter code..."
+                    className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors uppercase"
+                  />
+                  {formData.couponCode && discounts.find(d => d.code.toUpperCase() === formData.couponCode.toUpperCase().trim()) && (
+                    <p className="text-[7px] text-green-600 font-bold uppercase tracking-widest mt-0.5">Applied!</p>
+                  )}
+                </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">總計 (Total Price)</label>
                   <input 
@@ -345,7 +398,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
                     name="totalPrice"
                     value={formData.totalPrice}
                     onChange={handleChange}
-                    className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors"
+                    className="w-full bg-linen-50 border border-linen-100 px-3 py-1 text-sm focus:outline-none focus:border-linen-900 transition-colors font-bold"
                   />
                 </div>
               </div>
