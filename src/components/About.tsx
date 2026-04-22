@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Language } from '@/App';
+import { Language } from '@/types';
 
 interface AboutProps {
   lang: Language;
