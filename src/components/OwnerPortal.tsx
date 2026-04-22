@@ -255,7 +255,7 @@ const OwnerPortal: React.FC = () => {
 
   const exportSingleOrderToJPG = async (order: any) => {
     setPrintingOrder(order);
-    // Wait for state to update and render
+    // Wait longer for images to load
     setTimeout(async () => {
       const element = document.getElementById('printable-order');
       if (!element) return;
@@ -263,7 +263,8 @@ const OwnerPortal: React.FC = () => {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        allowTaint: true
       });
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       const link = document.createElement('a');
@@ -271,7 +272,7 @@ const OwnerPortal: React.FC = () => {
       link.href = dataUrl;
       link.click();
       setPrintingOrder(null);
-    }, 500);
+    }, 1500);
   };
 
   const printOrder = (order: any) => {
@@ -657,7 +658,7 @@ const OwnerPortal: React.FC = () => {
               </div>
 
               {/* Price & Coupon */}
-              <div className="flex justify-between items-end pt-8">
+              <div className="flex justify-between items-end pt-8 pb-8 border-b border-neutral-100">
                 <div className="space-y-4">
                    <div className="space-y-1">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Estimated Delivery</label>
@@ -676,11 +677,27 @@ const OwnerPortal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Minimalist Remarks */}
-              <div className="pt-16 space-y-6 opacity-60">
-                <p className="text-[10px] leading-relaxed max-w-2xl">
-                  * 作品製作時間約 3 個月。請提供 4:3 原圖照片。客製化作品一律不接受退換，恕不退款。收貨後 7 天內如有瑕疵請通知本館。
-                </p>
+              {/* Enhanced Remarks & Terms */}
+              <div className="grid grid-cols-2 gap-12 pt-8">
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-800">備註 (Remarks)</h4>
+                  <ul className="text-[11px] text-neutral-500 space-y-2 list-disc pl-5 leading-relaxed">
+                    <li>請把照片4:3 原圖 傳送到造白美學館之微信或電郵;</li>
+                    <li>資料齊全後方可進行下一工序，其製作時間約 3 個月；</li>
+                    <li>作品完成後，本館會立刻安排交收。</li>
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-800">條款及細則 (Terms & Conditions)</h4>
+                  <div className="text-[10px] text-neutral-400 leading-tight space-y-1.5">
+                    <p>1. 本訂單一經簽名確認，即表示客戶已閱讀並同意本服務條款；</p>
+                    <p>2. 基於客製化作品特性，訂單一經確認，無法取消或變更製作內容；</p>
+                    <p>3. 客製化作品一律不接受退換，恕不退款；</p>
+                    <p>4. 製作期仍以實際情況為主；</p>
+                    <p>5. 如有任何瑕疵，客戶必須在收貨後7天內以文字形式通知本館；</p>
+                    <p>6. 本司保留對條款及細則之最終解釋權。</p>
+                  </div>
+                </div>
               </div>
             </div>
 
