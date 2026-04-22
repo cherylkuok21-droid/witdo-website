@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import SignatureCanvas from 'react-signature-canvas';
+import SignaturePad, { SignaturePadRef } from './SignaturePad';
 import { db, auth } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
 
@@ -62,7 +62,7 @@ interface WorkOrderFormProps {
 }
 
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
-  const sigPad = useRef<SignatureCanvas>(null);
+  const sigPad = useRef<SignaturePadRef>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [nameTagFonts, setNameTagFonts] = useState<NameTagFont[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -100,6 +100,12 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     };
     fetchData();
   }, [initialData]);
+
+  useEffect(() => {
+    if (initialData?.signatureData && sigPad.current) {
+      sigPad.current.fromDataURL(initialData.signatureData);
+    }
+  }, [initialData, sigPad.current]);
 
   const generateOrderId = () => {
     const date = new Date();
@@ -178,7 +184,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
   const saveSignature = () => {
     if (sigPad.current?.isEmpty()) return;
-    const data = sigPad.current?.getTrimmedCanvas().toDataURL('image/png');
+    const data = sigPad.current?.toDataURL('image/png');
     setFormData(prev => ({ 
       ...prev, 
       signatureData: data || '', 
@@ -463,14 +469,12 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
             </div>
             
             <div className="border border-linen-200 bg-linen-50/30 rounded-sm overflow-hidden">
-              <SignatureCanvas 
+              <SignaturePad 
                 ref={sigPad}
                 onEnd={saveSignature}
                 penColor="#1a1a1a"
-                canvasProps={{
-                  className: "w-full h-32 cursor-crosshair",
-                  style: { width: '100%', height: '128px' }
-                }}
+                className="w-full h-32 cursor-crosshair"
+                style={{ width: '100%', height: '128px' }}
               />
             </div>
             
