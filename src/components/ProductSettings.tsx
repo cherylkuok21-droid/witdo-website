@@ -410,7 +410,7 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       ) : activeTab === 'nametags' ? (
         <div className="space-y-8">
           <div className="flex justify-between items-center">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Name Tag Fonts</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-linen-800">Studio Name Tag Fonts</h3>
             <button 
               onClick={() => {
                 setEditingNameTagFont({ name: '', imageUrl: '' });
@@ -418,8 +418,35 @@ const ProductSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               }}
               className="text-[10px] font-bold uppercase tracking-widest bg-linen-900 text-white px-4 py-2 hover:bg-linen-800 transition-all"
             >
-              + Add Font
+              + Add Custom Font
             </button>
+          </div>
+
+          <div className="bg-linen-50/50 p-6 border border-linen-100 rounded-sm space-y-4">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-600">Style Templates (Select an image to add)</h4>
+            <div className="grid grid-cols-3 gap-6">
+              {DEFAULT_FONT_IMAGES.map((url, idx) => (
+                <div key={idx} className="space-y-3">
+                  <div className="aspect-[3/2] bg-white border border-linen-200 flex items-center justify-center p-2 rounded-sm group relative overflow-hidden">
+                    <img 
+                      src={url} 
+                      alt={`Template ${idx + 1}`} 
+                      className="max-w-full max-h-full object-contain"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-linen-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button 
+                        onClick={() => setEditingNameTagFont({ name: `Style ${idx + 1}`, imageUrl: url })}
+                        className="bg-white text-linen-900 px-4 py-2 text-[9px] font-bold uppercase tracking-widest hover:bg-linen-100"
+                      >
+                        Add this Style
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-center uppercase tracking-widest text-linen-400 font-bold">Option {idx + 1}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
