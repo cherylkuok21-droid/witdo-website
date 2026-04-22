@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Language } from '@/App';
+import { Language } from '@/types';
 
 interface FooterProps {
   lang: Language;
