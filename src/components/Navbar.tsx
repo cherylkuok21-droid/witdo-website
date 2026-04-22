@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Language, Page } from '@/App';
+import { Language, Page } from '@/types';
 
 interface NavbarProps {
   scrolled: boolean;
