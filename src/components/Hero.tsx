@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Language } from '../App';
+import { useNavigate, Link } from 'react-router-dom';
+import { Language } from '@/App';
 
 interface HeroProps {
   lang: Language;
@@ -62,21 +62,21 @@ const Hero: React.FC<HeroProps> = ({ lang }) => {
           </h1>
           
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16">
-            <button 
-              onClick={() => navigate('/why')}
+            <Link 
+              to="/why"
               className="group relative text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-linen-900 py-2"
             >
               {content[lang].btn1}
               <span className="absolute bottom-0 left-0 w-6 md:w-8 h-px bg-linen-900 transition-all group-hover:w-full"></span>
-            </button>
+            </Link>
             
-            <button 
-              onClick={() => navigate('/studio')}
+            <Link 
+              to="/studio"
               className="group relative text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-linen-900 py-2"
             >
               {content[lang].btn2}
               <span className="absolute bottom-0 left-0 w-6 md:w-8 h-px bg-linen-900 transition-all group-hover:w-full"></span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
