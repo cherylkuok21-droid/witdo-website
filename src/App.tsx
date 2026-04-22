@@ -11,9 +11,10 @@ import CaringTips from './components/CaringTips';
 import Footer from './components/Footer';
 import Designs from './components/Designs';
 import GiftCards from './components/GiftCards';
-import OwnerPortal from './components/OwnerPortal';
 
-import { Language, Page, Category } from './types';
+const OwnerPortal = lazy(() => import('./components/OwnerPortal'));
+
+import { Language, Page, Category } from '@/types';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -48,49 +49,51 @@ const AppContent: React.FC = () => {
         setLang={setLang} 
       />
       <main className={`flex-grow ${isHome ? '' : 'pt-16'}`}>
-        <Routes>
-          <Route path="/" element={<Hero lang={lang} />} />
-          <Route path="/why" element={
-            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-              <WhyWitdo lang={lang} />
-            </section>
-          } />
-          <Route path="/designs" element={
-            <section className="py-32 bg-linen-100 px-6 fade-in min-h-[80vh]">
-              <div className="max-w-7xl mx-auto w-full">
-                <Designs lang={lang} initialCategory={initialCategory} />
-              </div>
-            </section>
-          } />
-          <Route path="/about" element={
-            <section className="px-8 md:px-12 max-w-7xl mx-auto fade-in">
-              <About lang={lang} />
-            </section>
-          } />
-          <Route path="/studio" element={
-            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-              <Location lang={lang} />
-            </section>
-          } />
-          <Route path="/care" element={
-            <section className="py-32 px-6 max-w-7xl mx-auto fade-in">
-              <CaringTips lang={lang} />
-            </section>
-          } />
-          <Route path="/faq" element={
-            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-              <FAQ lang={lang} />
-            </section>
-          } />
-          <Route path="/giftcards" element={
-            <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
-              <GiftCards lang={lang} />
-            </section>
-          } />
-          <Route path="/witdo-studio-management" element={
-            <OwnerPortal />
-          } />
-        </Routes>
+        <Suspense fallback={<div className="min-h-screen bg-linen-100 flex items-center justify-center"><div className="w-8 h-8 border-2 border-linen-900 border-t-transparent rounded-full animate-spin"></div></div>}>
+          <Routes>
+            <Route path="/" element={<Hero lang={lang} />} />
+            <Route path="/why" element={
+              <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+                <WhyWitdo lang={lang} />
+              </section>
+            } />
+            <Route path="/designs" element={
+              <section className="py-32 bg-linen-100 px-6 fade-in min-h-[80vh]">
+                <div className="max-w-7xl mx-auto w-full">
+                  <Designs lang={lang} initialCategory={initialCategory} />
+                </div>
+              </section>
+            } />
+            <Route path="/about" element={
+              <section className="px-8 md:px-12 max-w-7xl mx-auto fade-in">
+                <About lang={lang} />
+              </section>
+            } />
+            <Route path="/studio" element={
+              <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+                <Location lang={lang} />
+              </section>
+            } />
+            <Route path="/care" element={
+              <section className="py-32 px-6 max-w-7xl mx-auto fade-in">
+                <CaringTips lang={lang} />
+              </section>
+            } />
+            <Route path="/faq" element={
+              <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+                <FAQ lang={lang} />
+              </section>
+            } />
+            <Route path="/giftcards" element={
+              <section className="py-16 md:py-32 px-8 md:px-12 max-w-7xl mx-auto fade-in">
+                <GiftCards lang={lang} />
+              </section>
+            } />
+            <Route path="/witdo-studio-management" element={
+              <OwnerPortal />
+            } />
+          </Routes>
+        </Suspense>
       </main>
       <Footer lang={lang} />
     </div>
