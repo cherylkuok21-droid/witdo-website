@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { Language } from '../App';
+import { Language } from '@/App';
 
 interface LocationProps {
   lang: Language;
