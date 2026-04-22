@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Language, Category } from '@/App';
+import { Language, Category } from '@/types';
 
 interface DesignsProps {
   lang: Language;
