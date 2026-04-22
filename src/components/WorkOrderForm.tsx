@@ -49,12 +49,6 @@ interface Product {
   options: ProductOption[];
 }
 
-interface NameTagFont {
-  id: string;
-  name: string;
-  imageUrl: string;
-}
-
 interface WorkOrderFormProps {
   onSuccess: () => void;
   onCancel: () => void;
@@ -64,8 +58,19 @@ interface WorkOrderFormProps {
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const sigPad = useRef<SignaturePadRef>(null);
   const [products, setProducts] = useState<Product[]>([]);
-  const [nameTagFonts, setNameTagFonts] = useState<NameTagFont[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const DEFAULT_FONts = [
+    { name: '名牌字型 1', imageUrl: 'https://lh3.googleusercontent.com/d/1ZSP4Y30AIIr3RM3-Y_AocKL9xfvYOimj' },
+    { name: '名牌字型 2', imageUrl: 'https://lh3.googleusercontent.com/d/1USRIUHR_fNR_Pzbo1tToHOzClZkBgG7T' },
+    { name: '名牌字型 3', imageUrl: 'https://lh3.googleusercontent.com/d/1a_ThiLXFprrJ-Ao3YAiDphWVf1Azuudc' },
+    { name: '名牌字型 4', imageUrl: 'https://lh3.googleusercontent.com/d/16MTsK3i_HelpWQ3lQHbjx_Tzfrqj8Y1d' },
+    { name: '名牌字型 5', imageUrl: 'https://lh3.googleusercontent.com/d/1Q6K70SC4JY-8yNFZ0n5IsS8QkoMLjaYC' },
+    { name: '名牌字型 6', imageUrl: 'https://lh3.googleusercontent.com/d/1VwSh0SH4myrF1EGdts8kR1k4YJ2jY2M8' },
+    { name: '名牌字型 7', imageUrl: 'https://lh3.googleusercontent.com/d/1g19O6VjEW_GxEUtfqVxT0jnejPSn2mbC' },
+    { name: '名牌字型 8', imageUrl: 'https://lh3.googleusercontent.com/d/1gF2NQo3K8nY05Ii35o_0OjcTx7SfIE51' },
+    { name: '名牌字型 9', imageUrl: 'https://lh3.googleusercontent.com/d/1r4NrMpCmhI6PTJOoL6CzImk3wu_xAAdn' }
+  ];
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -77,11 +82,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       const productsSnapshot = await getDocs(productsQuery);
       const fetchedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
       setProducts(fetchedProducts);
-
-      // Fetch Name Tag Fonts
-      const fontsQuery = query(collection(db, 'nameTagFonts'), where('ownerUid', '==', auth.currentUser.uid));
-      const fontsSnapshot = await getDocs(fontsQuery);
-      setNameTagFonts(fontsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NameTagFont)));
 
       // If editing, try to find the selected product
       if (initialData?.style) {
@@ -312,9 +312,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
             <div className="md:col-span-8 space-y-1">
               <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">名牌字型 (Font Selection)</label>
               <div className="grid grid-cols-4 md:grid-cols-6 gap-2 border border-linen-100 p-2 bg-linen-50/30">
-                {nameTagFonts.map(font => (
+                {DEFAULT_FONts.map(font => (
                   <button
-                    key={font.id}
+                    key={font.name}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, nameplateFont: font.name }))}
                     className={`aspect-square border flex flex-col items-center justify-center p-1 transition-all ${formData.nameplateFont === font.name ? 'border-linen-900 bg-linen-100 shadow-inner' : 'border-linen-100 bg-white hover:border-linen-400'}`}
@@ -331,17 +331,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
                     <span className="text-[6px] font-bold uppercase truncate w-full text-center mt-0.5">{font.name}</span>
                   </button>
                 ))}
-                {nameTagFonts.length === 0 && (
-                  <div className="col-span-full">
-                    <input 
-                      name="nameplateFont"
-                      placeholder="Type font name manually..."
-                      value={formData.nameplateFont}
-                      onChange={handleChange}
-                      className="w-full bg-transparent px-2 py-1 text-xs focus:outline-none border-b border-linen-100"
-                    />
-                  </div>
-                )}
               </div>
               {formData.nameplateFont && (
                 <p className="text-[8px] font-bold text-linen-900 uppercase tracking-widest mt-1">Current Choice: {formData.nameplateFont}</p>
