@@ -3,7 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, db } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { collection, query, orderBy, onSnapshot, where, Timestamp, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where, deleteDoc, doc } from 'firebase/firestore';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
+
+import WorkOrderForm from './WorkOrderForm';
+import ProductSettings from './ProductSettings';
 
 enum OperationType {
   CREATE = 'create',
@@ -36,11 +42,6 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
-import WorkOrderForm from './WorkOrderForm';
-import ProductSettings from './ProductSettings';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 
 const OwnerPortal: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
