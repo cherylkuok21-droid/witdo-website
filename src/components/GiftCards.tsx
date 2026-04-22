@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Language } from '@/App';
+import { Language } from '@/types';
 
 interface GiftCardsProps {
   lang: Language;
