@@ -241,8 +241,19 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     }
 
     try {
+      // Auto-capture signature if it's there but not saved
+      let currentSignature = formData.signatureData;
+      let currentSignatureTime = formData.signatureTime;
+      
+      if (!currentSignature && sigPad.current && !sigPad.current.isEmpty()) {
+        currentSignature = sigPad.current.toDataURL('image/png');
+        currentSignatureTime = new Date().toLocaleString();
+      }
+
       const finalData = {
         ...formData,
+        signatureData: currentSignature,
+        signatureTime: currentSignatureTime,
         totalPrice: Number(formData.totalPrice) || 0,
         updatedAt: serverTimestamp(),
         ownerUid: auth.currentUser.uid,
