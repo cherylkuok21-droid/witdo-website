@@ -193,19 +193,23 @@ const OwnerPortal: React.FC = () => {
       headStyles: { fillColor: [40, 40, 40] }
     });
 
+    const tableBody = [
+      ['Style (款式)', order.style],
+      ['Font (名牌字型)', order.nameplateFont || '-'],
+      ['Content (名牌內容)', order.nameplateContent || '-'],
+    ];
+
+    if (order.couponCode) {
+      tableBody.push(['Coupon (優惠碼)', order.couponCode]);
+    }
+
+    tableBody.push(['Total Price (總價)', `MOP ${order.totalPrice}`]);
+
     // Order Details Table
     autoTable(doc, {
       startY: (doc as any).lastAutoTable.finalY + 10,
       head: [['Order Details', 'Value']],
-      body: [
-        ['Style (款式)', order.style],
-        ['Font (名牌字型)', order.nameplateFont],
-        ['Content (名牌內容)', order.nameplateContent],
-        ['Description (訂單內容)', order.orderDescription],
-        ['Options (選項)', order.options],
-        ['Unit Price (單價)', `$${order.unitPrice}`],
-        ['Total Price (總價)', `$${order.totalPrice}`],
-      ],
+      body: tableBody,
       theme: 'grid',
       headStyles: { fillColor: [40, 40, 40] }
     });
@@ -243,7 +247,12 @@ const OwnerPortal: React.FC = () => {
     setTimeout(async () => {
       const element = document.getElementById('printable-order');
       if (!element) return;
-      const canvas = await html2canvas(element, { scale: 2 });
+      const canvas = await html2canvas(element, { 
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       const link = document.createElement('a');
       link.download = `Order-${order.workOrderId}.jpg`;
@@ -551,124 +560,141 @@ const OwnerPortal: React.FC = () => {
       {/* Hidden Printable Order */}
       {printingOrder && (
         <div className="fixed left-[-9999px] top-0">
-          <div id="printable-order" className="w-[210mm] min-h-[297mm] bg-white p-[15mm] text-linen-900 font-sans">
-            {/* Header */}
-            <div className="flex justify-between items-start border-b-2 border-linen-900 pb-6 mb-8">
-              <div className="space-y-1">
-                <h2 className="text-3xl serif italic font-bold text-linen-900">造白美學館</h2>
-                <p className="text-[10px] uppercase tracking-[0.4em] text-linen-500">Witdo Studio • Art of Casting</p>
-                <div className="pt-2 text-[9px] text-linen-400 space-y-0.5">
-                  <p>Instagram: @witdo.macau</p>
-                  <p>Email: mo.witdo@gmail.com</p>
-                </div>
-              </div>
-              <div className="text-right space-y-2">
-                <div className="bg-linen-900 text-white px-4 py-2 inline-block">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest mb-1">訂單編號 (Order ID)</h3>
-                  <p className="text-lg font-mono font-bold leading-none">{printingOrder.workOrderId}</p>
-                </div>
-                <p className="text-[10px] text-linen-400 uppercase tracking-widest">
-                  日期: {printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}
-                </p>
+          <div id="printable-order" className="w-[1080px] h-[1920px] bg-white p-16 text-linen-900 font-sans flex flex-col">
+            {/* Header with Logo */}
+            <div className="flex flex-col items-center text-center space-y-6 mb-12 border-b-2 border-linen-900 pb-12">
+              <img 
+                src="https://lh3.googleusercontent.com/d/1B1FyUmmR92prZmcurZrLoEuxwe1r0HfN" 
+                alt="Witdo Studio Logo" 
+                className="h-48 object-contain"
+                referrerPolicy="no-referrer"
+              />
+              <div>
+                <h2 className="text-5xl serif italic font-bold text-linen-900 tracking-tight">造白美學館</h2>
+                <p className="text-sm uppercase tracking-[0.6em] text-linen-500 mt-2">Witdo Studio • Art of Casting</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-12 gap-y-8 mb-8">
+            {/* Order Identity Area */}
+            <div className="flex justify-between items-end mb-12">
+              <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-linen-400">Order Information</p>
+                <div className="flex items-center gap-4">
+                  <div className="bg-linen-900 text-white px-6 py-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">OrderID</p>
+                    <p className="text-3xl font-mono font-bold">{printingOrder.workOrderId}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-linen-400">Date</p>
+                    <p className="text-xl font-bold">{printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="inline-block border-2 border-linen-900 px-4 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-linen-900">{printingOrder.status?.toUpperCase() || 'PENDING'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-12">
               {/* Customer Section */}
-              <div className="space-y-4">
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-linen-900 border-b border-linen-200 pb-1">客戶資料 (Customer Info)</h3>
-                <div className="grid grid-cols-[80px_1fr] gap-y-2 text-sm">
-                  <span className="text-[10px] font-bold uppercase text-linen-400 self-center">姓名</span>
-                  <span className="border-b border-linen-100 pb-1">{printingOrder.customerName}</span>
-                  
-                  <span className="text-[10px] font-bold uppercase text-linen-400 self-center">微信號</span>
-                  <span className="border-b border-linen-100 pb-1">{printingOrder.wechatId}</span>
-                  
-                  <span className="text-[10px] font-bold uppercase text-linen-400 self-center">預計完成日</span>
-                  <span className="border-b border-linen-100 pb-1">{printingOrder.estimatedCompletionDate}</span>
+              <div className="grid grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-linen-900 border-b-2 border-linen-100 pb-2">客戶資料 (Customer)</h3>
+                  <div className="space-y-4">
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest block mb-1">姓名 (Name)</label>
+                      <p className="text-2xl font-medium border-b border-linen-50 pb-2">{printingOrder.customerName}</p>
+                    </div>
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest block mb-1">微信號 (WeChat)</label>
+                      <p className="text-2xl font-medium border-b border-linen-50 pb-2">{printingOrder.wechatId}</p>
+                    </div>
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest block mb-1">預計完成日 (Est. Date)</label>
+                      <p className="text-2xl font-medium border-b border-linen-50 pb-2">{printingOrder.estimatedCompletionDate}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-linen-900 border-b-2 border-linen-100 pb-2">訂單摘要 (Summary)</h3>
+                  <div className="space-y-4">
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest block mb-1">款式 (Style)</label>
+                      <p className="text-xl font-bold border-b border-linen-50 pb-2 leading-tight">{printingOrder.style}</p>
+                    </div>
+                    {printingOrder.couponCode && (
+                      <div className="group">
+                        <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest block mb-1">優惠碼 (Coupon)</label>
+                        <p className="text-xl font-medium border-b border-linen-50 pb-2">{printingOrder.couponCode}</p>
+                      </div>
+                    )}
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest block mb-1">總計 (Total)</label>
+                      <p className="text-4xl font-bold text-linen-900">MOP {printingOrder.totalPrice}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Summary Section */}
-              <div className="space-y-4">
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-linen-900 border-b border-linen-200 pb-1">訂單摘要 (Summary)</h3>
-                <div className="grid grid-cols-[80px_1fr] gap-y-2 text-sm">
-                  <span className="text-[10px] font-bold uppercase text-linen-400 self-center">款式</span>
-                  <span className="border-b border-linen-100 pb-1 font-bold">{printingOrder.style}</span>
-                  
-                  <span className="text-[10px] font-bold uppercase text-linen-400 self-center">單價</span>
-                  <span className="border-b border-linen-100 pb-1">MOP {printingOrder.unitPrice}</span>
-                  
-                  <span className="text-[10px] font-bold uppercase text-linen-400 self-center">總計</span>
-                  <span className="border-b border-linen-100 pb-1 font-bold text-lg">MOP {printingOrder.totalPrice}</span>
+              {/* Detailed Specs */}
+              <div className="space-y-6">
+                <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-linen-900 border-b-2 border-linen-100 pb-2">製作詳情 (Production Details)</h3>
+                <div className="grid grid-cols-2 gap-12">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest">名牌字型 (Font)</label>
+                    <p className="text-xl border-b border-linen-50 pb-2 min-h-[2.5rem]">{printingOrder.nameplateFont || '-'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-linen-400 tracking-widest">名牌內容 (Content)</label>
+                    <p className="text-xl border-b border-linen-50 pb-2 min-h-[2.5rem]">{printingOrder.nameplateContent || '-'}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Detailed Specs */}
-            <div className="space-y-4 mb-8">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-linen-900 border-b border-linen-200 pb-1">製作詳情 (Production Details)</h3>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-4">
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase text-linen-400 tracking-widest">名牌字型 (Font)</label>
-                  <p className="text-sm border-b border-linen-50 pb-1 min-h-[1.5rem]">{printingOrder.nameplateFont || '-'}</p>
+              {/* Remarks & Terms */}
+              <div className="space-y-8">
+                <div className="bg-linen-50/50 p-8 border border-linen-100 space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-linen-800">備註 (Remarks)</h4>
+                  <ul className="text-xs text-linen-600 space-y-2 list-disc pl-5 leading-relaxed">
+                    <li>請把照片4:3 原圖 傳送到造白美學館之微信或電郵;</li>
+                    <li>資料齊全後方可進行下一工序，其製作時間約 3 個月；</li>
+                    <li>作品完成後，本館會立刻安排交收。</li>
+                  </ul>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase text-linen-400 tracking-widest">名牌內容 (Content)</label>
-                  <p className="text-sm border-b border-linen-50 pb-1 min-h-[1.5rem]">{printingOrder.nameplateContent || '-'}</p>
-                </div>
-                <div className="space-y-1 col-span-2">
-                  <label className="text-[9px] font-bold uppercase text-linen-400 tracking-widest">選項 (Options)</label>
-                  <p className="text-sm border-b border-linen-50 pb-1 min-h-[1.5rem]">{printingOrder.options || '-'}</p>
-                </div>
-                <div className="space-y-1 col-span-2">
-                  <label className="text-[9px] font-bold uppercase text-linen-400 tracking-widest">訂單描述 (Description)</label>
-                  <p className="text-sm border-b border-linen-50 pb-1 min-h-[1.5rem]">{printingOrder.orderDescription || '-'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Remarks & Terms */}
-            <div className="grid grid-cols-[1.2fr_1fr] gap-8 mb-8">
-              <div className="bg-linen-50/50 p-4 border border-linen-100 space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-800">備註 (Remarks)</h4>
-                <ul className="text-[10px] text-linen-600 space-y-1.5 list-disc pl-4 leading-tight">
-                  <li>請把照片4:3 原圖 傳送到造白美學館之微信或電郵;</li>
-                  <li>資料齊全後方可進行下一工序，其製作時間約 3 個月；</li>
-                  <li>作品完成後，本館會立刻安排交收。</li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-linen-800">條款及細則 (Terms & Conditions)</h4>
-                <div className="text-[9px] text-linen-400 leading-tight space-y-1">
-                  <p>1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；</p>
-                  <p>2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；</p>
-                  <p>3. 客製化作品一律不接受退換，恕不退款；</p>
-                  <p>4. 如因原料有延長或縮短製作期，仍以實際情況為主，不便之處敬請見諒；</p>
-                  <p>5. 如作品有任何瑕疵，客戶必須在收貨後的7天內以文字形式通知造白美學館；</p>
-                  <p>6. 本司保留一切權利，可於任何時間及不時更改、增加、減少及／或修改本條款及細則，無需作出通知。</p>
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-linen-800 underline decoration-linen-200">條款及細則 (Terms & Conditions)</h4>
+                  <div className="text-[11px] text-linen-400 leading-relaxed space-y-2 text-justify">
+                    <p>1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；</p>
+                    <p>2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；</p>
+                    <p>3. 客製化作品一律不接受退換，恕不退款；</p>
+                    <p>4. 如因原料有延長或縮短製作期，仍以實際情況為主，不便之處敬請見諒；</p>
+                    <p>5. 如作品有任何瑕疵，客戶必須在收貨後的7天內以文字形式通知造白美學館；</p>
+                    <p>6. 本司保留一切權利，可於任何時間及不時更改、增加、減少及／或修改本條款及細則，無需作出通知。</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Signature Area */}
-            <div className="mt-auto pt-8 border-t-2 border-linen-900 flex justify-between items-end">
-              <div className="space-y-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-linen-500">客戶簽署 (Client Signature)</p>
+            <div className="mt-auto pt-12 border-t-4 border-linen-900 flex justify-between items-end">
+              <div className="space-y-6">
+                <p className="text-xs font-bold uppercase tracking-widest text-linen-500">客戶簽署 (Client Signature)</p>
                 {printingOrder.signatureData ? (
-                  <div className="space-y-2">
-                    <img src={printingOrder.signatureData} alt="Signature" className="h-20 object-contain" />
-                    <p className="text-[8px] text-linen-300 uppercase tracking-widest">Signed at: {printingOrder.signatureTime}</p>
+                  <div className="space-y-3">
+                    <img src={printingOrder.signatureData} alt="Signature" className="h-32 object-contain" />
+                    <p className="text-[10px] text-linen-300 uppercase tracking-widest">Signed at: {printingOrder.signatureTime}</p>
                   </div>
                 ) : (
-                  <div className="h-20 w-48 border-b border-linen-200"></div>
+                  <div className="h-32 w-80 border-b-2 border-linen-200"></div>
                 )}
               </div>
-              <div className="text-right space-y-1">
-                <p className="text-[10px] serif italic text-linen-900 font-bold">造白美學館 Witdo Studio</p>
-                <p className="text-[8px] text-linen-400 uppercase tracking-widest">Official Stamp / Authorized Signature</p>
-                <div className="h-16 w-32 border border-dashed border-linen-200 mt-2 ml-auto flex items-center justify-center">
-                  <span className="text-[8px] text-linen-200 uppercase tracking-widest">Company Stamp</span>
+              <div className="text-right space-y-2">
+                <p className="text-base serif italic text-linen-900 font-bold">造白美學館 Witdo Studio</p>
+                <div className="h-28 w-48 border-2 border-dashed border-linen-100 mt-4 ml-auto flex items-center justify-center bg-linen-50/20">
+                  <span className="text-[10px] text-linen-300 uppercase tracking-widest">Company Stamp</span>
                 </div>
               </div>
             </div>
