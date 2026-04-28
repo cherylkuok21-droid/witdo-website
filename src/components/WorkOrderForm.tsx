@@ -238,22 +238,26 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
     try {
       // Get the absolute latest signature from the pad ref direct to avoid state batching issues
+      // Signature Priority Logic:
       let latestSignature = formData.signatureData;
       let latestSignatureTime = formData.signatureTime;
       
-      // If the pad exists, trust its state over formData for the signature
+      // If the pad exists and the user has drawn something, or if it's explicitly cleared
       if (sigPad.current) {
         if (!sigPad.current.isEmpty()) {
-          latestSignature = sigPad.current.toDataURL('image/png');
-          // Update timestamp if signature changed or was missing
-          if (!latestSignatureTime || latestSignature !== formData.signatureData) {
+          const newData = sigPad.current.toDataURL('image/png');
+          // Only update if the data actually changed from what we have in state
+          if (newData !== formData.signatureData) {
+            latestSignature = newData;
             latestSignatureTime = new Date().toLocaleString();
           }
-        } else if (formData.signatureData) {
-          // If pad is empty but we HAD a signature in formData, it means the user cleared it
+        } else if (!formData.signatureData) {
+          // Pad is empty and we had no signature in state anyway
           latestSignature = '';
           latestSignatureTime = '';
         }
+        // Note: If pad is empty but state HAS a signature, it might mean the pad hasn't initialized 
+        // with the existing signature yet. In that case, we keep the state signature.
       }
 
       // Prepare final data, excluding the internal 'id' if it exists to satisfy Firestore rules
