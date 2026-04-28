@@ -672,31 +672,50 @@ const OwnerPortal: React.FC = () => {
               </div>
             </div>
 
-            {/* Section 4: Commercials */}
-            <div className="flex justify-between items-baseline mb-auto">
-              <div>
-                {/* Minimalist Remarks */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-300">Production Note</label>
-                  <p className="text-[11px] leading-relaxed text-neutral-400 max-w-md">
-                    Handcrafted production requires approximately 90 days. 
-                    Final aesthetics may vary slightly due to the nature of the casting process.
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">Final Investment</label>
-                  <div className="flex items-baseline justify-end gap-3">
+            {/* Section 4: Commercials & Production Note */}
+            <div className="flex justify-between items-baseline mb-20 pb-16 border-b border-neutral-100">
+              <div className="flex-1">
+                <div className="space-y-4">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-300">Final Investment</label>
+                  <div className="flex items-baseline gap-3">
                     <span className="text-2xl font-light text-neutral-400">MOP</span>
                     <p className="text-8xl font-medium tracking-tighter text-neutral-900">{printingOrder.totalPrice}</p>
                   </div>
+                  {printingOrder.couponCode && (
+                    <p className="text-[10px] font-mono text-neutral-300 uppercase tracking-widest">
+                      Promo Applied: {printingOrder.couponCode}
+                    </p>
+                  )}
                 </div>
-                {printingOrder.couponCode && (
-                  <p className="text-[10px] font-mono text-neutral-300 uppercase tracking-widest mt-2">
-                    Promo Applied: {printingOrder.couponCode}
-                  </p>
-                )}
+              </div>
+              <div className="text-right max-w-sm">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-300 block mb-2">Completion Timeline</label>
+                <p className="text-[11px] leading-relaxed text-neutral-400">
+                  Precision handcrafted production requires approximately 90 days from the date of final specification approval.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 5: Remarks & Terms (New Elegant Inclusion) */}
+            <div className="grid grid-cols-2 gap-24 mb-auto">
+              <div className="space-y-6">
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-neutral-900 border-l-2 border-neutral-900 pl-4">備註 Remarks</h4>
+                <div className="space-y-3 text-[11px] leading-relaxed text-neutral-500 pl-4">
+                  <p>• 請把照片 4:3 原圖傳送到造白美學館之微信或電郵；</p>
+                  <p>• 資料齊全後方可進行下一工序，其製作時間約 3 個月；</p>
+                  <p>• 作品完成後，本館會立刻安排交收。</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-neutral-900 border-l-2 border-neutral-200 pl-4">條款及細則 Terms & Conditions</h4>
+                <div className="grid grid-cols-1 gap-2 text-[9px] leading-relaxed text-neutral-400 pl-4">
+                  <p>1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；</p>
+                  <p>2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；</p>
+                  <p>3. 客製化作品一律不接受退換，恕不退款；</p>
+                  <p>4. 如因原料有延長或縮短製作期，仍以實際情況為主，不便之處敬請見諒；</p>
+                  <p>5. 如作品有任何瑕疵，客戶必須在收貨後的 7 天內以文字形式通知造白美學館；</p>
+                  <p>6. 本司保留一切權利，可於任何時間及不時更改、增加、減少及／或修改本條款及細則。</p>
+                </div>
               </div>
             </div>
 
