@@ -37,19 +37,19 @@ service cloud.firestore {
     // Work Orders Validation
     // ===============================================================
     function isValidWorkOrder(data) {
-      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 200 &&
-             data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() <= 200 &&
-             data.style is string && data.style.size() <= 2000 &&
-             (data.couponCode == null || (data.couponCode is string && data.couponCode.size() <= 100)) &&
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 300 &&
+             data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() <= 300 &&
+             data.style is string && data.style.size() <= 5000 &&
+             (data.couponCode == null || (data.couponCode is string && data.couponCode.size() <= 200)) &&
              data.totalPrice is number && data.totalPrice >= 0 &&
              data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
              data.ownerUid is string && data.ownerUid == request.auth.uid &&
-             (data.workOrderId == null || (data.workOrderId is string && data.workOrderId.size() <= 128)) &&
-             (data.nameplateFont == null || (data.nameplateFont is string && data.nameplateFont.size() <= 500)) &&
-             (data.nameplateContent == null || (data.nameplateContent is string && data.nameplateContent.size() <= 1000)) &&
-             (data.estimatedCompletionDate == null || (data.estimatedCompletionDate is string && data.estimatedCompletionDate.size() <= 100)) &&
-             (data.signatureData == null || (data.signatureData is string && data.signatureData.size() <= 2000000)) &&
-             (data.signatureTime == null || (data.signatureTime is string && data.signatureTime.size() <= 200)) &&
+             (data.workOrderId == null || (data.workOrderId is string && data.workOrderId.size() <= 200)) &&
+             (data.nameplateFont == null || (data.nameplateFont is string && data.nameplateFont.size() <= 1000)) &&
+             (data.nameplateContent == null || (data.nameplateContent is string && data.nameplateContent.size() <= 2000)) &&
+             (data.estimatedCompletionDate == null || (data.estimatedCompletionDate is string && data.estimatedCompletionDate.size() <= 200)) &&
+             (data.signatureData == null || (data.signatureData is string && data.signatureData.size() <= 10000000)) && // 10MB for high-res signatures
+             (data.signatureTime == null || (data.signatureTime is string && data.signatureTime.size() <= 300)) &&
              (data.updatedAt == request.time);
     }
 
@@ -71,9 +71,9 @@ service cloud.firestore {
                         // Action: Edit Order Details (if not completed)
                         (existing().status != 'delivered' && 
                          incoming().diff(existing()).affectedKeys().hasOnly([
-                           'customerName', 'wechatId', 'estimatedCompletionDate', 'style', 
+                           'customerName', 'wechatId', 'estimatedCompletionDate', 'style', 'workOrderId',
                            'couponCode', 'nameplateFont', 'nameplateContent', 'totalPrice', 
-                           'status', 'signatureData', 'signatureTime', 'updatedAt'
+                           'status', 'signatureData', 'signatureTime', 'updatedAt', 'orderDate'
                          ]))
                       );
       
