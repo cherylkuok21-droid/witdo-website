@@ -3,147 +3,115 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // ===============================================================
-    // Assumed Data Model
+    // Global Safety Net & Helpers
     // ===============================================================
-    //
-    // Collection: workOrders
-    // Document ID: auto-generated
-    // Fields:
-    //   - customerName: string (required)
-    //   - wechatId: string (required)
-    //   - estimatedCompletionDate: string (optional)
-    //   - style: string (required)
-    //   - nameplateFont: string (optional)
-    //   - nameplateContent: string (optional)
-    //   - orderDescription: string (optional)
-    //   - options: string (optional)
-    //   - unitPrice: number (optional)
-    //   - totalPrice: number (required)
-    //   - orderDate: timestamp (required)
-    //   - status: string (required, enum: ['pending', 'in-progress', 'completed', 'delivered'])
-    //   - signatureData: string (optional)
-    //   - signatureTime: string (optional)
-    //   - ownerUid: string (required)
-    //
-    // Collection: products
-    // Document ID: auto-generated
-    // Fields:
-    //   - name: string (required)
-    //   - price: number (required)
-    //   - options: list (optional)
-    //   - ownerUid: string (required)
-    //
-    // Collection: presets
-    // Document ID: auto-generated
-    // Fields:
-    //   - name: string (required)
-    //   - values: list (required)
-    //   - ownerUid: string (required)
-    //
-    // Collection: discounts
-    // Document ID: auto-generated
-    // Fields:
-    //   - code: string (required)
-    //   - type: string (required, enum: ['percentage', 'fixed'])
-    //   - value: number (required)
-    //   - applicableProductIds: list (required)
-    //   - ownerUid: string (required)
-    //
-    // Collection: nameTagFonts
-    // Document ID: auto-generated
-    // Fields:
-    //   - name: string (required)
-    //   - imageUrl: string (required)
-    //   - ownerUid: string (required)
-    //
-    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
 
-    // ===============================================================
-    // Helper Functions
-    // ===============================================================
-    function isAuthenticated() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
+    function isVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
     function isAdmin() {
-      return isAuthenticated() &&
-        (request.auth.token.email == "mo.witdo@gmail.com"); 
+      return isVerified() && request.auth.token.email == "mo.witdo@gmail.com";
     }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // ===============================================================
+    // Work Orders Validation
+    // ===============================================================
     function isValidWorkOrder(data) {
-      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
-             data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() < 100 &&
-             data.style is string && data.style.size() > 0 && data.style.size() < 1000 &&
-             (data.couponCode == null || (data.couponCode is string && data.couponCode.size() < 50)) &&
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 200 &&
+             data.wechatId is string && data.wechatId.size() > 0 && data.wechatId.size() <= 200 &&
+             data.style is string && data.style.size() <= 2000 &&
+             (data.couponCode == null || (data.couponCode is string && data.couponCode.size() <= 100)) &&
              data.totalPrice is number && data.totalPrice >= 0 &&
              data.status in ['pending', 'in-progress', 'completed', 'delivered'] &&
-             (data.orderDate is timestamp || data.orderDate == null) &&
-             data.ownerUid is string && data.ownerUid == request.auth.uid;
+             data.ownerUid is string && data.ownerUid == request.auth.uid &&
+             (data.workOrderId == null || (data.workOrderId is string && data.workOrderId.size() <= 128)) &&
+             (data.nameplateFont == null || (data.nameplateFont is string && data.nameplateFont.size() <= 500)) &&
+             (data.nameplateContent == null || (data.nameplateContent is string && data.nameplateContent.size() <= 1000)) &&
+             (data.estimatedCompletionDate == null || (data.estimatedCompletionDate is string && data.estimatedCompletionDate.size() <= 100)) &&
+             (data.signatureData == null || (data.signatureData is string && data.signatureData.size() <= 2000000)) &&
+             (data.signatureTime == null || (data.signatureTime is string && data.signatureTime.size() <= 200)) &&
+             (data.updatedAt == request.time);
     }
 
+    match /workOrders/{orderId} {
+      allow read: if isVerified() && (isAdmin() || existing().ownerUid == request.auth.uid);
+      
+      allow create: if isVerified() && 
+                      incoming().ownerUid == request.auth.uid && 
+                      incoming().orderDate == request.time &&
+                      isValidWorkOrder(incoming());
+      
+      allow update: if isVerified() && 
+                      (isAdmin() || existing().ownerUid == request.auth.uid) &&
+                      incoming().ownerUid == existing().ownerUid &&
+                      isValidWorkOrder(incoming()) &&
+                      (
+                        // Action: Admin State Change
+                        (isAdmin() && incoming().diff(existing()).affectedKeys().hasAny(['status', 'updatedAt'])) ||
+                        // Action: Edit Order Details (if not completed)
+                        (existing().status != 'delivered' && 
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'customerName', 'wechatId', 'estimatedCompletionDate', 'style', 
+                           'couponCode', 'nameplateFont', 'nameplateContent', 'totalPrice', 
+                           'status', 'signatureData', 'signatureTime', 'updatedAt'
+                         ]))
+                      );
+      
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Products & Utilities
+    // ===============================================================
     function isValidProduct(data) {
-      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 500 &&
              data.price is number && data.price >= 0 &&
              data.ownerUid is string && data.ownerUid == request.auth.uid;
     }
 
-    function isValidPreset(data) {
-      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
-             data.values is list && data.values.size() >= 0 &&
-             data.ownerUid is string && data.ownerUid == request.auth.uid;
-    }
-
-    function isValidDiscount(data) {
-      return data.code is string && data.code.size() > 0 && data.code.size() < 50 &&
-             data.type in ['percentage', 'fixed'] &&
-             data.value is number && data.value >= 0 &&
-             data.applicableProductIds is list &&
-             data.ownerUid is string && data.ownerUid == request.auth.uid;
-    }
-
-    function isValidNameTagFont(data) {
-      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
-             data.imageUrl is string && data.imageUrl.size() > 0 &&
-             data.ownerUid is string && data.ownerUid == request.auth.uid;
-    }
-
-    match /workOrders/{orderId} {
-      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
-      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidWorkOrder(request.resource.data);
-      allow update: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid) && isValidWorkOrder(request.resource.data);
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
-    }
-
     match /products/{productId} {
-      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
-      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidProduct(request.resource.data);
-      allow update: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidProduct(request.resource.data);
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
+      allow read: if isVerified();
+      allow create: if isVerified() && (isAdmin() || incoming().ownerUid == request.auth.uid) && isValidProduct(incoming());
+      allow update: if isVerified() && (isAdmin() || existing().ownerUid == request.auth.uid) && isValidProduct(incoming());
+      allow delete: if isAdmin() || (isVerified() && existing().ownerUid == request.auth.uid);
     }
 
     match /presets/{presetId} {
-      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
-      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidPreset(request.resource.data);
-      allow update: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidPreset(request.resource.data);
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
+      allow read: if isVerified();
+      allow create, update: if isVerified() && (isAdmin() || incoming().ownerUid == request.auth.uid);
+      allow delete: if isVerified() && (isAdmin() || existing().ownerUid == request.auth.uid);
     }
 
     match /discounts/{discountId} {
-      allow read: if isAuthenticated() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
-      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidDiscount(request.resource.data);
-      allow update: if isAuthenticated() && (isAdmin() || request.resource.data.ownerUid == request.auth.uid) && isValidDiscount(request.resource.data);
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
+      allow read: if isVerified();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /nameTagFonts/{fontId} {
-      allow read: if isAuthenticated();
-      allow create: if isAdmin() && isValidNameTagFont(request.resource.data);
-      allow update: if isAdmin() && isValidNameTagFont(request.resource.data);
-      allow delete: if isAdmin();
+      allow read: if isVerified();
+      allow write: if isAdmin();
     }
   }
 }
+
