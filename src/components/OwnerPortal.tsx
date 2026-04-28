@@ -255,7 +255,7 @@ const OwnerPortal: React.FC = () => {
 
   const exportSingleOrderToJPG = async (order: any) => {
     setPrintingOrder(order);
-    // Wait longer for images to load
+    // Wait for state to update and render
     setTimeout(async () => {
       const element = document.getElementById('printable-order');
       if (!element) return;
@@ -263,8 +263,7 @@ const OwnerPortal: React.FC = () => {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff',
-        allowTaint: true
+        backgroundColor: '#ffffff'
       });
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       const link = document.createElement('a');
@@ -272,7 +271,7 @@ const OwnerPortal: React.FC = () => {
       link.href = dataUrl;
       link.click();
       setPrintingOrder(null);
-    }, 1500);
+    }, 500);
   };
 
   const printOrder = (order: any) => {
@@ -575,158 +574,140 @@ const OwnerPortal: React.FC = () => {
         <div className="fixed left-[-9999px] top-0">
           <div id="printable-order" className="w-[1080px] h-[1920px] bg-white p-20 text-neutral-800 font-sans flex flex-col">
             {/* Header with Minimalist Logo */}
-            <div className="flex justify-between items-center mb-16">
-              <div className="flex items-center gap-6">
+            <div className="flex justify-between items-center mb-20">
+              <div className="flex items-center gap-4">
                 <img 
                   src="https://lh3.googleusercontent.com/d/1B1FyUmmR92prZmcurZrLoEuxwe1r0HfN" 
                   alt="Witdo Studio Logo" 
-                  className="h-24 w-24 object-contain"
+                  className="h-16 w-16 object-contain"
                   referrerPolicy="no-referrer"
-                  crossOrigin="anonymous"
                 />
                 <div>
-                  <h2 className="text-4xl serif italic font-bold tracking-tight">造白美學館</h2>
-                  <p className="text-lg uppercase tracking-[0.4em] text-neutral-400">Witdo Studio</p>
+                  <h2 className="text-2xl serif italic font-bold tracking-tight">造白美學館</h2>
+                  <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400">Witdo Studio</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold uppercase tracking-widest text-neutral-400 mb-2">Receipt No.</p>
-                <p className="text-3xl font-mono font-medium">#{printingOrder.workOrderId}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1">Receipt No.</p>
+                <p className="text-xl font-mono font-medium">#{printingOrder.workOrderId}</p>
               </div>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 space-y-20">
+            <div className="flex-1 space-y-16">
               {/* Date & Status */}
-              <div className="flex justify-between border-b-2 border-neutral-100 pb-10">
+              <div className="flex justify-between border-b border-neutral-100 pb-8">
                 <div>
-                  <label className="text-sm font-bold uppercase tracking-widest text-neutral-400 block mb-3">Order Date</label>
-                  <p className="text-2xl">{printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-2">Order Date</label>
+                  <p className="text-lg">{printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <label className="text-sm font-bold uppercase tracking-widest text-neutral-400 block mb-3">Status</label>
-                  <p className="text-2xl font-bold text-neutral-900">{printingOrder.status?.toUpperCase() || 'PENDING'}</p>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-2">Status</label>
+                  <p className="text-lg font-medium">{printingOrder.status?.toUpperCase() || 'PENDING'}</p>
                 </div>
               </div>
 
               {/* Customer Info */}
-              <div className="space-y-8">
-                <h3 className="text-sm font-bold uppercase tracking-[0.4em] text-neutral-300">Customer Details</h3>
-                <div className="grid grid-cols-2 gap-16">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">Client Name</label>
-                    <p className="text-3xl border-b-2 border-neutral-50 pb-3">{printingOrder.customerName}</p>
+              <div className="space-y-6">
+                <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300">Customer Details</h3>
+                <div className="grid grid-cols-2 gap-12">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Client Name</label>
+                    <p className="text-2xl border-b border-neutral-50 pb-2">{printingOrder.customerName}</p>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">WeChat ID</label>
-                    <p className="text-3xl border-b-2 border-neutral-50 pb-3">{printingOrder.wechatId}</p>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">WeChat ID</label>
+                    <p className="text-2xl border-b border-neutral-50 pb-2">{printingOrder.wechatId}</p>
                   </div>
                 </div>
               </div>
 
               {/* Order Info */}
-              <div className="space-y-10">
-                <h3 className="text-sm font-bold uppercase tracking-[0.4em] text-neutral-300">Product Selection</h3>
-                <div className="bg-neutral-50 p-12 rounded-3xl space-y-12">
-                   <div className="space-y-3">
-                    <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">Style</label>
-                    <p className="text-5xl font-bold leading-tight">{printingOrder.style}</p>
+              <div className="space-y-8">
+                <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300">Product Selection</h3>
+                <div className="bg-neutral-50 p-10 rounded-2xl space-y-8">
+                   <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Style</label>
+                    <p className="text-3xl font-bold leading-tight">{printingOrder.style}</p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-16">
-                    <div className="space-y-6">
-                      <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">Font Style Image</label>
+                  <div className="grid grid-cols-2 gap-12">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Font Style Image</label>
                       {printingOrder.nameplateFont && DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont) ? (
-                        <div className="bg-white p-6 border-2 border-neutral-100 inline-block shadow-sm">
+                        <div className="bg-white p-4 border border-neutral-100 inline-block shadow-sm">
                           <img 
                             src={DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont)?.imageUrl} 
                             alt="Font style" 
-                            className="h-32 object-contain"
+                            className="h-24 object-contain"
                             referrerPolicy="no-referrer"
-                            crossOrigin="anonymous"
                           />
-                          <p className="text-xs text-neutral-400 text-center mt-3 font-bold uppercase tracking-widest">{printingOrder.nameplateFont}</p>
+                          <p className="text-[9px] text-neutral-400 text-center mt-2 font-medium">{printingOrder.nameplateFont}</p>
                         </div>
                       ) : (
-                        <p className="text-lg italic text-neutral-400">No font style selected</p>
+                        <p className="text-sm italic text-neutral-400">No font style selected</p>
                       )}
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">Engraving Content</label>
-                      <p className="text-3xl italic serif border-l-4 border-neutral-200 pl-6 py-2">{printingOrder.nameplateContent || '-'}</p>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Engraving Content</label>
+                      <p className="text-2xl italic serif">{printingOrder.nameplateContent || '-'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Price & Coupon */}
-              <div className="flex justify-between items-end pt-12 pb-12 border-b-2 border-neutral-100">
-                <div className="space-y-6">
-                   <div className="space-y-2">
-                    <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">Estimated Delivery</label>
-                    <p className="text-3xl font-medium">{printingOrder.estimatedCompletionDate}</p>
+              <div className="flex justify-between items-end pt-8">
+                <div className="space-y-4">
+                   <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Estimated Delivery</label>
+                    <p className="text-xl font-medium">{printingOrder.estimatedCompletionDate}</p>
                   </div>
                   {printingOrder.couponCode && (
-                    <div className="inline-flex items-center gap-3 bg-neutral-900 text-white px-5 py-2 rounded-full">
-                      <span className="text-xs font-bold tracking-widest uppercase">Discount Applied</span>
-                      <span className="text-xs font-mono">{printingOrder.couponCode}</span>
+                    <div className="inline-flex items-center gap-2 bg-neutral-900 text-white px-3 py-1 rounded-full">
+                      <span className="text-[9px] font-bold tracking-widest uppercase">Discount Applied</span>
+                      <span className="text-[9px] font-mono">{printingOrder.couponCode}</span>
                     </div>
                   )}
                 </div>
-                <div className="text-right space-y-2">
-                  <label className="text-sm font-bold uppercase tracking-widest text-neutral-400">Total Investment</label>
-                  <p className="text-8xl font-bold tracking-tighter">MOP {printingOrder.totalPrice}</p>
+                <div className="text-right space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Total Investment</label>
+                  <p className="text-6xl font-bold tracking-tighter">MOP {printingOrder.totalPrice}</p>
                 </div>
               </div>
 
-              {/* Enhanced Remarks & Terms */}
-              <div className="grid grid-cols-2 gap-16 pt-12">
-                <div className="space-y-6">
-                  <h4 className="text-base font-bold uppercase tracking-widest text-neutral-800 border-b border-neutral-100 pb-2">備註 (Remarks)</h4>
-                  <ul className="text-sm text-neutral-600 space-y-4 list-disc pl-6 leading-relaxed">
-                    <li>請把照片4:3 原圖 傳送到造白美學館之微信或電郵;</li>
-                    <li>資料齊全後方可進行下一工序，其製作時間約 3 個月；</li>
-                    <li>作品完成後，本館會立刻安排交收。</li>
-                  </ul>
-                </div>
-                <div className="space-y-6">
-                  <h4 className="text-base font-bold uppercase tracking-widest text-neutral-800 border-b border-neutral-100 pb-2">條款及細則 (Terms & Conditions)</h4>
-                  <div className="text-[13px] text-neutral-500 leading-relaxed space-y-3">
-                    <p>1. 本訂單一經簽名確認，即表示客戶已閱讀並同意本服務條款；</p>
-                    <p>2. 基於客製化作品特性，訂單一經確認，無法取消或變更製作內容；</p>
-                    <p>3. 客製化作品一律不接受退換，恕不退款；</p>
-                    <p>4. 製作期仍以實際情況為主；</p>
-                    <p>5. 如有任何瑕疵，客戶必須在收貨後7天內以文字形式通知本館；</p>
-                    <p>6. 本司保留對條款及細則之最終解釋權。</p>
-                  </div>
-                </div>
+              {/* Minimalist Remarks */}
+              <div className="pt-16 space-y-6 opacity-60">
+                <p className="text-[10px] leading-relaxed max-w-2xl">
+                  * 作品製作時間約 3 個月。請提供 4:3 原圖照片。客製化作品一律不接受退換，恕不退款。收貨後 7 天內如有瑕疵請通知本館。
+                </p>
               </div>
             </div>
 
             {/* Signature Area */}
-            <div className="pt-24 mt-auto border-t-2 border-neutral-100 flex justify-between items-end">
-              <div className="space-y-10">
-                <div className="space-y-6">
-                  <p className="text-sm font-bold uppercase tracking-widest text-neutral-400">Client Authorization</p>
+            <div className="pt-20 mt-auto border-t border-neutral-100 flex justify-between items-end">
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Client Authorization</p>
                   {printingOrder.signatureData ? (
                     <div className="relative">
-                      <img src={printingOrder.signatureData} alt="Signature" className="h-40 object-contain mix-blend-multiply" />
-                      <p className="text-xs text-neutral-300 mt-4 uppercase tracking-widest">Authenticated: {printingOrder.signatureTime}</p>
+                      <img src={printingOrder.signatureData} alt="Signature" className="h-28 object-contain mix-blend-multiply" />
+                      <p className="text-[9px] text-neutral-300 mt-2 uppercase tracking-widest">Authenticated: {printingOrder.signatureTime}</p>
                     </div>
                   ) : (
-                    <div className="h-40 w-[400px] border-b-2 border-neutral-50"></div>
+                    <div className="h-28 w-80 border-b border-neutral-100"></div>
                   )}
                 </div>
               </div>
-              <div className="text-right pb-6">
-                <div className="space-y-2">
-                  <p className="text-3xl serif italic font-bold">造白美學館</p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-400">Official Certification</p>
+              <div className="text-right pb-4">
+                <div className="space-y-1">
+                  <p className="text-lg serif italic font-bold">造白美學館</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-400">Official Certification</p>
                 </div>
-                <div className="mt-10 flex justify-end">
-                   <div className="h-32 w-32 rounded-full border-4 border-neutral-50 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 border-4 border-neutral-100 rounded-full scale-90 border-dashed opacity-50"></div>
-                      <span className="text-xs text-neutral-200 uppercase text-center font-bold tracking-tighter leading-none">Witdo<br/>Studio<br/>Macau</span>
+                <div className="mt-6 flex justify-end">
+                   <div className="h-24 w-24 rounded-full border-2 border-neutral-50 flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 border-2 border-neutral-50 rounded-full scale-90 border-dashed opacity-50"></div>
+                      <span className="text-[8px] text-neutral-200 uppercase text-center font-bold tracking-tighter leading-none">Witdo<br/>Studio<br/>Macau</span>
                    </div>
                 </div>
               </div>
