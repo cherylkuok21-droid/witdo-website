@@ -600,9 +600,9 @@ const OwnerPortal: React.FC = () => {
       {/* Hidden Printable Order */}
       {printingOrder && (
         <div className="fixed left-[-9999px] top-0">
-          <div id="printable-order" className="w-[1080px] h-[1920px] bg-white p-32 text-neutral-800 font-sans flex flex-col">
+          <div id="printable-order" className="w-[1080px] h-[1920px] bg-white px-32 pt-32 pb-48 text-neutral-800 font-sans flex flex-col">
             {/* Header: Brand Identity */}
-            <div className="flex justify-between items-start mb-32">
+            <div className="flex justify-between items-start mb-24">
               <div className="flex items-center gap-6">
                 <img 
                   src="https://lh3.googleusercontent.com/d/1B1FyUmmR92prZmcurZrLoEuxwe1r0HfN" 
@@ -644,12 +644,12 @@ const OwnerPortal: React.FC = () => {
                   <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-8">Client Portfolio</h3>
                   <div className="space-y-8">
                     <div className="group">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">Full Name</label>
-                      <p className="text-3xl font-medium border-b border-neutral-50 pb-2">{printingOrder.customerName}</p>
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">Full Name</label>
+                      <p className="text-2xl font-medium border-b border-neutral-50 pb-2">{printingOrder.customerName}</p>
                     </div>
                     <div className="group">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">Unified Contact (WeChat)</label>
-                      <p className="text-3xl font-medium border-b border-neutral-50 pb-2">{printingOrder.wechatId || '-'}</p>
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">Unified Contact (WeChat)</label>
+                      <p className="text-2xl font-medium border-b border-neutral-50 pb-2">{printingOrder.wechatId || '-'}</p>
                     </div>
                   </div>
                 </div>
@@ -657,8 +657,8 @@ const OwnerPortal: React.FC = () => {
                 <div className="space-y-4">
                   <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-8">Selected Masterpiece</h3>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">Style / Format</label>
-                    <p className="text-4xl font-bold italic serif leading-tight text-neutral-900">{printingOrder.style}</p>
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block">Style / Format</label>
+                    <p className="text-3xl font-bold italic serif leading-tight text-neutral-900">{printingOrder.style}</p>
                   </div>
                 </div>
               </div>
@@ -670,8 +670,8 @@ const OwnerPortal: React.FC = () => {
                 <div className="flex-1 space-y-12">
                    <div className="space-y-2">
                     <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-4">Engraving Details</h3>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">Inscribed Content</label>
-                    <p className="text-4xl serif italic font-light text-neutral-800 leading-snug">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block">Inscribed Content</label>
+                    <p className="text-3xl serif italic font-light text-neutral-800 leading-snug">
                       "{printingOrder.nameplateContent || '-'}"
                     </p>
                   </div>
@@ -707,7 +707,7 @@ const OwnerPortal: React.FC = () => {
                   <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-300">Final Investment</label>
                   <div className="flex items-baseline gap-3">
                     <span className="text-2xl font-light text-neutral-400">MOP</span>
-                    <p className="text-8xl font-medium tracking-tighter text-neutral-900">{printingOrder.totalPrice}</p>
+                    <p className="text-7xl font-medium tracking-tighter text-neutral-900">{printingOrder.totalPrice}</p>
                   </div>
                   {printingOrder.couponCode && (
                     <p className="text-[10px] font-mono text-neutral-300 uppercase tracking-widest">
@@ -725,18 +725,18 @@ const OwnerPortal: React.FC = () => {
             </div>
 
             {/* Section 5: Remarks & Terms (New Elegant Inclusion) */}
-            <div className="grid grid-cols-2 gap-24 mb-auto">
+            <div className="grid grid-cols-2 gap-24 mb-16">
               <div className="space-y-6">
-                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-neutral-900 border-l-2 border-neutral-900 pl-4">備註 Remarks</h4>
-                <div className="space-y-3 text-[11px] leading-relaxed text-neutral-500 pl-4">
+                <h4 className="text-[12px] font-bold uppercase tracking-[0.4em] text-neutral-900 border-l-2 border-neutral-900 pl-4">備註 Remarks</h4>
+                <div className="space-y-3 text-[12px] leading-relaxed text-neutral-500 pl-4">
                   <p>• 請把照片 4:3 原圖傳送到造白美學館之微信或電郵；</p>
                   <p>• 資料齊全後方可進行下一工序，其製作時間約 3 個月；</p>
                   <p>• 作品完成後，本館會立刻安排交收。</p>
                 </div>
               </div>
               <div className="space-y-6">
-                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-neutral-900 border-l-2 border-neutral-200 pl-4">條款及細則 Terms & Conditions</h4>
-                <div className="grid grid-cols-1 gap-2 text-[9px] leading-relaxed text-neutral-400 pl-4">
+                <h4 className="text-[12px] font-bold uppercase tracking-[0.4em] text-neutral-900 border-l-2 border-neutral-200 pl-4">條款及細則 Terms & Conditions</h4>
+                <div className="grid grid-cols-1 gap-2 text-[11px] leading-relaxed text-neutral-400 pl-4">
                   <p>1. 本訂單一經簽名確認，即表示客戶已閱讀、瞭解並同意接受本服務條款之所有內容；</p>
                   <p>2. 基於客製化作品訂單的特性，訂單一經確認，即無法中途取消或變更製作內容；</p>
                   <p>3. 客製化作品一律不接受退換，恕不退款；</p>
@@ -748,7 +748,7 @@ const OwnerPortal: React.FC = () => {
             </div>
 
             {/* Footer: Authorization */}
-            <div className="pt-24 border-t border-neutral-100 flex justify-between items-end">
+            <div className="mt-auto pt-16 border-t border-neutral-100 flex justify-between items-end">
               <div className="space-y-8">
                 <div className="space-y-6">
                   <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-300">Client Signature Authorization</p>
