@@ -95,13 +95,22 @@ const OwnerPortal: React.FC = () => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const orders = snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data({ serverTimestamps: 'estimate' })
         })) as any[];
         
-        // Sort client-side to avoid Index requirement errors
+        // Sort client-side to handle estimates and different date formats robustly
         orders.sort((a: any, b: any) => {
-          const dateA = a.orderDate?.toDate ? a.orderDate.toDate().getTime() : 0;
-          const dateB = b.orderDate?.toDate ? b.orderDate.toDate().getTime() : 0;
+          const getTimestamp = (val: any) => {
+            if (!val) return Date.now(); // Treat as now if missing (e.g., local optimistic update)
+            if (val.toDate) return val.toDate().getTime();
+            if (val instanceof Date) return val.getTime();
+            if (val.seconds) return val.seconds * 1000;
+            return typeof val === 'number' ? val : Date.now();
+          };
+
+          // Use orderDate as primary sort, fallback to updatedAt
+          const dateA = getTimestamp(a.orderDate || a.updatedAt);
+          const dateB = getTimestamp(b.orderDate || b.updatedAt);
           return dateB - dateA;
         });
 
