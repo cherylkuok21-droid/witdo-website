@@ -260,31 +260,41 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
         // with the existing signature yet. In that case, we keep the state signature.
       }
 
-      // Prepare final data, excluding the internal 'id' if it exists to satisfy Firestore rules
+      // Prepare final data
       const { id: _, ...cleanedFormData } = formData as any;
 
-      const finalData = {
+      const finalData: any = {
         ...cleanedFormData,
         signatureData: latestSignature,
         signatureTime: latestSignatureTime,
         totalPrice: Number(formData.totalPrice) || 0,
         updatedAt: serverTimestamp(),
-        ownerUid: auth.currentUser.uid,
+        // Preserve original owner if editing, otherwise use current user
+        ownerUid: initialData?.ownerUid || auth.currentUser.uid,
       };
 
-      console.log('Submitting work order:', finalData.workOrderId, 'Owner:', finalData.ownerUid);
+      // Ensure orderDate is preserved if editing
+      if (initialData?.orderDate) {
+        finalData.orderDate = initialData.orderDate;
+      }
+
+      console.log('Finalizing Submission:', { 
+        id: initialData?.id || 'NEW',
+        hasSignature: !!latestSignature,
+        orderId: finalData.workOrderId
+      });
 
       if (initialData?.id) {
-        console.log('Updating existing order:', initialData.id);
-        // Specifically sanitize the payload for the update to ensure only allowed fields are sent
+        console.log('Sending Update...');
         await setDoc(doc(db, 'workOrders', initialData.id), finalData, { merge: true });
+        console.log('Update Success');
       } else {
-        console.log('Creating new order...');
+        console.log('Sending Create...');
         const docRef = await addDoc(collection(db, 'workOrders'), {
           ...finalData,
           orderDate: serverTimestamp(),
         });
-        console.log('New order created with ID:', docRef.id);
+        console.log('Create Success ID:', docRef.id);
       }
       onSuccess();
     } catch (err: any) {
