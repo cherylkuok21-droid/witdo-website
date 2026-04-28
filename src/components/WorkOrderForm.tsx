@@ -241,15 +241,20 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       let latestSignature = formData.signatureData;
       let latestSignatureTime = formData.signatureTime;
       
+      // We check the pad. If it is NOT empty, we take the new drawing.
+      // If it IS empty, we stick with what was in formData (the existing signature).
       if (sigPad.current && !sigPad.current.isEmpty()) {
         latestSignature = sigPad.current.toDataURL('image/png');
-        if (!latestSignatureTime) {
+        if (!latestSignatureTime || latestSignature !== formData.signatureData) {
           latestSignatureTime = new Date().toLocaleString();
         }
       }
 
+      // Prepare final data, excluding the internal 'id' if it exists to satisfy Firestore rules
+      const { id: _, ...cleanedFormData } = formData as any;
+
       const finalData = {
-        ...formData,
+        ...cleanedFormData,
         signatureData: latestSignature,
         signatureTime: latestSignatureTime,
         totalPrice: Number(formData.totalPrice) || 0,
@@ -261,6 +266,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
       if (initialData?.id) {
         console.log('Updating existing order:', initialData.id);
+        // Specifically sanitize the payload for the update to ensure only allowed fields are sent
         await setDoc(doc(db, 'workOrders', initialData.id), finalData, { merge: true });
       } else {
         console.log('Creating new order...');
