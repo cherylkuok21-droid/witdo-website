@@ -69,7 +69,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const DEFAULT_FONTS = [
+  const DEFAULT_FONts = [
     { name: '名牌字型 1', imageUrl: 'https://lh3.googleusercontent.com/d/1ZSP4Y30AIIr3RM3-Y_AocKL9xfvYOimj' },
     { name: '名牌字型 2', imageUrl: 'https://lh3.googleusercontent.com/d/1USRIUHR_fNR_Pzbo1tToHOzClZkBgG7T' },
     { name: '名牌字型 3', imageUrl: 'https://lh3.googleusercontent.com/d/1a_ThiLXFprrJ-Ao3YAiDphWVf1Azuudc' },
@@ -241,26 +241,8 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     }
 
     try {
-      // Robust signature capture
-      let currentSignature = formData.signatureData;
-      let currentSignatureTime = formData.signatureTime;
-      
-      // Attempt to capture from pad if it's not empty
-      if (sigPad.current) {
-        if (!sigPad.current.isEmpty()) {
-          const padData = sigPad.current.toDataURL('image/png');
-          // Only update if it's different from what we have or if we have nothing
-          if (padData !== currentSignature) {
-            currentSignature = padData;
-            currentSignatureTime = new Date().toLocaleString();
-          }
-        }
-      }
-
       const finalData = {
         ...formData,
-        signatureData: currentSignature,
-        signatureTime: currentSignatureTime,
         totalPrice: Number(formData.totalPrice) || 0,
         updatedAt: serverTimestamp(),
         ownerUid: auth.currentUser.uid,
@@ -276,14 +258,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       }
       onSuccess();
     } catch (err: any) {
-      console.error('Submit Error:', err);
-      // Show user-friendly error from Firestore if possible
-      try {
-        const parsed = JSON.parse(err.message);
-        setError(`Save Failed: ${parsed.error || 'Permission Denied or Data Error'}`);
-      } catch {
-        setError(`Save Failed: ${err.message || 'Unknown error occurred'}`);
-      }
       handleFirestoreError(err, initialData?.id ? OperationType.UPDATE : OperationType.CREATE, 'workOrders');
     } finally {
       setLoading(false);
@@ -439,7 +413,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
                   className="w-full bg-linen-50 border border-linen-100 px-3 py-1.5 text-sm focus:outline-none focus:border-linen-900 transition-colors"
                 >
                   <option value="">選擇字型...</option>
-                  {DEFAULT_FONTS.map(font => (
+                  {DEFAULT_FONts.map(font => (
                     <option key={font.name} value={font.name}>{font.name}</option>
                   ))}
                 </select>
@@ -448,7 +422,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
               {formData.nameplateFont && (
                 <div className="border border-linen-100 bg-white p-2 h-32 flex items-center justify-center relative group">
                   <img 
-                    src={DEFAULT_FONTS.find(f => f.name === formData.nameplateFont)?.imageUrl} 
+                    src={DEFAULT_FONts.find(f => f.name === formData.nameplateFont)?.imageUrl} 
                     alt={formData.nameplateFont} 
                     className="max-w-full max-h-full object-contain"
                     referrerPolicy="no-referrer"
