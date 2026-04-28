@@ -50,7 +50,6 @@ interface WorkOrderFormProps {
 }
 
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, initialData }) => {
-  const sigPad = useRef<SignaturePadRef>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -117,8 +116,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     nameplateContent: initialData?.nameplateContent || '',
     totalPrice: initialData?.totalPrice || '',
     status: initialData?.status || 'pending',
-    signatureData: initialData?.signatureData || '',
-    signatureTime: initialData?.signatureTime || '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -210,21 +207,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     }));
   }, [formData.style, formData.couponCode, products, discounts]);
 
-  const clearSignature = useCallback(() => {
-    sigPad.current?.clear();
-    setFormData(prev => ({ ...prev, signatureData: '', signatureTime: '' }));
-  }, []);
-
-  const saveSignature = useCallback(() => {
-    if (sigPad.current?.isEmpty()) return;
-    const data = sigPad.current?.toDataURL('image/png');
-    setFormData(prev => ({ 
-      ...prev, 
-      signatureData: data || '', 
-      signatureTime: new Date().toLocaleString() 
-    }));
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -237,36 +219,11 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     }
 
     try {
-      // Get the absolute latest signature from the pad ref direct to avoid state batching issues
-      // Signature Priority Logic:
-      let latestSignature = formData.signatureData;
-      let latestSignatureTime = formData.signatureTime;
-      
-      // If the pad exists and the user has drawn something, or if it's explicitly cleared
-      if (sigPad.current) {
-        if (!sigPad.current.isEmpty()) {
-          const newData = sigPad.current.toDataURL('image/png');
-          // Only update if the data actually changed from what we have in state
-          if (newData !== formData.signatureData) {
-            latestSignature = newData;
-            latestSignatureTime = new Date().toLocaleString();
-          }
-        } else if (!formData.signatureData) {
-          // Pad is empty and we had no signature in state anyway
-          latestSignature = '';
-          latestSignatureTime = '';
-        }
-        // Note: If pad is empty but state HAS a signature, it might mean the pad hasn't initialized 
-        // with the existing signature yet. In that case, we keep the state signature.
-      }
-
       // Prepare final data
       const { id: _, ...cleanedFormData } = formData as any;
 
       const finalData: any = {
         ...cleanedFormData,
-        signatureData: latestSignature,
-        signatureTime: latestSignatureTime,
         totalPrice: Number(formData.totalPrice) || 0,
         updatedAt: serverTimestamp(),
         // Preserve original owner if editing, otherwise use current user
@@ -280,7 +237,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
       console.log('Finalizing Submission:', { 
         id: initialData?.id || 'NEW',
-        hasSignature: !!latestSignature,
         orderId: finalData.workOrderId
       });
 
@@ -478,40 +434,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
                   <span className="text-[10px] text-linen-300 uppercase tracking-widest italic">Please select a font to see preview</span>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* SIGNATURE */}
-          <div className="space-y-2 col-span-2">
-            <div className="flex justify-between items-end">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-linen-500">客戶簽署 (Client Signature)</label>
-              <div className="flex gap-4 items-center">
-                {formData.signatureTime && (
-                  <p className="text-[8px] text-linen-400 uppercase tracking-widest">
-                    Signed at: {formData.signatureTime}
-                  </p>
-                )}
-                <button 
-                  type="button"
-                  onClick={clearSignature}
-                  className="text-[8px] uppercase tracking-widest text-linen-400 hover:text-red-500"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-            
-            <div className="border border-linen-200 bg-linen-50/30 rounded-sm overflow-hidden h-16">
-              <SignaturePad 
-                ref={sigPad}
-                initialDataUrl={initialData?.signatureData}
-                onEnd={saveSignature}
-                penColor="#1a1a1a"
-                className="w-full h-full cursor-crosshair"
-                style={{ width: '100%', height: '100%' }}
-              />
             </div>
           </div>
         </div>
