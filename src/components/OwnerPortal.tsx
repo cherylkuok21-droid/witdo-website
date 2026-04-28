@@ -27,22 +27,6 @@ interface FirestoreErrorInfo {
   authInfo: any;
 }
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
-
 const OwnerPortal: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +35,25 @@ const OwnerPortal: React.FC = () => {
   const [workOrders, setWorkOrders] = useState<any[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [firestoreError, setFirestoreError] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [printingOrder, setPrintingOrder] = useState<any | null>(null);
+
+  function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+    const errInfo: FirestoreErrorInfo = {
+      error: error instanceof Error ? error.message : String(error),
+      authInfo: {
+        userId: auth.currentUser?.uid,
+        email: auth.currentUser?.email,
+        emailVerified: auth.currentUser?.emailVerified,
+        isAnonymous: auth.currentUser?.isAnonymous,
+      },
+      operationType,
+      path
+    }
+    console.error('Firestore Error: ', JSON.stringify(errInfo));
+    setFirestoreError(errInfo);
+  }
 
   const DEFAULT_FONTS = [
     { name: '名牌字型 1', imageUrl: 'https://lh3.googleusercontent.com/d/1ZSP4Y30AIIr3RM3-Y_AocKL9xfvYOimj' },
@@ -87,18 +88,31 @@ const OwnerPortal: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      const q = query(
-        collection(db, 'workOrders'),
-        where('ownerUid', '==', user.uid)
-      );
+      // If admin, fetch all. Otherwise fetch only owned.
+      // This helps if some orders were created with a different UID or before UID tracking.
+      let q;
+      if (user.email === OWNER_EMAIL) {
+        q = query(collection(db, 'workOrders'));
+        console.log('Admin detected, fetching all work orders.');
+      } else {
+        q = query(
+          collection(db, 'workOrders'),
+          where('ownerUid', '==', user.uid)
+        );
+        console.log('Fetching work orders for user:', user.uid);
+      }
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const orders = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data({ serverTimestamps: 'estimate' })
-        })) as any[];
+        console.log('WorkOrders Snapshot received. Size:', snapshot.size);
+        const orders = snapshot.docs.map(doc => {
+          const data = doc.data({ serverTimestamps: 'estimate' });
+          return {
+            id: doc.id,
+            ...data
+          };
+        }) as any[];
         
-        // Sort client-side to handle estimates and different date formats robustly
+        console.log('Processed orders count:', orders.length);
         orders.sort((a: any, b: any) => {
           const getTimestamp = (val: any) => {
             if (!val) return Date.now(); // Treat as now if missing (e.g., local optimistic update)
@@ -354,6 +368,11 @@ const OwnerPortal: React.FC = () => {
         <div className="space-y-2">
           <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-linen-400">Management Portal</span>
           <h1 className="text-4xl md:text-6xl serif italic text-linen-900">Welcome, {user.displayName?.split(' ')[0]}</h1>
+          {firestoreError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-100 text-red-600 text-[10px] uppercase tracking-widest animate-pulse">
+              Firestore Error: {firestoreError.error} ({firestoreError.operationType} on {firestoreError.path})
+            </div>
+          )}
         </div>
         <button 
           onClick={handleLogout}
@@ -495,7 +514,7 @@ const OwnerPortal: React.FC = () => {
             <tbody className="divide-y divide-linen-50">
               {workOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-sm serif italic text-linen-400">No work orders found.</td>
+                  <td colSpan={8} className="py-12 text-center text-sm serif italic text-linen-400">No work orders found.</td>
                 </tr>
               ) : (
                 workOrders.map((order) => (
