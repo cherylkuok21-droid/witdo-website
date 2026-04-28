@@ -107,12 +107,6 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     fetchData();
   }, [initialData]);
 
-  useEffect(() => {
-    if (initialData?.signatureData && sigPad.current) {
-      sigPad.current.fromDataURL(initialData.signatureData);
-    }
-  }, [initialData, sigPad.current]);
-
   const generateOrderId = () => {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
@@ -479,6 +473,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
             <div className="border border-linen-200 bg-linen-50/30 rounded-sm overflow-hidden h-16">
               <SignaturePad 
                 ref={sigPad}
+                initialDataUrl={initialData?.signatureData}
                 onEnd={saveSignature}
                 penColor="#1a1a1a"
                 className="w-full h-full cursor-crosshair"
