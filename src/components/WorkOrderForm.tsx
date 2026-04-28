@@ -241,12 +241,18 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       let latestSignature = formData.signatureData;
       let latestSignatureTime = formData.signatureTime;
       
-      // We check the pad. If it is NOT empty, we take the new drawing.
-      // If it IS empty, we stick with what was in formData (the existing signature).
-      if (sigPad.current && !sigPad.current.isEmpty()) {
-        latestSignature = sigPad.current.toDataURL('image/png');
-        if (!latestSignatureTime || latestSignature !== formData.signatureData) {
-          latestSignatureTime = new Date().toLocaleString();
+      // If the pad exists, trust its state over formData for the signature
+      if (sigPad.current) {
+        if (!sigPad.current.isEmpty()) {
+          latestSignature = sigPad.current.toDataURL('image/png');
+          // Update timestamp if signature changed or was missing
+          if (!latestSignatureTime || latestSignature !== formData.signatureData) {
+            latestSignatureTime = new Date().toLocaleString();
+          }
+        } else if (formData.signatureData) {
+          // If pad is empty but we HAD a signature in formData, it means the user cleared it
+          latestSignature = '';
+          latestSignatureTime = '';
         }
       }
 
