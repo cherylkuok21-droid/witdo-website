@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SignaturePad, { SignaturePadRef } from './SignaturePad';
 import { db, auth } from '@/firebase';
@@ -195,7 +195,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const toggleStyle = (productName: string) => {
+  const toggleStyle = useCallback((productName: string) => {
     const currentStyles = formData.style ? formData.style.split(', ').filter(s => s !== '') : [];
     let newStyles: string[];
     
@@ -212,14 +212,14 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       style: styleString,
       totalPrice: calculateTotal(styleString, prev.couponCode)
     }));
-  };
+  }, [formData.style, formData.couponCode, products, discounts]);
 
-  const clearSignature = () => {
+  const clearSignature = useCallback(() => {
     sigPad.current?.clear();
     setFormData(prev => ({ ...prev, signatureData: '', signatureTime: '' }));
-  };
+  }, []);
 
-  const saveSignature = () => {
+  const saveSignature = useCallback(() => {
     if (sigPad.current?.isEmpty()) return;
     const data = sigPad.current?.toDataURL('image/png');
     setFormData(prev => ({ 
@@ -227,7 +227,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
       signatureData: data || '', 
       signatureTime: new Date().toLocaleString() 
     }));
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,8 +241,21 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
     }
 
     try {
+      // Get the absolute latest signature from the pad ref direct to avoid state batching issues
+      let latestSignature = formData.signatureData;
+      let latestSignatureTime = formData.signatureTime;
+      
+      if (sigPad.current && !sigPad.current.isEmpty()) {
+        latestSignature = sigPad.current.toDataURL('image/png');
+        if (!latestSignatureTime) {
+          latestSignatureTime = new Date().toLocaleString();
+        }
+      }
+
       const finalData = {
         ...formData,
+        signatureData: latestSignature,
+        signatureTime: latestSignatureTime,
         totalPrice: Number(formData.totalPrice) || 0,
         updatedAt: serverTimestamp(),
         ownerUid: auth.currentUser.uid,
