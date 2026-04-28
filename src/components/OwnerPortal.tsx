@@ -572,151 +572,194 @@ const OwnerPortal: React.FC = () => {
       {/* Hidden Printable Order */}
       {printingOrder && (
         <div className="fixed left-[-9999px] top-0">
-          <div id="printable-order" className="w-[1080px] h-[1920px] bg-white p-20 text-neutral-800 font-sans flex flex-col">
-            {/* Header with Minimalist Logo */}
-            <div className="flex justify-between items-center mb-20">
-              <div className="flex items-center gap-4">
+          <div id="printable-order" className="w-[1080px] h-[1920px] bg-white p-32 text-neutral-800 font-sans flex flex-col">
+            {/* Header: Brand Identity */}
+            <div className="flex justify-between items-start mb-32">
+              <div className="flex items-center gap-6">
                 <img 
                   src="https://lh3.googleusercontent.com/d/1B1FyUmmR92prZmcurZrLoEuxwe1r0HfN" 
                   alt="Witdo Studio Logo" 
-                  className="h-16 w-16 object-contain"
+                  className="h-20 w-20 object-contain grayscale"
                   referrerPolicy="no-referrer"
                 />
-                <div>
-                  <h2 className="text-2xl serif italic font-bold tracking-tight">造白美學館</h2>
-                  <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400">Witdo Studio</p>
+                <div className="space-y-1">
+                  <h2 className="text-3xl serif italic font-bold tracking-tight text-neutral-900">造白美學館</h2>
+                  <p className="text-[11px] uppercase tracking-[0.5em] text-neutral-400 font-medium">Witdo Studio • Art of Casting</p>
+                </div>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-300">Order Reference</p>
+                <p className="text-2xl font-mono font-light tracking-tighter">#{printingOrder.workOrderId}</p>
+              </div>
+            </div>
+
+            {/* Section 1: Customer Identity */}
+            <div className="grid grid-cols-3 gap-16 mb-24 pb-16 border-b border-neutral-100">
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Date of Order</label>
+                <p className="text-xl font-medium">{printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Current Status</label>
+                <p className="text-xl font-medium tracking-wide uppercase">{printingOrder.status || 'Pending'}</p>
+              </div>
+              <div className="space-y-2 text-right">
+                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Estimated Completion</label>
+                <p className="text-xl font-medium">{printingOrder.estimatedCompletionDate || 'TBD'}</p>
+              </div>
+            </div>
+
+            {/* Section 2: Client Specifications */}
+            <div className="space-y-16 mb-24">
+              <div className="grid grid-cols-2 gap-24">
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-8">Client Portfolio</h3>
+                  <div className="space-y-8">
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">Full Name</label>
+                      <p className="text-3xl font-medium border-b border-neutral-50 pb-2">{printingOrder.customerName}</p>
+                    </div>
+                    <div className="group">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">Unified Contact (WeChat)</label>
+                      <p className="text-3xl font-medium border-b border-neutral-50 pb-2">{printingOrder.wechatId || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-8">Selected Masterpiece</h3>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">Style / Format</label>
+                    <p className="text-4xl font-bold italic serif leading-tight text-neutral-900">{printingOrder.style}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3: Fine Details (Font Spec) */}
+            <div className="bg-neutral-50/50 p-16 rounded-[2rem] mb-24 border border-neutral-100/50">
+              <div className="flex justify-between items-start gap-16">
+                <div className="flex-1 space-y-12">
+                   <div className="space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-4">Engraving Details</h3>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">Inscribed Content</label>
+                    <p className="text-4xl serif italic font-light text-neutral-800 leading-snug">
+                      "{printingOrder.nameplateContent || '-'}"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="w-80 flex flex-col items-center gap-4 bg-white p-8 rounded-2xl shadow-sm border border-neutral-100">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">Chosen Font Aesthetic</label>
+                  {printingOrder.nameplateFont && DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont) ? (
+                    <div className="w-full flex flex-col items-center">
+                      <img 
+                        src={DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont)?.imageUrl} 
+                        alt="Font style" 
+                        className="h-32 w-full object-contain mix-blend-darken grayscale brightness-95"
+                        referrerPolicy="no-referrer"
+                      />
+                      <p className="text-[10px] text-neutral-400 mt-4 tracking-[0.3em] font-medium border-t border-neutral-50 pt-3 w-full text-center">
+                        {printingOrder.nameplateFont}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center italic text-neutral-300 text-sm">
+                      Standard Typography
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Section 4: Commercials */}
+            <div className="flex justify-between items-baseline mb-auto">
+              <div>
+                {/* Minimalist Remarks */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-300">Production Note</label>
+                  <p className="text-[11px] leading-relaxed text-neutral-400 max-w-md">
+                    Handcrafted production requires approximately 90 days. 
+                    Final aesthetics may vary slightly due to the nature of the casting process.
+                  </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1">Receipt No.</p>
-                <p className="text-xl font-mono font-medium">#{printingOrder.workOrderId}</p>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">Final Investment</label>
+                  <div className="flex items-baseline justify-end gap-3">
+                    <span className="text-2xl font-light text-neutral-400">MOP</span>
+                    <p className="text-8xl font-medium tracking-tighter text-neutral-900">{printingOrder.totalPrice}</p>
+                  </div>
+                </div>
+                {printingOrder.couponCode && (
+                  <p className="text-[10px] font-mono text-neutral-300 uppercase tracking-widest mt-2">
+                    Promo Applied: {printingOrder.couponCode}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 space-y-16">
-              {/* Date & Status */}
-              <div className="flex justify-between border-b border-neutral-100 pb-8">
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-2">Order Date</label>
-                  <p className="text-lg">{printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
-                </div>
-                <div className="text-right">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-2">Status</label>
-                  <p className="text-lg font-medium">{printingOrder.status?.toUpperCase() || 'PENDING'}</p>
-                </div>
-              </div>
-
-              {/* Customer Info */}
-              <div className="space-y-6">
-                <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300">Customer Details</h3>
-                <div className="grid grid-cols-2 gap-12">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Client Name</label>
-                    <p className="text-2xl border-b border-neutral-50 pb-2">{printingOrder.customerName}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">WeChat ID</label>
-                    <p className="text-2xl border-b border-neutral-50 pb-2">{printingOrder.wechatId}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Info */}
+            {/* Footer: Authorization */}
+            <div className="pt-24 border-t border-neutral-100 flex justify-between items-end">
               <div className="space-y-8">
-                <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300">Product Selection</h3>
-                <div className="bg-neutral-50 p-10 rounded-2xl space-y-8">
-                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Style</label>
-                    <p className="text-3xl font-bold leading-tight">{printingOrder.style}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-12">
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Font Style Image</label>
-                      {printingOrder.nameplateFont && DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont) ? (
-                        <div className="bg-white p-4 border border-neutral-100 inline-block shadow-sm">
-                          <img 
-                            src={DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont)?.imageUrl} 
-                            alt="Font style" 
-                            className="h-24 object-contain"
-                            referrerPolicy="no-referrer"
-                          />
-                          <p className="text-[9px] text-neutral-400 text-center mt-2 font-medium">{printingOrder.nameplateFont}</p>
-                        </div>
-                      ) : (
-                        <p className="text-sm italic text-neutral-400">No font style selected</p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Engraving Content</label>
-                      <p className="text-2xl italic serif">{printingOrder.nameplateContent || '-'}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Price & Coupon */}
-              <div className="flex justify-between items-end pt-8">
-                <div className="space-y-4">
-                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Estimated Delivery</label>
-                    <p className="text-xl font-medium">{printingOrder.estimatedCompletionDate}</p>
-                  </div>
-                  {printingOrder.couponCode && (
-                    <div className="inline-flex items-center gap-2 bg-neutral-900 text-white px-3 py-1 rounded-full">
-                      <span className="text-[9px] font-bold tracking-widest uppercase">Discount Applied</span>
-                      <span className="text-[9px] font-mono">{printingOrder.couponCode}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="text-right space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Total Investment</label>
-                  <p className="text-6xl font-bold tracking-tighter">MOP {printingOrder.totalPrice}</p>
-                </div>
-              </div>
-
-              {/* Minimalist Remarks */}
-              <div className="pt-16 space-y-6 opacity-60">
-                <p className="text-[10px] leading-relaxed max-w-2xl">
-                  * 作品製作時間約 3 個月。請提供 4:3 原圖照片。客製化作品一律不接受退換，恕不退款。收貨後 7 天內如有瑕疵請通知本館。
-                </p>
-              </div>
-            </div>
-
-            {/* Signature Area */}
-            <div className="pt-20 mt-auto border-t border-neutral-100 flex justify-between items-end">
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Client Authorization</p>
+                <div className="space-y-6">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-300">Client Signature Authorization</p>
                   {printingOrder.signatureData ? (
                     <div className="relative">
-                      <img src={printingOrder.signatureData} alt="Signature" className="h-28 object-contain mix-blend-multiply" />
-                      <p className="text-[9px] text-neutral-300 mt-2 uppercase tracking-widest">Authenticated: {printingOrder.signatureTime}</p>
+                      <img src={printingOrder.signatureData} alt="Signature" className="h-32 object-contain mix-blend-multiply opacity-90" />
+                      <div className="mt-4 space-y-1">
+                        <p className="text-[10px] text-neutral-500 font-medium">DOCUMENT DIGITALLY SIGNED</p>
+                        <p className="text-[9px] text-neutral-300 uppercase tracking-widest">Timestamp: {printingOrder.signatureTime}</p>
+                      </div>
                     </div>
                   ) : (
-                    <div className="h-28 w-80 border-b border-neutral-100"></div>
+                    <div className="h-32 w-96 border-b border-neutral-100 flex items-end pb-2">
+                       <span className="text-[10px] uppercase tracking-widest text-neutral-200">Awaiting Signature</span>
+                    </div>
                   )}
                 </div>
               </div>
-              <div className="text-right pb-4">
+
+              <div className="text-right pb-4 space-y-8 flex flex-col items-end">
                 <div className="space-y-1">
-                  <p className="text-lg serif italic font-bold">造白美學館</p>
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-400">Official Certification</p>
+                  <p className="text-2xl serif italic font-bold text-neutral-900">造白美學館</p>
+                  <p className="text-[10px] uppercase tracking-[0.5em] text-neutral-400">Studio Certification</p>
                 </div>
-                <div className="mt-6 flex justify-end">
-                   <div className="h-24 w-24 rounded-full border-2 border-neutral-50 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 border-2 border-neutral-50 rounded-full scale-90 border-dashed opacity-50"></div>
-                      <span className="text-[8px] text-neutral-200 uppercase text-center font-bold tracking-tighter leading-none">Witdo<br/>Studio<br/>Macau</span>
-                   </div>
+                
+                {/* Abstract Security Seal */}
+                <div className="relative h-28 w-28 flex items-center justify-center">
+                  <div className="absolute inset-0 border border-neutral-100 rounded-full"></div>
+                  <div className="absolute inset-2 border border-neutral-50 border-dashed rounded-full animate-spin-slow"></div>
+                  <div className="text-[8px] text-neutral-200 font-bold tracking-widest text-center leading-tight uppercase">
+                    Witdo<br/>Studio<br/>Verified
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Fine Print */}
+            <div className="mt-12 text-center">
+              <p className="text-[9px] text-neutral-200 uppercase tracking-[0.4em]">
+                Authenticity Guaranteed • Made in Macau
+              </p>
             </div>
           </div>
         </div>
       )}
 
       <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:italic,wght@700&display=swap');
+        
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 12s linear infinite;
+        }
+        .serif { font-family: 'Playfair Display', serif; }
+        
         @media print {
           body * {
             visibility: hidden;
