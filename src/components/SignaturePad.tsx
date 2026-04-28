@@ -22,6 +22,12 @@ const CustomSignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>((props
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<any>(null);
 
+  const onEndRef = useRef(onEnd);
+
+  useEffect(() => {
+    onEndRef.current = onEnd;
+  }, [onEnd]);
+
   useEffect(() => {
     if (canvasRef.current) {
       const pad = new SignaturePad(canvasRef.current, {
@@ -31,9 +37,13 @@ const CustomSignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>((props
 
       signaturePadRef.current = pad;
 
-      if (onEnd) {
-        pad.addEventListener('endStroke', onEnd as any, undefined);
-      }
+      const handleEndStroke = () => {
+        if (onEndRef.current) {
+          onEndRef.current();
+        }
+      };
+
+      pad.addEventListener('endStroke', handleEndStroke as any, undefined);
 
       // Handle resize
       const resizeCanvas = () => {
@@ -59,7 +69,7 @@ const CustomSignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>((props
         window.removeEventListener('resize', resizeCanvas);
       };
     }
-  }, [penColor, backgroundColor, onEnd]);
+  }, [penColor, backgroundColor]);
 
   useImperativeHandle(ref, () => ({
     clear: () => signaturePadRef.current?.clear(),
