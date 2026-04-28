@@ -21,21 +21,7 @@ interface FirestoreErrorInfo {
   authInfo: any;
 }
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
+
 
 interface ProductOption {
   name: string;
@@ -137,6 +123,22 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleLocalFirestoreError = (err: unknown, operationType: OperationType, path: string | null) => {
+    const errInfo: FirestoreErrorInfo = {
+      error: err instanceof Error ? err.message : String(err),
+      authInfo: {
+        userId: auth.currentUser?.uid,
+        email: auth.currentUser?.email,
+        emailVerified: auth.currentUser?.emailVerified,
+        isAnonymous: auth.currentUser?.isAnonymous,
+      },
+      operationType,
+      path
+    };
+    console.error('Firestore Error:', errInfo);
+    setError(`Error: ${errInfo.error} (${operationType} on ${path})`);
+  };
 
   const calculateTotal = (styleString: string, coupon: string) => {
     const selectedStyleNames = styleString.split(', ').filter(s => s !== '');
@@ -255,17 +257,22 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ onSuccess, onCancel, init
         ownerUid: auth.currentUser.uid,
       };
 
+      console.log('Submitting work order:', finalData.workOrderId, 'Owner:', finalData.ownerUid);
+
       if (initialData?.id) {
+        console.log('Updating existing order:', initialData.id);
         await setDoc(doc(db, 'workOrders', initialData.id), finalData, { merge: true });
       } else {
-        await addDoc(collection(db, 'workOrders'), {
+        console.log('Creating new order...');
+        const docRef = await addDoc(collection(db, 'workOrders'), {
           ...finalData,
           orderDate: serverTimestamp(),
         });
+        console.log('New order created with ID:', docRef.id);
       }
       onSuccess();
     } catch (err: any) {
-      handleFirestoreError(err, initialData?.id ? OperationType.UPDATE : OperationType.CREATE, 'workOrders');
+      handleLocalFirestoreError(err, initialData?.id ? OperationType.UPDATE : OperationType.CREATE, 'workOrders');
     } finally {
       setLoading(false);
     }
