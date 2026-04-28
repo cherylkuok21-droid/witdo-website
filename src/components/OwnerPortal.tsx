@@ -611,12 +611,12 @@ const OwnerPortal: React.FC = () => {
                   referrerPolicy="no-referrer"
                 />
                 <div className="space-y-1">
-                  <h2 className="text-3xl serif italic font-bold tracking-tight text-neutral-900">造白美學館</h2>
-                  <p className="text-[11px] uppercase tracking-[0.5em] text-neutral-400 font-medium">Witdo Studio • Art of Casting</p>
+                  <h2 className="text-4xl serif italic font-bold tracking-tight text-neutral-900">造白美學館</h2>
+                  <p className="text-[12px] uppercase tracking-[0.5em] text-neutral-400 font-medium">Witdo Studio • Art of Casting</p>
                 </div>
               </div>
               <div className="text-right space-y-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-300">Order Reference</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.3em] text-neutral-300">Order Reference</p>
                 <p className="text-2xl font-mono font-light tracking-tighter">#{printingOrder.workOrderId}</p>
               </div>
             </div>
@@ -624,15 +624,15 @@ const OwnerPortal: React.FC = () => {
             {/* Section 1: Customer Identity */}
             <div className="grid grid-cols-3 gap-16 mb-24 pb-16 border-b border-neutral-100">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Date of Order</label>
+                <label className="text-[12px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Date of Order</label>
                 <p className="text-xl font-medium">{printingOrder.orderDate?.toDate ? printingOrder.orderDate.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Current Status</label>
+                <label className="text-[12px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Current Status</label>
                 <p className="text-xl font-medium tracking-wide uppercase">{printingOrder.status || 'Pending'}</p>
               </div>
               <div className="space-y-2 text-right">
-                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Estimated Completion</label>
+                <label className="text-[12px] font-bold uppercase tracking-[0.2em] text-neutral-400 block">Estimated Completion</label>
                 <p className="text-xl font-medium">{printingOrder.estimatedCompletionDate || 'TBD'}</p>
               </div>
             </div>
@@ -658,7 +658,7 @@ const OwnerPortal: React.FC = () => {
                   <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-8">Selected Masterpiece</h3>
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block">Style / Format</label>
-                    <p className="text-3xl font-bold italic serif leading-tight text-neutral-900">{printingOrder.style}</p>
+                    <p className="text-2xl font-bold italic serif leading-tight text-neutral-900">{printingOrder.style}</p>
                   </div>
                 </div>
               </div>
@@ -671,23 +671,24 @@ const OwnerPortal: React.FC = () => {
                    <div className="space-y-2">
                     <h3 className="text-xs font-bold uppercase tracking-[0.4em] text-neutral-300 mb-4">Engraving Details</h3>
                     <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block">Inscribed Content</label>
-                    <p className="text-3xl serif italic font-light text-neutral-800 leading-snug">
+                    <p className="text-2xl serif italic font-light text-neutral-800 leading-snug">
                       "{printingOrder.nameplateContent || '-'}"
                     </p>
                   </div>
                 </div>
 
-                <div className="w-80 flex flex-col items-center gap-4 bg-white p-8 rounded-2xl shadow-sm border border-neutral-100">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">Chosen Font Aesthetic</label>
+                <div className="w-96 flex flex-col items-center gap-4 bg-white p-8 rounded-2xl shadow-sm border border-neutral-100">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block text-center">Chosen Font Aesthetic</label>
                   {printingOrder.nameplateFont && DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont) ? (
                     <div className="w-full flex flex-col items-center">
                       <img 
                         src={DEFAULT_FONTS.find(f => f.name === printingOrder.nameplateFont)?.imageUrl} 
                         alt="Font style" 
-                        className="h-32 w-full object-contain mix-blend-darken grayscale brightness-95"
+                        style={{ maxHeight: '140px', width: 'auto', maxWidth: '100%' }}
+                        className="mix-blend-darken grayscale brightness-95"
                         referrerPolicy="no-referrer"
                       />
-                      <p className="text-[10px] text-neutral-400 mt-4 tracking-[0.3em] font-medium border-t border-neutral-50 pt-3 w-full text-center">
+                      <p className="text-[11px] text-neutral-400 mt-4 tracking-[0.3em] font-medium border-t border-neutral-50 pt-3 w-full text-center">
                         {printingOrder.nameplateFont}
                       </p>
                     </div>
@@ -704,21 +705,21 @@ const OwnerPortal: React.FC = () => {
             <div className="flex justify-between items-baseline mb-20 pb-16 border-b border-neutral-100">
               <div className="flex-1">
                 <div className="space-y-4">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-300">Final Investment</label>
+                  <label className="text-[12px] font-bold uppercase tracking-[0.3em] text-neutral-300">Final Investment</label>
                   <div className="flex items-baseline gap-3">
                     <span className="text-2xl font-light text-neutral-400">MOP</span>
-                    <p className="text-7xl font-medium tracking-tighter text-neutral-900">{printingOrder.totalPrice}</p>
+                    <p className="text-6xl font-medium tracking-tighter text-neutral-900">{printingOrder.totalPrice}</p>
                   </div>
                   {printingOrder.couponCode && (
-                    <p className="text-[10px] font-mono text-neutral-300 uppercase tracking-widest">
+                    <p className="text-[11px] font-mono text-neutral-300 uppercase tracking-widest">
                       Promo Applied: {printingOrder.couponCode}
                     </p>
                   )}
                 </div>
               </div>
               <div className="text-right max-w-sm">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-neutral-300 block mb-2">Completion Timeline</label>
-                <p className="text-[11px] leading-relaxed text-neutral-400">
+                <label className="text-[12px] font-bold uppercase tracking-widest text-neutral-300 block mb-2">Completion Timeline</label>
+                <p className="text-[12px] leading-relaxed text-neutral-400">
                   Precision handcrafted production requires approximately 90 days from the date of final specification approval.
                 </p>
               </div>
@@ -748,21 +749,28 @@ const OwnerPortal: React.FC = () => {
             </div>
 
             {/* Footer: Authorization */}
-            <div className="mt-auto pt-16 border-t border-neutral-100 flex justify-between items-end">
+            <div className="mt-auto pt-16 border-t border-neutral-100 flex justify-between items-end pb-32">
               <div className="space-y-8">
                 <div className="space-y-6">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-300">Client Signature Authorization</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-300">Client Signature Authorization</p>
                   {printingOrder.signatureData ? (
                     <div className="relative">
-                      <img src={printingOrder.signatureData} alt="Signature" className="h-32 object-contain mix-blend-multiply opacity-90" />
+                      <div className="bg-neutral-50 rounded-xl p-4 inline-block">
+                        <img 
+                          src={printingOrder.signatureData} 
+                          alt="Signature" 
+                          style={{ maxHeight: '160px', width: 'auto', maxWidth: '400px' }}
+                          className="mix-blend-multiply opacity-95" 
+                        />
+                      </div>
                       <div className="mt-4 space-y-1">
-                        <p className="text-[10px] text-neutral-500 font-medium">DOCUMENT DIGITALLY SIGNED</p>
-                        <p className="text-[9px] text-neutral-300 uppercase tracking-widest">Timestamp: {printingOrder.signatureTime}</p>
+                        <p className="text-[11px] text-neutral-500 font-medium">DOCUMENT DIGITALLY SIGNED</p>
+                        <p className="text-[10px] text-neutral-300 uppercase tracking-widest">Timestamp: {printingOrder.signatureTime}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="h-32 w-96 border-b border-neutral-100 flex items-end pb-2">
-                       <span className="text-[10px] uppercase tracking-widest text-neutral-200">Awaiting Signature</span>
+                       <span className="text-[11px] uppercase tracking-widest text-neutral-200">Awaiting Signature</span>
                     </div>
                   )}
                 </div>
